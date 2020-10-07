@@ -1,4 +1,5 @@
 #Zeptat se
+
 Fonemovy rozpoznavac 32bit lib STK nejde zkompilovat vyzaduje g++ 4.1
 Pokusit se instalovat rozsireni pro 32bit system?
 Vydat se smerem trid nebo funkci?
