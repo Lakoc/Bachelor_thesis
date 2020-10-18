@@ -1,34 +1,46 @@
 import numpy as np
 from sys import maxsize
 from soundfile import read
+import matplotlib.pyplot as plt
+
+NUMBER_OF_TRACKS = 2
 
 
 def detect_cross_talks(vad_segments):
     cross_talks = np.zeros(len(vad_segments[0]))
-
-    def detect_it(index_to_check):
-        if vad_segments[0][index_to_check]:
-            return np.sometrue(vad_segments[1][index_to_check - 1: index_to_check + 1])
-        elif vad_segments[1][index_to_check]:
-            return np.sometrue(vad_segments[0][index_to_check - 1: index_to_check + 1])
-        return 0
-
     for index in range(len(vad_segments[0])):
-        cross_talks[index] = detect_it(index)
-
+        cross_talks[index] = vad_segments[0][index] and vad_segments[1][index]
     return cross_talks
 
 
-def process_voice_activity_detection(energy_segments, zero_crossings):
+def post_process_vad_energy(vad_coefficients, peak_width):
+    for track_index, track in enumerate(vad_coefficients):
+        # we find indexes on each value changed
+        changes = np.where(track[:-1] != track[1:])[0]
+        should_skip = False
+        for index, change in enumerate(changes):
+            if index == 0 or should_skip:
+                should_skip = False
+                continue
+            if change - changes[index - 1] < peak_width:
+                should_skip = True
+                track[changes[index - 1]: change + 1] = 1 - track[change]
+        vad_coefficients[track_index] = track
+    return vad_coefficients
+
+
+def process_voice_activity_detection_via_energy(energy_segments, zero_crossings, threshold, remove_pitches_size):
     def is_speaking(val):
         (energy, crossings) = val
-        return energy > 0.0001 and crossings < 500
+        return energy > threshold
 
-    vad = np.zeros(energy_segments.shape)
+    vad = np.zeros(energy_segments.shape, dtype=np.int8)
+
     for index in range(len(energy_segments)):
         vad[index] = np.array(
             [is_speaking(val) for val in zip(energy_segments[index], zero_crossings[index])])
-    return vad
+
+    return post_process_vad_energy(vad, remove_pitches_size)
 
 
 def detect_spaces(vad_segments):
@@ -53,83 +65,91 @@ def detect_spaces(vad_segments):
     return spaces_ret
 
 
-class AudioProcessing:
-    def __init__(self, path):
-        # should use value somewhere between 0.9 - 1
-        self.pre_emphasis = 0.97
-        # read wav file and each sampling rate
-        self.audio, self.sampling_rate = read(path)
+def read_wav_file(path):
+    return read(path)
 
-        # attribute for segmented_tracks multiplied by hamming window
-        self.segmented_tracks = None
-        self.tracks = len(self.audio[0])
-        self.windows_count = 0
 
-    def get_sampling_rate(self):
-        return self.sampling_rate
+def process_pre_emphasis(signal, coefficient):
+    # amplifying high frequencies, and balance frequency spectrum
+    return np.append([signal[0]], signal[1:] - coefficient * signal[:-1], axis=0)
 
-    def get_audio(self):
-        return self.audio
 
-    def process_pre_emphasis(self):
-        # amplifying high frequencies, and balance frequency spectrum
-        self.audio = np.append([self.audio[0]], self.audio[1:] - self.pre_emphasis * self.audio[:-1], axis=0)
+def process_hamming(signal_to_process, emphasis_coefficient, sampling_rate):
+    amplified_signal = process_pre_emphasis(signal_to_process, emphasis_coefficient)
 
-    def process_hamming(self):
-        self.process_pre_emphasis()
-        # iterate for each track in fetched audio
-        for track_index in range(self.tracks):
-            # get current working track
-            track = self.audio[:, track_index]
+    # hamming window size 25 ms (1/40 s)
+    window_size = sampling_rate // 40
 
-            # hamming window size 25 ms (1/40 s)
-            window_size = self.sampling_rate // 40
+    # overlap 10 ms (1/100s)
+    shift = sampling_rate // 100
 
-            # overlap 5 ms (1/200s)
-            overlap_size = self.sampling_rate // 200
+    # size of window part which doesn't overlap with next window
+    overlapped = window_size - shift
 
-            # size of each window overlapped
-            shift = window_size - overlap_size
+    # length of each track
+    length_of_track = len(amplified_signal[:, 0])
 
-            # add zeros to end of track to process all values
-            overlay = ((len(track)) % shift)
-            if overlay:
-                missing_part = window_size - overlay
-                zeros = np.zeros(missing_part)
-                track = np.append(track, zeros)
-            # windows per track
-            self.windows_count = (len(track) + overlap_size) // shift
+    # values will be ignored if we don't add zeros at the end
+    overlay = ((length_of_track - overlapped) % window_size)
 
-            # result array
-            if self.segmented_tracks is None:
-                self.segmented_tracks = np.zeros((self.tracks, self.windows_count, window_size))
+    # windows per track
+    windows_count = ((length_of_track - window_size) // overlapped) + 1
 
-            # iterate over track and write values multiplied by hamming window to returned array
-            for window in range(self.windows_count):
-                # get starting array
-                current_starting_index = window * shift
-                # change value in return array sliced from input wav and multiply it by hamming window
-                self.segmented_tracks[track_index][window] = track[
-                                                             current_starting_index: current_starting_index + window_size] * np.hamming(
-                    window_size)
+    # create return numpy array
+    segmented_tracks = np.zeros((NUMBER_OF_TRACKS, windows_count, window_size))
 
-    def calculate_energy_over_segments(self):
-        # iterate over all segments and count energy ( E = sum(x^2))
-        self.process_hamming()
-        energies_per_segment = np.zeros((self.tracks, self.windows_count))
-        for track_index, track in enumerate(self.segmented_tracks):
-            for segment_index, segment in enumerate(track):
-                energies_per_segment[track_index][segment_index] = np.sum(segment ** 2)
-        return energies_per_segment
+    for track_index in range(NUMBER_OF_TRACKS):
+        # get current working track
+        track = signal_to_process[:, track_index]
 
-    def calculate_sign_changes(self):
-        # iterate over all segments and count sign change
-        sign_changes = np.zeros((self.tracks, self.windows_count))
-        for track_index, track in enumerate(self.segmented_tracks):
-            for segment_index, segment in enumerate(track):
-                # check for sign by comparing sign bit of two neighbor numbers
-                sign_changes[track_index][segment_index] = np.sum(np.diff(np.signbit(segment)))
-        return sign_changes
+        # we add zeros at the end here
+        if overlay:
+            missing_part = window_size - overlay
+            zeros = np.zeros(missing_part)
+            track = np.append(track, zeros)
+
+        # iterate over track and write values multiplied by hamming window to returned array
+        for window in range(windows_count):
+            # get starting array
+            current_stop_index = (overlapped * window) + window_size
+            # change value in return array sliced from input wav and multiply it by hamming window
+            segmented_tracks[track_index][window] = track[
+                                                    current_stop_index - window_size: current_stop_index] * np.hamming(
+                window_size)
+    return segmented_tracks
+
+
+def plot_energy_with_wav(track, energies_per_segment):
+    fig, axs = plt.subplots(2)
+    axs[0].set_title('Vaw')
+    track_shape = track.shape
+    axs[0].plot(np.reshape(track, track_shape[0] * track_shape[1]))
+    axs[1].set_title('Energy')
+    axs[1].plot(energies_per_segment)
+    fig.show()
+
+
+def calculate_energy_over_segments(segmented_tracks):
+    # iterate over all segments and count energy ( E = sum(x^2))
+    energies_per_segment = np.zeros((NUMBER_OF_TRACKS, len(segmented_tracks[0])))
+    for track_index, track in enumerate(segmented_tracks):
+        for segment_index, segment in enumerate(track):
+            # energies_per_segment[track_index][segment_index] = np.sum(segment ** 2)
+            energies_per_segment[track_index][segment_index] = np.log(np.sum(segment ** 2))
+        energies_per_segment[track_index] += np.abs(np.min(energies_per_segment[track_index]))
+        # to show detected energy plot uncomment next line
+        # plot_energy_with_wav(track, energies_per_segment[track_index])
+    return energies_per_segment
+
+
+def calculate_sign_changes(segmented_tracks):
+    # iterate over all segments and count sign change
+    sign_changes = np.zeros((NUMBER_OF_TRACKS, len(segmented_tracks[0])))
+    for track_index, track in enumerate(segmented_tracks):
+        for segment_index, segment in enumerate(track):
+            # check for sign by comparing sign bit of two neighbor numbers
+            sign_changes[track_index][segment_index] = np.sum(np.diff(np.signbit(segment)))
+    return sign_changes
 
     # def get_normalized_energies(self):
     #     # subtract mean value for better VAD
