@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+# 15 ms not overlapping frame we get that by dividing by this number
 NORMALIZATION_COEFFICIENT = 67
 
 
@@ -186,6 +187,5 @@ def generate_statistics(energy_over_segments, vad):
         f'{channel1_energy / channel2_energy if is_channel1_louder else channel2_energy / channel1_energy:.2f} '
         f'louder.')
 
-    # 15 ms not overlapping frame
     print(f'Channel 1 speech time: {np.sum(vad[0]) / NORMALIZATION_COEFFICIENT:.2f}s')
     print(f'Channel 2 speech time: {np.sum(vad[1]) / NORMALIZATION_COEFFICIENT:.2f}s')

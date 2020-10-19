@@ -1,12 +1,13 @@
 import numpy as np
-from sys import maxsize
 from soundfile import read
 import matplotlib.pyplot as plt
 
+# We work with stereo file, where track 1 is therapist and track 2 client
 NUMBER_OF_TRACKS = 2
 
 
 def detect_cross_talks(vad_segments):
+    """Detects cross talks by vad coefficients"""
     cross_talks = np.zeros(len(vad_segments[0]))
     for index in range(len(vad_segments[0])):
         cross_talks[index] = vad_segments[0][index] and vad_segments[1][index]
@@ -14,6 +15,7 @@ def detect_cross_talks(vad_segments):
 
 
 def post_process_vad_energy(vad_coefficients, peak_width):
+    """Post process vad segments to remove pitches"""
     for track_index, track in enumerate(vad_coefficients):
         # we find indexes on each value changed
         changes = np.where(track[:-1] != track[1:])[0]
@@ -30,6 +32,7 @@ def post_process_vad_energy(vad_coefficients, peak_width):
 
 
 def process_voice_activity_detection_via_energy(energy_segments, zero_crossings, threshold, remove_pitches_size):
+    """Process voice activity detection with simple energy thresholding"""
     def is_speaking(val):
         (energy, crossings) = val
         return energy > threshold
@@ -44,15 +47,17 @@ def process_voice_activity_detection_via_energy(energy_segments, zero_crossings,
 
 
 def read_wav_file(path):
+    """Read wav file and returns numpy array and sampling rate"""
     return read(path)
 
 
 def process_pre_emphasis(signal, coefficient):
-    # amplifying high frequencies, and balance frequency spectrum
+    """Amplify high frequencies, and balance frequency spectrum"""
     return np.append([signal[0]], signal[1:] - coefficient * signal[:-1], axis=0)
 
 
 def process_hamming(signal_to_process, emphasis_coefficient, sampling_rate):
+    """Process hamming windowing and pre emphasis over input signal, return segmented signal"""
     amplified_signal = process_pre_emphasis(signal_to_process, emphasis_coefficient)
 
     # hamming window size 25 ms (1/40 s)
@@ -98,6 +103,7 @@ def process_hamming(signal_to_process, emphasis_coefficient, sampling_rate):
 
 
 def plot_energy_with_wav(track, energies_per_segment):
+    """Plots wav and energy of signal"""
     fig, axs = plt.subplots(2)
     axs[0].set_title('Vaw')
     track_shape = track.shape
@@ -108,7 +114,7 @@ def plot_energy_with_wav(track, energies_per_segment):
 
 
 def calculate_energy_over_segments(segmented_tracks):
-    # iterate over all segments and count energy ( E = sum(x^2))
+    """Iterate over all segments and count energy ( E = sum(x^2))"""
     energies_per_segment = np.zeros((NUMBER_OF_TRACKS, len(segmented_tracks[0])))
     for track_index, track in enumerate(segmented_tracks):
         for segment_index, segment in enumerate(track):
@@ -121,18 +127,10 @@ def calculate_energy_over_segments(segmented_tracks):
 
 
 def calculate_sign_changes(segmented_tracks):
-    # iterate over all segments and count sign change
+    """Iterate over all segments and count sign change"""
     sign_changes = np.zeros((NUMBER_OF_TRACKS, len(segmented_tracks[0])))
     for track_index, track in enumerate(segmented_tracks):
         for segment_index, segment in enumerate(track):
             # check for sign by comparing sign bit of two neighbor numbers
             sign_changes[track_index][segment_index] = np.sum(np.diff(np.signbit(segment)))
     return sign_changes
-
-    # def get_normalized_energies(self):
-    #     # subtract mean value for better VAD
-    #     energies_per_segment = self.calculate_energy_over_segments()
-    #     for index, channel in enumerate(energies_per_segment):
-    #         channel_mean_energy = np.mean(channel)
-    #         energies_per_segment[index] = channel - channel_mean_energy
-    #     return energies_per_segment
