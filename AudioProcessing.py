@@ -43,28 +43,6 @@ def process_voice_activity_detection_via_energy(energy_segments, zero_crossings,
     return post_process_vad_energy(vad, remove_pitches_size)
 
 
-def detect_spaces(vad_segments):
-    spaces_ret = [{'min': maxsize,
-                   'max': 0, 'mean': 0}, {'min': maxsize,
-                                          'max': 0, 'mean': 0}]
-    for index in range(len(vad_segments)):
-        values = vad_segments[index]
-        length = len(values)
-        spaces = np.where(values[:-1] != values[1:])[0]
-        if len(spaces) % 2:
-            np.append(spaces, length)
-        for x in range(len(spaces) // 2):
-            interval = (spaces[(2 * x) + 1] - spaces[(2 * x)]) / 50
-            if spaces_ret[index]['max'] < interval < 2:
-                spaces_ret[index]['max'] = interval
-                spaces_ret[index]['mean'] += interval
-            if spaces_ret[index]['min'] > interval > 0.1:
-                spaces_ret[index]['min'] = interval
-                spaces_ret[index]['mean'] += interval
-        spaces_ret[index]['mean'] /= (len(spaces) // 2)
-    return spaces_ret
-
-
 def read_wav_file(path):
     return read(path)
 
