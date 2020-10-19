@@ -34,6 +34,24 @@ def post_process_vad_energy(vad_coefficients, peak_width):
     return vad_coefficients
 
 
+# def post_process_vad_energy_v2(vad_coefficients, peak_width):
+#     for track_index, track in enumerate(vad_coefficients):
+#         track = track[np.newaxis, :]
+#         N = peak_width
+#         padded = np.pad(track, ((0, 0), (N, N)), 'constant', constant_values=0)
+#         conv = np.convolve(padded[0], np.ones(N), 'valid')
+#
+#         left = conv[:-N - 1]
+#         right = conv[N + 1:]
+#
+#         neighbours = np.add(left, right)
+#
+#         mask = (track[0] == 1) & (neighbours < N * 0.8)  # flip 1 to 0
+#         mask |= (track[0] == 0) & (neighbours > N * 0.8)  # flip 0 to 1
+#         vad_coefficients[track_index] = np.logical_xor(track, mask).astype(np.int)
+#     return vad_coefficients
+
+
 def process_voice_activity_detection_via_energy(energy_segments, zero_crossings, threshold, remove_pitches_size):
     """Process voice activity detection with simple energy thresholding"""
 

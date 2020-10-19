@@ -3,15 +3,14 @@ from AudioProcessing import process_hamming, read_wav_file, calculate_sign_chang
 import statistics
 
 # config -> we will get from params
+energy_threshold = 8
+displayEnergy = False
 pre_emphasis_coefficient = 0.97
 file_path = 'data/treatmentMerged.wav'
-energy_threshold = 8
-remove_pitches_size = 40
-with_gmm = False
-displayEnergy = True
 
-# pre_emphasis_coefficient = 0.97
-# file_path = 'data/treatmentMerged.wav'
+remove_pitches_size = 80
+with_gmm = False
+
 # remove_pitches_size = 200
 # with_gmm = True
 
