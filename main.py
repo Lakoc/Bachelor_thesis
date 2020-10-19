@@ -7,6 +7,7 @@ file_path = 'data/treatmentMerged.wav'
 energy_threshold = 8
 remove_pitches_size = 40
 
+
 wav_file, sampling_rate = read_wav_file(file_path)
 segmented_tracks = process_hamming(wav_file, pre_emphasis_coefficient, sampling_rate)
 energy_over_segments = calculate_energy_over_segments(segmented_tracks)
