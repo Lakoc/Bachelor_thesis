@@ -170,6 +170,8 @@ def count_energy_when_speaking(energy_segments, vad):
         if value:
             energy += energy_segments[index]
             counter += 1
+    if counter == 0:
+        return 0
     return energy / counter
 
 

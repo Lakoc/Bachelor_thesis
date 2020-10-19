@@ -1,6 +1,7 @@
 import numpy as np
 from soundfile import read
 import matplotlib.pyplot as plt
+from external import energy_vad
 
 # We work with stereo file, where track 1 is therapist and track 2 client
 NUMBER_OF_TRACKS = 2
@@ -25,6 +26,8 @@ def post_process_vad_energy(vad_coefficients, peak_width):
                 should_skip = False
                 continue
             if change - changes[index - 1] < peak_width:
+                if track[change] and change - changes[index - 1] > peak_width / 2:
+                    continue
                 should_skip = True
                 track[changes[index - 1]: change + 1] = 1 - track[change]
         vad_coefficients[track_index] = track
@@ -33,6 +36,7 @@ def post_process_vad_energy(vad_coefficients, peak_width):
 
 def process_voice_activity_detection_via_energy(energy_segments, zero_crossings, threshold, remove_pitches_size):
     """Process voice activity detection with simple energy thresholding"""
+
     def is_speaking(val):
         (energy, crossings) = val
         return energy > threshold
@@ -43,6 +47,14 @@ def process_voice_activity_detection_via_energy(energy_segments, zero_crossings,
         vad[index] = np.array(
             [is_speaking(val) for val in zip(energy_segments[index], zero_crossings[index])])
 
+    return post_process_vad_energy(vad, remove_pitches_size)
+
+
+def process_voice_activity_detection_via_gmm(wav_file, remove_pitches_size):
+    """Process voice activity detection with gmm"""
+    vad0, _ = energy_vad.compute_vad(wav_file[:, 0])
+    vad1, _ = energy_vad.compute_vad(wav_file[:, 1])
+    vad = [vad0, vad1]
     return post_process_vad_energy(vad, remove_pitches_size)
 
 
@@ -113,7 +125,7 @@ def plot_energy_with_wav(track, energies_per_segment):
     fig.show()
 
 
-def calculate_energy_over_segments(segmented_tracks):
+def calculate_energy_over_segments(segmented_tracks, display_energy):
     """Iterate over all segments and count energy ( E = sum(x^2))"""
     energies_per_segment = np.zeros((NUMBER_OF_TRACKS, len(segmented_tracks[0])))
     for track_index, track in enumerate(segmented_tracks):
@@ -122,7 +134,8 @@ def calculate_energy_over_segments(segmented_tracks):
             energies_per_segment[track_index][segment_index] = np.log(np.sum(segment ** 2))
         energies_per_segment[track_index] += np.abs(np.min(energies_per_segment[track_index]))
         # to show detected energy plot uncomment next line
-        # plot_energy_with_wav(track, energies_per_segment[track_index])
+        if display_energy:
+            plot_energy_with_wav(track, energies_per_segment[track_index])
     return energies_per_segment
 
 
