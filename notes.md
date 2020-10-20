@@ -24,3 +24,6 @@ provest MFCC?
 
 # Statistiky
 Pro rozpoznani mezer a delky vet natrenovat model? Threshholding v tomto pripade smysl moc nedava?
+
+# TODO
+pomer reci, procento kdy kdo mluvil,  cross talky- pocty , kruhovy graf, vad rozdelen a spojene , vahani v monologu - pocty prumery delky sumu delek,  procentualne zobrazovat, najit studie jak zobrazovat data, citelnost a preyentovatelnost dat,  cekani odstranit min a max, lpc 
