@@ -7,18 +7,16 @@ energy_threshold = 8
 displayEnergy = False
 pre_emphasis_coefficient = 0.97
 file_path = 'data/treatmentMerged.wav'
-
 remove_pitches_size = 80
-with_gmm = False
 
-# remove_pitches_size = 200
+with_gmm = False
 # with_gmm = True
 
 # get wav file
 wav_file, sampling_rate = read_wav_file(file_path)
 
 if with_gmm:
-    vad = process_voice_activity_detection_via_gmm(wav_file, remove_pitches_size)
+    vad = process_voice_activity_detection_via_gmm(wav_file, remove_pitches_size, win_length=sampling_rate // 40)
 else:
     # get parameters needed for next processing
     segmented_tracks = process_hamming(wav_file, pre_emphasis_coefficient, sampling_rate)

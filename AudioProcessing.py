@@ -68,10 +68,10 @@ def process_voice_activity_detection_via_energy(energy_segments, zero_crossings,
     return post_process_vad_energy(vad, remove_pitches_size)
 
 
-def process_voice_activity_detection_via_gmm(wav_file, remove_pitches_size):
+def process_voice_activity_detection_via_gmm(wav_file, remove_pitches_size, win_length):
     """Process voice activity detection with gmm"""
-    vad0, _ = energy_vad.compute_vad(wav_file[:, 0])
-    vad1, _ = energy_vad.compute_vad(wav_file[:, 1])
+    vad0, _ = energy_vad.compute_vad(wav_file[:, 0], win_length=win_length, win_overlap=win_length // 2)
+    vad1, _ = energy_vad.compute_vad(wav_file[:, 1], win_length=win_length, win_overlap=win_length // 2)
     vad = [vad0, vad1]
     return post_process_vad_energy(vad, remove_pitches_size)
 
