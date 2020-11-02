@@ -26,8 +26,6 @@ def post_process_vad_energy(vad_coefficients, peak_width):
                 should_skip = False
                 continue
             if change - changes[index - 1] < peak_width:
-                if track[change] and change - changes[index - 1] > peak_width / 2:
-                    continue
                 should_skip = True
                 track[changes[index - 1]: change + 1] = 1 - track[change]
         vad_coefficients[track_index] = track

@@ -7,7 +7,7 @@ energy_threshold = 8
 displayEnergy = False
 pre_emphasis_coefficient = 0.97
 file_path = 'data/treatmentMerged.wav'
-remove_pitches_size = 80
+remove_pitches_size = 20
 
 with_gmm = False
 # with_gmm = True
