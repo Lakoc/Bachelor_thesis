@@ -7,15 +7,6 @@ from external import energy_vad
 NUMBER_OF_TRACKS = 2
 
 
-def detect_cross_talks(vad_segments):
-    """Detects cross talks by vad coefficients"""
-    cross_talks = np.logical_and(vad_segments[0], vad_segments[1])
-    cross_talks_bounds = np.where(np.diff(cross_talks))[0].reshape(-1, 2) - [0, 1]
-    interruptions = np.all(vad_segments[:, cross_talks_bounds], axis=2)
-    interruptions = interruptions.shape[1] - np.count_nonzero(interruptions, axis=1)
-    return cross_talks, interruptions
-
-
 def post_process_vad_energy(vad_coefficients, peak_width):
     """Post process vad segments to remove pitches"""
     for track_index, track in enumerate(vad_coefficients):
@@ -85,15 +76,15 @@ def process_pre_emphasis(signal, coefficient):
     return np.append([signal[0]], signal[1:] - coefficient * signal[:-1], axis=0)
 
 
-def process_hamming(signal_to_process, emphasis_coefficient, sampling_rate):
+def process_hamming(signal_to_process, emphasis_coefficient, sampling_rate, window_size, overlap_size):
     """Process hamming windowing and pre emphasis over input signal, return segmented signal"""
     amplified_signal = process_pre_emphasis(signal_to_process, emphasis_coefficient)
 
     # hamming window size 25 ms (1/40 s)
-    window_size = sampling_rate // 40
+    window_size = int(sampling_rate * window_size)
 
     # overlap 10 ms (1/100s)
-    shift = sampling_rate // 100
+    shift = int(sampling_rate * overlap_size)
 
     # size of window part which doesn't overlap with next window
     overlapped = window_size - shift

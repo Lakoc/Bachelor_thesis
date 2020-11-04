@@ -1,7 +1,5 @@
 import numpy as np
 
-from ouputs import create_histogram
-
 # 15 ms not overlapping frame we get that by dividing by this number
 NORMALIZATION_COEFFICIENT = 67
 
@@ -31,6 +29,15 @@ def find_non_zero_intervals(vad):
                                                                               run_starts[1][non_zero_runs_indexes[1]] +
                                                                               run_lengths[1][
                                                                                   non_zero_runs_indexes[1]]))
+
+
+def detect_cross_talks(vad_segments):
+    """Detects cross talks by vad coefficients"""
+    cross_talks = np.logical_and(vad_segments[0], vad_segments[1])
+    cross_talks_bounds = np.where(np.diff(cross_talks))[0].reshape(-1, 2) - [0, 1]
+    interruptions = np.all(vad_segments[:, cross_talks_bounds], axis=2)
+    interruptions = interruptions.shape[1] - np.count_nonzero(interruptions, axis=1)
+    return cross_talks, interruptions
 
 
 def get_next_segment_in_bounds(segments, start_bound, end_bound, current_index, length):
@@ -93,17 +100,17 @@ def detect_spaces(segments1, segments2):
         if response > 0:
             spaces.append(opposite_item[0] - current_item[1])
         current_done_index1 += 1
-    return spaces
+    return np.array(spaces)
 
 
-def generate_response_and_speech_time_statistics(vad, save_to):
+def generate_response_and_speech_time_statistics(vad):
     """Process vad to get histograms with lengths of response time and speech time"""
     track_speech_segments = find_non_zero_intervals(vad)
     sentences_lengths = track_speech_segments[0][:, 1] - track_speech_segments[0][:, 0], \
                         track_speech_segments[1][:, 1] - track_speech_segments[1][:, 0]
-    spaces = np.array([detect_spaces(track_speech_segments[0], track_speech_segments[1]),
-                       detect_spaces(track_speech_segments[1], track_speech_segments[0])])
-    return spaces, sentences_lengths
+    responses = detect_spaces(track_speech_segments[0], track_speech_segments[1]), detect_spaces(
+        track_speech_segments[1], track_speech_segments[0])
+    return responses, sentences_lengths
 
 
 def count_mean_energy_when_speaking(energy_segments, vad):
@@ -118,14 +125,76 @@ def get_speech_time(vad):
     return np.sum(vad[:], axis=1) / NORMALIZATION_COEFFICIENT
 
 
-def generate_text_statistics(mean_energies, speech_time):
+# def count_monolog_hesitations(vad, hesitations_max_size):
+#     """Detects hesitations in monolog"""
+#     # get indexes of speech
+#     hesitations = np.where(np.diff(vad[0]))[0].reshape(-1, 2) + [1, 0], np.where(np.diff(vad[1]))[0].reshape(-1, 2) + [
+#         1, 0]
+#     # count differences between start and stop of following speech segments
+#     hesitations = np.diff(
+#         np.append(hesitations[0][0, 1], hesitations[0][1:].reshape(-1, 1))[:-1].reshape(-1, 2)), np.diff(
+#         np.append(hesitations[1][0, 1], hesitations[1][1:].reshape(-1, 1))[:-1].reshape(-1, 2))
+#     # filter differences greater than our threshold
+#     return hesitations[0][hesitations[0] < hesitations_max_size], hesitations[1][hesitations[1] < hesitations_max_size]
+
+
+def print_min_max_mean_sum(data):
+    """Print min, max, mean and sum of selected values"""
+    for value, label, normalize in data:
+        print(f'Therapist {label} min:{np.min(value[0]) / normalize:.2f}, max:{np.max(value[0]) / normalize:.2f}, '
+              f'mean:{np.mean(value[0]) / normalize:.2f}, sum:{np.sum(value[0]) / normalize:.2f}')
+        print(f'Client {label} min:{np.min(value[1]) / normalize:.2f}, max:{np.max(value[1]) / normalize:.2f},'
+              f' mean:{np.mean(value[1]) / normalize:.2f}, sum:{np.sum(value[1]) / normalize:.2f}\n')
+
+
+def generate_text_statistics(mean_energies, speech_time, hesitations, responses, sentences_lengths,
+                             interruptions):
     """Generate text statistics about speech"""
     is_channel1_louder = mean_energies[0] > mean_energies[1]
-    print(f'Channel 1 speech mean energy: {mean_energies[0]:.2f}')
-    print(f'Channel 2 speech mean energy: {mean_energies[1]:.2f}')
+    print(f'Therapist speech mean energy: {mean_energies[0]:.2f}')
+    print(f'Client speech mean energy: {mean_energies[1]:.2f}')
     print(
-        f'Overall channel {1 if is_channel1_louder else 2} was '
+        f'Overall {"Therapist" if is_channel1_louder else "Client"} was '
         f'{mean_energies[0] / mean_energies[1] if is_channel1_louder else mean_energies[1] / mean_energies[0]:.2f} '
-        f'louder.')
-    print(f'Channel 1 speech time: {speech_time[0]:.2f}s')
-    print(f'Channel 2 speech time: {speech_time[1]:.2f}s')
+        f'louder')
+    print(f'Therapist speech time: {speech_time[0]:.2f}s')
+    print(f'Client speech time: {speech_time[1]:.2f}s\n')
+    print(f'Therapist interruptions count: {interruptions[0]}')
+    print(f'Client interruptions count: {interruptions[1]}\n')
+    print_min_max_mean_sum([(hesitations, 'hesitation time', NORMALIZATION_COEFFICIENT),
+                            (responses, 'response time', NORMALIZATION_COEFFICIENT),
+                            (sentences_lengths, 'sentences length', NORMALIZATION_COEFFICIENT)])
+
+
+def join_vad_and_count_hesitations(vad, hesitations_max_size):
+    """Join sentences with hesitations to one block"""
+    # get indexes of speech
+    hesitations_ind = np.where(np.diff(vad[0]))[0].reshape(-1, 2) + [1, 0], np.where(np.diff(vad[1]))[0].reshape(-1,
+                                                                                                                 2) + [
+                          1, 0]
+    # count differences between start and stop of following speech segments
+    hesitations = np.diff(
+        np.append(hesitations_ind[0][0, 1], hesitations_ind[0][1:].reshape(-1, 1))[:-1].reshape(-1, 2)), np.diff(
+        np.append(hesitations_ind[1][0, 1], hesitations_ind[1][1:].reshape(-1, 1))[:-1].reshape(-1, 2))
+
+    # filter differences greater than our threshold
+    hesitations_ind_filtered = hesitations[0] < hesitations_max_size, hesitations[1] < hesitations_max_size
+
+    # append false to indexes because of removing start and end index
+    hesitations_ind_filtered_with_false = np.append(hesitations_ind_filtered[0], False), np.append(
+        hesitations_ind_filtered[1], False)
+
+    # find indexes where values in vad should be changed to 1
+    spaces_to_fill = np.stack((hesitations_ind[0][hesitations_ind_filtered_with_false[0]][:, 1],
+                               hesitations_ind[0][np.roll(hesitations_ind_filtered_with_false[0], 1)][:, 0]),
+                              axis=1), np.stack((hesitations_ind[1][hesitations_ind_filtered_with_false[1]][:, 1],
+                                                 hesitations_ind[1][np.roll(hesitations_ind_filtered_with_false[1], 1)][
+                                                 :,
+                                                 0]), axis=1)
+    joined_vad = vad.copy()
+    for index, channel in enumerate(spaces_to_fill):
+        for space in channel:
+            joined_vad[index][space[0]: space[1]] = 1
+    # filter values that are bigger than threshold
+    hesitations_filtered = hesitations[0][hesitations_ind_filtered[0]], hesitations[1][hesitations_ind_filtered[1]]
+    return joined_vad, hesitations_filtered

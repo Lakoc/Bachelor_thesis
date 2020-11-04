@@ -14,7 +14,6 @@ def generate_graph(save_to, plot_name, fig):
 
 def count_percentage_with_values(values):
     """Create function that add counts and percentages to pie charts"""
-
     def fun(pct):
         total = sum(values)
         val = int(round(pct * total / 100.0))
@@ -23,24 +22,28 @@ def count_percentage_with_values(values):
     return fun
 
 
-def plot_wav_with_detection(sampling_rate, wav, vad_segments, cross_talks, save_to):
+def plot_wav_with_detection(sampling_rate, wav, vad_segments, joined_vad, cross_talks, save_to):
     """Plot signals with vad and cross talks"""
-    fig, axs = plt.subplots(5, sharex=True)
+    fig, axs = plt.subplots(7, sharex=True, figsize=(14,12))
     wav_len = len(wav[:, 0])
     length_in_sec = wav_len / sampling_rate
     time_audio = np.linspace(0, length_in_sec, num=wav_len)
     time_vad = np.linspace(0, length_in_sec, num=len(vad_segments[0]))
-    axs[0].set_title('Left channel')
+    axs[0].set_title('Therapist')
     axs[0].plot(time_audio, wav[:, 0])
-    axs[1].set_title('Left channel vad')
+    axs[1].set_title('Therapist vad')
     axs[1].plot(time_vad, vad_segments[0])
-    axs[2].set_title('Right channel')
-    axs[2].plot(time_audio, wav[:, 1])
-    axs[3].set_title('Right channel vad')
-    axs[3].plot(time_vad, vad_segments[1])
-    axs[4].set_title('Cross talks')
-    axs[4].set_xlabel("Time (s)")
-    axs[4].plot(time_vad, cross_talks)
+    axs[2].set_title('Therapist vad joined')
+    axs[2].plot(time_vad, joined_vad[0])
+    axs[3].set_title('Client')
+    axs[3].plot(time_audio, wav[:, 1])
+    axs[4].set_title('Client vad')
+    axs[4].plot(time_vad, vad_segments[1])
+    axs[5].set_title('Client vad joined')
+    axs[5].plot(time_vad, joined_vad[1])
+    axs[6].set_title('Cross talks')
+    axs[6].set_xlabel("Time (s)")
+    axs[6].plot(time_vad, cross_talks)
     generate_graph(save_to, 'speech_vad', fig)
 
 
@@ -56,14 +59,17 @@ def plot_speech_time_comparison(mean_energies, speech_time, save_to):
     generate_graph(save_to, 'energy_and_speech_time', fig)
 
 
-def create_histogram(data, titles, save_to, hist_name):
-    """Plots histogram"""
+def create_time_histogram(data, titles, save_to, hist_name, bins):
+    """Create histogram with normalized time values"""
     graphs = len(titles)
     fig, axes = plt.subplots(nrows=graphs, ncols=1, figsize=(8, 6), sharex=True, sharey=True)
     for index in range(graphs):
-        labels, counts = np.unique(data[index] / NORMALIZATION_COEFFICIENT, return_counts=True)
-        counts_probability = counts / counts.shape[0]
-        axes[index].bar(labels, counts_probability, width=0.1)
+        data_normalized = data[index] / NORMALIZATION_COEFFICIENT
+        counts, _ = np.histogram(data_normalized, bins=bins)
+        labels = [f'{bins[i]:.1f} - {bins[i + 1]:.1f}' for i in range(len(bins) - 1)]
+        count_sum = np.sum(counts)
+        counts_probability = counts / count_sum
+        axes[index].bar(labels, counts_probability, width=0.5)
         axes[index].grid(axis='y', color='black', linewidth=.5, alpha=.5)
         axes[index].spines["top"].set_visible(False)
         axes[index].spines["right"].set_visible(False)
@@ -74,15 +80,25 @@ def create_histogram(data, titles, save_to, hist_name):
     generate_graph(save_to, hist_name, fig)
 
 
-def plot_space_lengths(spaces, sentences_lengths, save_to):
-    create_histogram(spaces, ['Client response time', 'Therapist response time'], save_to, 'response_time')
-    create_histogram(sentences_lengths, ['Therapist sentences length', 'Client sentences length'], save_to,
-                     'sentences_length')
+def plot_responses_lengths(responses, sentences_lengths, save_to):
+    """Plot sentences lengths and responses time"""
+    create_time_histogram(responses, ['Therapist response time', 'Client response time'],
+                          save_to, 'response_time', np.arange(0, 3.1, 0.3))
+    create_time_histogram(sentences_lengths,
+                          ['Therapist sentences length', 'Client sentences length'], save_to,
+                          'sentences_length', np.arange(0, 31, 5))
 
 
 def plot_interruptions(interruptions, save_to):
+    """Create pie chart with interruptions"""
     fig, ax = plt.subplots()
     ax.set_title('Interruptions')
     ax.pie(interruptions, labels=['Therapist', 'Client'], autopct=count_percentage_with_values(interruptions),
            startangle=90)
     generate_graph(save_to, 'interruptions', fig)
+
+
+def plot_monolog_hesitations_histogram(hesitations, save_to):
+    """Create histogram of hesitations"""
+    create_time_histogram(hesitations, ['Therapist monolog hesitations', 'Client monolog hesitations'],
+                          save_to, 'monolog_hesitations', np.arange(0, 5.1, 0.5))
