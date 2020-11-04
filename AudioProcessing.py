@@ -9,10 +9,11 @@ NUMBER_OF_TRACKS = 2
 
 def detect_cross_talks(vad_segments):
     """Detects cross talks by vad coefficients"""
-    cross_talks = np.zeros(len(vad_segments[0]))
-    for index in range(len(vad_segments[0])):
-        cross_talks[index] = vad_segments[0][index] and vad_segments[1][index]
-    return cross_talks
+    cross_talks = np.logical_and(vad_segments[0], vad_segments[1])
+    cross_talks_bounds = np.where(np.diff(cross_talks))[0].reshape(-1, 2) - [0, 1]
+    interruptions = np.all(vad_segments[:, cross_talks_bounds], axis=2)
+    interruptions = interruptions.shape[1] - np.count_nonzero(interruptions, axis=1)
+    return cross_talks, interruptions
 
 
 def post_process_vad_energy(vad_coefficients, peak_width):

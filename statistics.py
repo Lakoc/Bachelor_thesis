@@ -1,5 +1,6 @@
-import matplotlib.pyplot as plt
 import numpy as np
+
+from ouputs import create_histogram
 
 # 15 ms not overlapping frame we get that by dividing by this number
 NORMALIZATION_COEFFICIENT = 67
@@ -30,11 +31,6 @@ def find_non_zero_intervals(vad):
                                                                               run_starts[1][non_zero_runs_indexes[1]] +
                                                                               run_lengths[1][
                                                                                   non_zero_runs_indexes[1]]))
-
-
-def remove_zeros(segments):
-    """Remove zeros from intervals"""
-    return segments[np.where(segments.any(axis=1))]
 
 
 def get_next_segment_in_bounds(segments, start_bound, end_bound, current_index, length):
@@ -100,102 +96,36 @@ def detect_spaces(segments1, segments2):
     return spaces
 
 
-def create_histogram(data, titles):
-    """Plots histogram"""
-    graphs = len(titles)
-    fig, axes = plt.subplots(nrows=graphs, ncols=1, figsize=(8, 6), sharex=True, sharey=True)
-    for index in range(graphs):
-        labels, counts = np.unique(data[index] / NORMALIZATION_COEFFICIENT, return_counts=True)
-        counts_probability = counts / counts.shape[0]
-        axes[index].bar(labels, counts_probability, width=0.1)
-        axes[index].grid(axis='y', color='black', linewidth=.5, alpha=.5)
-        axes[index].spines["top"].set_visible(False)
-        axes[index].spines["right"].set_visible(False)
-        axes[index].tick_params(left=False, bottom=False)
-        axes[index].set_ylabel("Probability")
-        axes[index].set_xlabel("Length (s)")
-        axes[index].set_title(titles[index], fontsize=20)
-    fig.show()
-
-
-def detect_response_speech_times(vad):
+def generate_response_and_speech_time_statistics(vad, save_to):
     """Process vad to get histograms with lengths of response time and speech time"""
     track_speech_segments = find_non_zero_intervals(vad)
     sentences_lengths = track_speech_segments[0][:, 1] - track_speech_segments[0][:, 0], \
                         track_speech_segments[1][:, 1] - track_speech_segments[1][:, 0]
     spaces = np.array([detect_spaces(track_speech_segments[0], track_speech_segments[1]),
                        detect_spaces(track_speech_segments[1], track_speech_segments[0])])
-    create_histogram(spaces, ['Client response time', 'Therapist response time'])
-    create_histogram(sentences_lengths, ['Therapist sentences length', 'Client sentences length'])
+    return spaces, sentences_lengths
 
 
-def plot_wav_with_detection(sampling_rate, wav, vad_segments, cross_talks):
-    """Plot signals with vad and cross talks"""
-    fig, axs = plt.subplots(5, sharex=True)
-    wav_len = len(wav[:, 0])
-    length_in_sec = wav_len / sampling_rate
-    time_audio = np.linspace(0, length_in_sec, num=wav_len)
-    time_vad = np.linspace(0, length_in_sec, num=len(vad_segments[0]))
-    axs[0].set_title('Left channel')
-    axs[0].plot(time_audio, wav[:, 0])
-    axs[1].set_title('Left channel vad')
-    axs[1].plot(time_vad, vad_segments[0])
-    axs[2].set_title('Right channel')
-    axs[2].plot(time_audio, wav[:, 1])
-    axs[3].set_title('Right channel vad')
-    axs[3].plot(time_vad, vad_segments[1])
-    axs[4].set_title('Cross talks')
-    axs[4].set_xlabel("Time (s)")
-    axs[4].plot(time_vad, cross_talks)
-    # uncomment if we want to save figures to file
-    # plt.savefig('output/plots.png', dpi=1200)
-    fig.show()
-
-
-def plot_speech_time_comparison(energies, speech_time):
-    fig, axs = plt.subplots(2)
-    axs[0].set_title('Speech energy')
-    axs[0].pie(energies, labels=['Therapist', 'Client'], autopct='%1.1f%%',
-               startangle=90)
-    axs[1].set_title('Speech time')
-    axs[1].pie(speech_time, labels=['Therapist', 'Client'], autopct='%1.1f%%',
-               startangle=90)
-    # axs[1].set_title('Speech time')
-    # axs[1].plot(time_vad, vad_segments[0])
-    # uncomment if we want to save figures to file
-    # plt.savefig('output/plots.png', dpi=1200)
-    fig.show()
-
-
-def count_energy_when_speaking(energy_segments, vad):
+def count_mean_energy_when_speaking(energy_segments, vad):
     """Count mean energy when speaking"""
-    counter = 0
-    energy = 0
-    for index, value in enumerate(vad):
-        if value:
-            energy += energy_segments[index]
-            counter += 1
-    if counter == 0:
-        return 0
-    return energy / counter
+    mean_energy0 = np.mean(energy_segments[0][np.where(vad[0])])
+    mean_energy1 = np.mean(energy_segments[1][np.where(vad[1])])
+    return mean_energy0, mean_energy1
 
 
-def generate_statistics(energy_over_segments, vad):
+def get_speech_time(vad):
+    """Count speech time of each speaker"""
+    return np.sum(vad[:], axis=1) / NORMALIZATION_COEFFICIENT
+
+
+def generate_text_statistics(mean_energies, speech_time):
     """Generate text statistics about speech"""
-    channel1_energy = count_energy_when_speaking(energy_over_segments[0], vad[0])
-    channel2_energy = count_energy_when_speaking(energy_over_segments[1], vad[1])
-
-    detect_response_speech_times(vad)
-    is_channel1_louder = channel1_energy > channel2_energy
-    print(f'Channel 1 speech mean energy: {channel1_energy:.2f}')
-    print(f'Channel 2 speech mean energy: {channel2_energy:.2f}')
+    is_channel1_louder = mean_energies[0] > mean_energies[1]
+    print(f'Channel 1 speech mean energy: {mean_energies[0]:.2f}')
+    print(f'Channel 2 speech mean energy: {mean_energies[1]:.2f}')
     print(
         f'Overall channel {1 if is_channel1_louder else 2} was '
-        f'{channel1_energy / channel2_energy if is_channel1_louder else channel2_energy / channel1_energy:.2f} '
+        f'{mean_energies[0] / mean_energies[1] if is_channel1_louder else mean_energies[1] / mean_energies[0]:.2f} '
         f'louder.')
-
-    speech_time = np.sum(vad[0]) / NORMALIZATION_COEFFICIENT, np.sum(vad[1]) / NORMALIZATION_COEFFICIENT
     print(f'Channel 1 speech time: {speech_time[0]:.2f}s')
     print(f'Channel 2 speech time: {speech_time[1]:.2f}s')
-
-    plot_speech_time_comparison([channel1_energy, channel2_energy], speech_time)
