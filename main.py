@@ -1,8 +1,7 @@
 from AudioProcessing import process_hamming, read_wav_file, calculate_sign_changes, calculate_energy_over_segments, \
-    process_voice_activity_detection_via_energy, process_voice_activity_detection_via_gmm, calculate_lpc
+    process_voice_activity_detection_via_energy, process_voice_activity_detection_via_gmm
 import statistics
 import outputs
-import numpy as np
 
 # config -> get from params
 file_path = 'data/treatmentMerged.wav'
@@ -41,6 +40,7 @@ else:
     speech_time = statistics.get_speech_time(vad)
     responses, sentences_lengths = statistics.generate_response_and_speech_time_statistics(vad)
     lpc = statistics.calculate_lpc_over_segments(segmented_tracks, number_of_lpc_coefficients)
+    # TODO: Plot lpc
 
     # plot outputs
     outputs.plot_wav_with_detection(sampling_rate, wav_file, vad, vad_joined, cross_talks, save_to)
