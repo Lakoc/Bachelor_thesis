@@ -1,6 +1,7 @@
 import numpy as np
+from AudioProcessing import calculate_lpc
 
-# 15 ms not overlapping frame we get that by dividing by this number
+# 15 ms not overlapping frame -> corresponding to 1000 // 15
 NORMALIZATION_COEFFICIENT = 67
 
 
@@ -47,10 +48,10 @@ def get_next_segment_in_bounds(segments, start_bound, end_bound, current_index, 
         item = segments[current_index]
         item_left_bound = item[0]
         item_right_bound = item[1]
-        # if response start in our speech and ends after our speech we don't detect space
+        # if response start in our speech and ends after our speech space is not detected
         if item_left_bound > start_bound and item_right_bound < end_bound:
             return None, current_index
-        # we have found our item
+        # item has been found
         if item_left_bound > start_bound:
             return item, current_index
         current_index += 1
@@ -64,7 +65,7 @@ def get_last_segment_within_bounds(segments, end_bound, current_index, length):
     item_left_bound = item[0]
     while item_left_bound < end_bound:
         current_index += 1
-        # last item was item we searched
+        # last item was searched item
         if current_index == length:
             break
         item = segments[current_index]
@@ -75,7 +76,7 @@ def get_last_segment_within_bounds(segments, end_bound, current_index, length):
 
 def detect_spaces(segments1, segments2):
     """Detects silence after when speaker ends speech and waits for response"""
-    # indexes to detect which segments we already processed segments
+    # indexes to detect which segments are already processed
     current_done_index1 = 0
     current_done_index2 = 0
     len_seg1 = len(segments1)
@@ -84,18 +85,18 @@ def detect_spaces(segments1, segments2):
     while current_done_index1 < len_seg1:
         bound_left = segments1[current_done_index1][0]
         bound_right = segments1[current_done_index1][1]
-        # we found first segment after silence
+        # first segment after silence
         opposite_item, current_done_index2 = get_next_segment_in_bounds(segments2, bound_left, bound_right,
                                                                         current_done_index2,
                                                                         len_seg2)
         if opposite_item is None:
             current_done_index1 += 1
             continue
-        # we check if we don't find any later segment of our speech, because of some small pauses
+        # check if any later segment of our speech could precede pause, because of some small pauses
         current_item, current_done_index1 = get_last_segment_within_bounds(segments1, opposite_item[0],
                                                                            current_done_index1,
                                                                            len_seg1)
-        # we check if we found space or we found cross talk
+        # check if space was found or cross talk
         response = opposite_item[0] - current_item[1]
         if response > 0:
             spaces.append(opposite_item[0] - current_item[1])
@@ -198,3 +199,10 @@ def join_vad_and_count_hesitations(vad, hesitations_max_size):
     # filter values that are bigger than threshold
     hesitations_filtered = hesitations[0][hesitations_ind_filtered[0]], hesitations[1][hesitations_ind_filtered[1]]
     return joined_vad, hesitations_filtered
+
+
+def calculate_lpc_over_segments(segmented_signals, lpc_coefficients_count):
+    x = segmented_signals[0,0]
+    z = calculate_lpc(x, lpc_coefficients_count)
+    print(z)
+    return z

@@ -1,7 +1,7 @@
 import numpy as np
 from soundfile import read
-import matplotlib.pyplot as plt
 from external import energy_vad
+from outputs import plot_energy_with_wav
 
 # We work with stereo file, where track 1 is therapist and track 2 client
 NUMBER_OF_TRACKS = 2
@@ -10,7 +10,7 @@ NUMBER_OF_TRACKS = 2
 def post_process_vad_energy(vad_coefficients, peak_width):
     """Post process vad segments to remove pitches"""
     for track_index, track in enumerate(vad_coefficients):
-        # we find indexes on each value changed
+        # find indexes on each value changed
         changes = np.where(track[:-1] != track[1:])[0]
         should_skip = False
         for index, change in enumerate(changes):
@@ -92,7 +92,7 @@ def process_hamming(signal_to_process, emphasis_coefficient, sampling_rate, wind
     # length of each track
     length_of_track = len(amplified_signal[:, 0])
 
-    # values will be ignored if we don't add zeros at the end
+    # values will be ignored if zeros won't be added at the end
     overlay = ((length_of_track - overlapped) % window_size)
 
     # windows per track
@@ -105,7 +105,7 @@ def process_hamming(signal_to_process, emphasis_coefficient, sampling_rate, wind
         # get current working track
         track = signal_to_process[:, track_index]
 
-        # we add zeros at the end here
+        # add zeros at the end here
         if overlay:
             missing_part = window_size - overlay
             zeros = np.zeros(missing_part)
@@ -120,17 +120,6 @@ def process_hamming(signal_to_process, emphasis_coefficient, sampling_rate, wind
                                                     current_stop_index - window_size: current_stop_index] * np.hamming(
                 window_size)
     return segmented_tracks
-
-
-def plot_energy_with_wav(track, energies_per_segment):
-    """Plots wav and energy of signal"""
-    fig, axs = plt.subplots(2)
-    axs[0].set_title('Vaw')
-    track_shape = track.shape
-    axs[0].plot(np.reshape(track, track_shape[0] * track_shape[1]))
-    axs[1].set_title('Energy')
-    axs[1].plot(energies_per_segment)
-    fig.show()
 
 
 def calculate_energy_over_segments(segmented_tracks, display_energy):
@@ -155,3 +144,43 @@ def calculate_sign_changes(segmented_tracks):
             # check for sign by comparing sign bit of two neighbor numbers
             sign_changes[track_index][segment_index] = np.sum(np.diff(np.signbit(segment)))
     return sign_changes
+
+
+def calculate_lpc(signal, number_of_coefficients):
+    """Return linear predictive coefficients for segment of speech using Levinson-Durbin prediction algorithm"""
+    # Compute autocorrelation coefficients R_0 which is energy of signal in segment
+    r_vector = [signal @ signal]
+
+    # if energy of signal is 0 return array like [1,0 x m,-1]
+    # TODO: Ask if because of hamming window
+    if r_vector[0] == 0:
+        return np.array(([1] + [0] * (number_of_coefficients - 2) + [-1]))
+    else:
+        # shift signal to calculate rest of autocorrelation coefficients
+        for shift in range(1, number_of_coefficients + 1):
+            # multiply vectors of signal[current index : end] @ signal[0:current shift] and append to r vector
+            r = signal[shift:] @ signal[:-shift]
+            r_vector.append(r)
+        r_vector = np.array(r_vector)
+
+        # set initial value of a[0,m] to 1 and calculate next coefficient
+        a_vector = np.array([1, -r_vector[1] / r_vector[0]])
+
+        # calculate initial error
+        error = r_vector[0] + r_vector[1] * a_vector[1]
+
+        # for each step add new coefficient and update coefficients by alpha
+        for i in range(1, number_of_coefficients):
+            # set error to the small float to prevent division by zero
+            if error == 0:
+                error = 10e-20
+
+            # calculate new alpha by multiplying existing coefficient with R[1:i+1] flipped, same as a[m,m]
+            alpha = - (a_vector[:i + 1] @ r_vector[i + 1:0:-1]) / error
+            # add 0 as new coefficient
+            a_vector = np.hstack([a_vector, 0])
+            # add flipped coefficients multiplied by alpha to coefficients
+            a_vector = a_vector + alpha * a_vector[::-1]
+            # update error by alpha
+            error *= (1 - alpha ** 2)
+        return a_vector

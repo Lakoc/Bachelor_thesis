@@ -1,17 +1,19 @@
 from AudioProcessing import process_hamming, read_wav_file, calculate_sign_changes, calculate_energy_over_segments, \
-    process_voice_activity_detection_via_energy, process_voice_activity_detection_via_gmm
+    process_voice_activity_detection_via_energy, process_voice_activity_detection_via_gmm, calculate_lpc
 import statistics
 import outputs
+import numpy as np
 
-# config -> we will get from params
+# config -> get from params
+file_path = 'data/treatmentMerged.wav'
 window_size = 1 / 40  # 25ms
 overlap_size = 1 / 100  # 10ms
-energy_threshold = 8
-displayEnergy = False
-pre_emphasis_coefficient = 0.97
-file_path = 'data/treatmentMerged.wav'
 remove_pitches_size = 0.5  # seconds
 hesitations_max_size_max_size = 5  # seconds
+pre_emphasis_coefficient = 0.97
+energy_threshold = 8
+number_of_lpc_coefficients = 14
+displayEnergy = False
 save_to = False
 with_gmm = False
 
@@ -38,6 +40,7 @@ else:
     mean_energies = statistics.count_mean_energy_when_speaking(energy_over_segments, vad)
     speech_time = statistics.get_speech_time(vad)
     responses, sentences_lengths = statistics.generate_response_and_speech_time_statistics(vad)
+    lpc = statistics.calculate_lpc_over_segments(segmented_tracks, number_of_lpc_coefficients)
 
     # plot outputs
     outputs.plot_wav_with_detection(sampling_rate, wav_file, vad, vad_joined, cross_talks, save_to)

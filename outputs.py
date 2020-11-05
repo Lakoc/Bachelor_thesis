@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-# 15 ms not overlapping frame we get that by dividing by this number
+# 15 ms not overlapping frame -> corresponding to 1000 // 15
 NORMALIZATION_COEFFICIENT = 67
 
 
@@ -20,6 +20,17 @@ def count_percentage_with_values(values):
         return '{p:.2f}%  ({v:d})'.format(p=pct, v=val)
 
     return fun
+
+
+def plot_energy_with_wav(track, energies_per_segment):
+    """Plots wav and energy of signal"""
+    fig, axs = plt.subplots(2)
+    axs[0].set_title('Vaw')
+    track_shape = track.shape
+    axs[0].plot(np.reshape(track, track_shape[0] * track_shape[1]))
+    axs[1].set_title('Energy')
+    axs[1].plot(energies_per_segment)
+    fig.show()
 
 
 def plot_wav_with_detection(sampling_rate, wav, vad_segments, joined_vad, cross_talks, save_to):
