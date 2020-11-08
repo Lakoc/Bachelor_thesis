@@ -12,7 +12,7 @@ hesitations_max_size_max_size = 5  # seconds
 pre_emphasis_coefficient = 0.97
 energy_threshold = 8
 number_of_lpc_coefficients = 14
-displayEnergy = False
+displayEnergy = True
 save_to = False
 with_gmm = False
 

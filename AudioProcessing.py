@@ -124,10 +124,12 @@ def process_hamming(signal_to_process, emphasis_coefficient, sampling_rate, wind
 
 def calculate_energy_over_segments(segmented_tracks, display_energy):
     """Iterate over all segments and count energy ( E = sum(x^2))"""
+    # TODO: Convert to short
     energies_per_segment = np.zeros((NUMBER_OF_TRACKS, len(segmented_tracks[0])))
     for track_index, track in enumerate(segmented_tracks):
         for segment_index, segment in enumerate(track):
             # energies_per_segment[track_index][segment_index] = np.sum(segment ** 2)
+            # TODO: Natural logarithm
             energies_per_segment[track_index][segment_index] = np.log(np.sum(segment ** 2))
         energies_per_segment[track_index] += np.abs(np.min(energies_per_segment[track_index]))
         # to show detected energy plot uncomment next line
