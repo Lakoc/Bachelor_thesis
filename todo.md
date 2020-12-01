@@ -6,10 +6,10 @@
 5. Vad rozdelen a spojene
 6. Nastudovat jak psat bp
 7. Lpc
+8. Sepsat uvod, klicova slova, abstrakt -> nasdilet
+9. Poslal priklad spusteni fonemoveho rozpoznavace (wavesurfer) 
 
 # TODO
-1. Sepsat uvod, klicova slova, abstrakt -> nasdilet
-2. Poslal priklad spusteni fonemoveho rozpoznavace (wavesurfer) 
 3. Dotazat se na nahravky Hedepy
 4. Upravit algoritmus spojovani VAD
 5. Vytvorit realnejsi nahravku
