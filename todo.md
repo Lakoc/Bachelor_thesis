@@ -8,10 +8,11 @@
 7. Lpc
 8. Sepsat uvod, klicova slova, abstrakt -> nasdilet
 9. Poslal priklad spusteni fonemoveho rozpoznavace (wavesurfer) 
+10. Pridat Dithering
+11. Upravit vypocet energie
+12. Domluven styl nasazeni na hedepy a poskytnute nahravky
 
 # TODO
-3. Dotazat se na nahravky Hedepy
 4. Upravit algoritmus spojovani VAD
-5. Vytvorit realnejsi nahravku
-6. Pridat Dithering
-7. Upravit vypocet energie
+5. Vytvorit realnsikulejsi nahravku
+6. Validovat lpc

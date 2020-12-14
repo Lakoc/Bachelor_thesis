@@ -2,6 +2,7 @@ import numpy as np
 from soundfile import read
 from external import energy_vad
 from outputs import plot_energy_with_wav
+import ctypes
 
 # We work with stereo file, where track 1 is therapist and track 2 client
 NUMBER_OF_TRACKS = 2
@@ -124,14 +125,11 @@ def process_hamming(signal_to_process, emphasis_coefficient, sampling_rate, wind
 
 def calculate_energy_over_segments(segmented_tracks, display_energy):
     """Iterate over all segments and count energy ( E = sum(x^2))"""
-    # TODO: Convert to short
     energies_per_segment = np.zeros((NUMBER_OF_TRACKS, len(segmented_tracks[0])))
     for track_index, track in enumerate(segmented_tracks):
+        track = track * (2 ** 15 - 1)  # short size
         for segment_index, segment in enumerate(track):
-            # energies_per_segment[track_index][segment_index] = np.sum(segment ** 2)
-            # TODO: Natural logarithm
             energies_per_segment[track_index][segment_index] = np.log(np.sum(segment ** 2))
-        energies_per_segment[track_index] += np.abs(np.min(energies_per_segment[track_index]))
         # to show detected energy plot uncomment next line
         if display_energy:
             plot_energy_with_wav(track, energies_per_segment[track_index])

@@ -10,8 +10,8 @@ overlap_size = 1 / 100  # 10ms
 remove_pitches_size = 0.5  # seconds
 hesitations_max_size_max_size = 5  # seconds
 pre_emphasis_coefficient = 0.97
-energy_threshold = 8
-number_of_lpc_coefficients = 14
+energy_threshold = 18
+number_of_lpc_coefficients = 18
 displayEnergy = True
 save_to = False
 with_gmm = False
@@ -40,6 +40,7 @@ else:
     speech_time = statistics.get_speech_time(vad)
     responses, sentences_lengths = statistics.generate_response_and_speech_time_statistics(vad)
     lpc = statistics.calculate_lpc_over_segments(segmented_tracks, number_of_lpc_coefficients)
+    outputs.plot_lpc(wav_file, sampling_rate, lpc)
     # TODO: Plot lpc
 
     # plot outputs

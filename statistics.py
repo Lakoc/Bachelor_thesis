@@ -210,7 +210,6 @@ def calculate_lpc_over_segments(segmented_signals, lpc_coefficients_count):
         r_vector = [signal @ signal]
 
         # if energy of signal is 0 return array like [1,0 x m,-1]
-        # TODO: Ask if because of hamming window
         if r_vector[0] == 0:
             # return np.array(([1] + [0] * (lpc_coefficients_count - 2) + [-1]))
             # sum

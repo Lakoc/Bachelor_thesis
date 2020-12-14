@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy import signal
+from scipy.fft import fftshift
 
 # 15 ms not overlapping frame -> corresponding to 1000 // 15
 NORMALIZATION_COEFFICIENT = 67
@@ -14,6 +16,7 @@ def generate_graph(save_to, plot_name, fig):
 
 def count_percentage_with_values(values):
     """Create function that add counts and percentages to pie charts"""
+
     def fun(pct):
         total = sum(values)
         val = int(round(pct * total / 100.0))
@@ -35,7 +38,7 @@ def plot_energy_with_wav(track, energies_per_segment):
 
 def plot_wav_with_detection(sampling_rate, wav, vad_segments, joined_vad, cross_talks, save_to):
     """Plot signals with vad and cross talks"""
-    fig, axs = plt.subplots(7, sharex=True, figsize=(14,12))
+    fig, axs = plt.subplots(7, sharex=True, figsize=(14, 12))
     wav_len = len(wav[:, 0])
     length_in_sec = wav_len / sampling_rate
     time_audio = np.linspace(0, length_in_sec, num=wav_len)
@@ -113,3 +116,32 @@ def plot_monolog_hesitations_histogram(hesitations, save_to):
     """Create histogram of hesitations"""
     create_time_histogram(hesitations, ['Therapist monolog hesitations', 'Client monolog hesitations'],
                           save_to, 'monolog_hesitations', np.arange(0, 5.1, 0.5))
+
+
+def plot_lpc(wav, samplingFrequency, lpc):
+    """Plots wav and lpc"""
+    # Read the wav file (mono)
+    # Plot the signal read from wav file
+    # rate = 30.0
+    # p = 20 * np.log10(np.abs(np.fft.rfft(wav[:,0])))
+    # f = np.linspace(0, rate / 2, len(p))
+    # plt.plot(f, p)
+    # plt.show()
+
+    # plt.subplot(211)
+    #
+    # plt.plot(lpc[0])
+    #
+    # plt.xlabel('Time')
+    #
+    # plt.ylabel('Frequency')
+    #
+    # plt.subplot(212)
+    #
+    # plt.specgram(signalData, Fs=samplingFrequency)
+    #
+    # plt.xlabel('Time')
+    #
+    # plt.ylabel('Frequency')
+    #
+    # plt.show()
