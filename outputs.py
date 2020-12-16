@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy import signal
-from scipy.fft import fftshift
+from scipy import fftpack
 
 # 15 ms not overlapping frame -> corresponding to 1000 // 15
 NORMALIZATION_COEFFICIENT = 67
@@ -118,30 +117,36 @@ def plot_monolog_hesitations_histogram(hesitations, save_to):
                           save_to, 'monolog_hesitations', np.arange(0, 5.1, 0.5))
 
 
-def plot_lpc(wav, samplingFrequency, lpc):
+def plot_lpc_ftt(sig, sampling_frequency, lpc, coefficients):
     """Plots wav and lpc"""
     # Read the wav file (mono)
     # Plot the signal read from wav file
-    # rate = 30.0
-    # p = 20 * np.log10(np.abs(np.fft.rfft(wav[:,0])))
-    # f = np.linspace(0, rate / 2, len(p))
-    # plt.plot(f, p)
-    # plt.show()
+    sampling_half = sampling_frequency // 2
+    weight = np.linspace(start=(2 * -1j * np.pi) / sampling_half, stop=(2 * coefficients * -1j * np.pi) / sampling_half,
+                         num=coefficients)
+    frequencies = np.arange(0, sampling_half)
+    log_spectrum = np.empty((len(frequencies)))
+    for index, freq in enumerate(frequencies):
+        # print(weight * freq)
+        # print(lpc @ np.exp(weight * freq))
+        log_spectrum[index] = 1 / np.power(np.absolute(1 - lpc @ np.exp(weight * freq)), 2)
+    # log_spectrum = np.empty(sampling_half)
+    # for i in range(0, sampling_half):
+    #     log_spectrum[i] = 10 * np.log10(
+    #         1 / np.power(np.absolute(1 - lpc @ weight), 2))
 
-    # plt.subplot(211)
-    #
-    # plt.plot(lpc[0])
-    #
-    # plt.xlabel('Time')
-    #
-    # plt.ylabel('Frequency')
-    #
-    # plt.subplot(212)
-    #
-    # plt.specgram(signalData, Fs=samplingFrequency)
-    #
-    # plt.xlabel('Time')
-    #
-    # plt.ylabel('Frequency')
-    #
-    # plt.show()
+    # The FFT of the signal
+    sig_fft = fftpack.fft(sig)
+    # And the power (sig_fft is of complex dtype)
+    power = np.abs(sig_fft) ** 2
+    # The corresponding frequencies
+    sample_freq = fftpack.fftfreq(sig.size, d=1 / sampling_frequency)
+
+    fig, axes = plt.subplots(2,1)
+
+    axes[0].plot(sample_freq, power)
+    axes[1].plot(log_spectrum)
+    # ax.set_xlabel('Frequency in Hertz [Hz]')
+    # ax.set_ylabel('Frequency Domain (Spectrum) Magnitude')
+    axes[0].set_xlim(0, 5000)
+    fig.show()

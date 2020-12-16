@@ -1,4 +1,5 @@
 import numpy as np
+import librosa
 
 # 15 ms not overlapping frame -> corresponding to 1000 // 15
 NORMALIZATION_COEFFICIENT = 67
@@ -204,41 +205,44 @@ def calculate_lpc_over_segments(segmented_signals, lpc_coefficients_count):
     """Calculate lpc for every segment of speech"""
 
     def calculate_lpc(signal):
-        """Return linear predictive coefficients for segment of speech using Levinson-Durbin prediction algorithm"""
-        # TODO: Remove unnecessary values
-        # Compute autocorrelation coefficients R_0 which is energy of signal in segment
-        r_vector = [signal @ signal]
-
-        # if energy of signal is 0 return array like [1,0 x m,-1]
-        if r_vector[0] == 0:
-            # return np.array(([1] + [0] * (lpc_coefficients_count - 2) + [-1]))
-            # sum
-            return np.zeros(lpc_coefficients_count)
-        else:
-            # shift signal to calculate rest of autocorrelation coefficients
-            for shift in range(1, lpc_coefficients_count + 1):
-                # multiply vectors of signal[current index : end] @ signal[0:current shift] and append to r vector
-                r = signal[shift:] @ signal[:-shift]
-                r_vector.append(r)
-            r_vector = np.array(r_vector)
-
-            # set initial values
-            a_matrix = np.ones((lpc_coefficients_count + 1, lpc_coefficients_count + 1))
-            error = r_vector[0]
-
-            # count first step
-            a_matrix[1, 1] = (r_vector[1]) / error
-            error *= (1 - a_matrix[1, 1] ** 2)
-            # for each step add new coefficient and update coefficients by alpha
-            for m in range(2, lpc_coefficients_count + 1):
-                # set error to the small float to prevent division by zero
-                if error == 0:
-                    error = 10e-20
-                a_matrix[m, m] = (r_vector[m] - a_matrix[1:m, m - 1] @ r_vector[1:m][::-1]) / error
-                for i in range(1, m):
-                    # calculate new alpha by multiplying existing coefficient with R[1:i+1] flipped, same as a[m,m]
-                    a_matrix[i, m] = a_matrix[i, m - 1] - a_matrix[m, m] * a_matrix[m - 1, m - 1]
-                error *= (1 - a_matrix[m, m] ** 2)
-            return a_matrix[1:, lpc_coefficients_count]
+        x = librosa.core.lpc(signal, lpc_coefficients_count)
+        #
+        # """Return linear predictive coefficients for segment of speech using Levinson-Durbin prediction algorithm"""
+        # # TODO: Remove unnecessary values
+        # # Compute autocorrelation coefficients R_0 which is energy of signal in segment
+        # r_vector = [signal @ signal]
+        #
+        # # if energy of signal is 0 return array like [1,0 x m,-1]
+        # if r_vector[0] == 0:
+        #     # return np.array(([1] + [0] * (lpc_coefficients_count - 2) + [-1]))
+        #     # sum
+        #     return np.zeros(lpc_coefficients_count)
+        # else:
+        #     # shift signal to calculate rest of autocorrelation coefficients
+        #     for shift in range(1, lpc_coefficients_count + 1):
+        #         # multiply vectors of signal[current index : end] @ signal[0:current shift] and append to r vector
+        #         r = signal[shift:] @ signal[:-shift]
+        #         r_vector.append(r)
+        #     r_vector = np.array(r_vector)
+        #
+        #     # set initial values
+        #     a_matrix = np.ones((lpc_coefficients_count + 1, lpc_coefficients_count + 1))
+        #     error = r_vector[0]
+        #
+        #     # count first step
+        #     a_matrix[1, 1] = (r_vector[1]) / error
+        #     error *= (1 - a_matrix[1, 1] ** 2)
+        #     # for each step add new coefficient and update coefficients by alpha
+        #     for m in range(2, lpc_coefficients_count + 1):
+        #         # set error to the small float to prevent division by zero
+        #         if error == 0:
+        #             error = 10e-20
+        #         a_matrix[m, m] = (r_vector[m] - a_matrix[1:m, m - 1] @ r_vector[1:m][::-1]) / error
+        #         for i in range(1, m):
+        #             # calculate new alpha by multiplying existing coefficient with R[1:i+1] flipped, same as a[m,m]
+        #             a_matrix[i, m] = a_matrix[i, m - 1] - a_matrix[m, m] * a_matrix[m - 1, m - 1]
+        #         error *= (1 - a_matrix[m, m] ** 2)
+        #     y = a_matrix[1:, lpc_coefficients_count]
+        return x[1:]
 
     return np.apply_along_axis(calculate_lpc, 2, segmented_signals)

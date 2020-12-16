@@ -11,8 +11,8 @@ remove_pitches_size = 0.5  # seconds
 hesitations_max_size_max_size = 5  # seconds
 pre_emphasis_coefficient = 0.97
 energy_threshold = 18
-number_of_lpc_coefficients = 18
-displayEnergy = True
+number_of_lpc_coefficients = 10
+displayEnergy = False
 save_to = False
 with_gmm = False
 
@@ -40,15 +40,16 @@ else:
     speech_time = statistics.get_speech_time(vad)
     responses, sentences_lengths = statistics.generate_response_and_speech_time_statistics(vad)
     lpc = statistics.calculate_lpc_over_segments(segmented_tracks, number_of_lpc_coefficients)
-    outputs.plot_lpc(wav_file, sampling_rate, lpc)
-    # TODO: Plot lpc
+    # TODO: Test lpc
+    for i in range(100, 110):
+        outputs.plot_lpc_ftt(segmented_tracks[0][i], sampling_rate, lpc[0][i], number_of_lpc_coefficients)
 
-    # plot outputs
-    outputs.plot_wav_with_detection(sampling_rate, wav_file, vad, vad_joined, cross_talks, save_to)
-    outputs.plot_speech_time_comparison(mean_energies, speech_time, save_to)
-    outputs.plot_interruptions(interruptions, save_to)
-    outputs.plot_responses_lengths(responses, sentences_lengths, save_to)
-    outputs.plot_monolog_hesitations_histogram(hesitations, save_to)
-
-    statistics.generate_text_statistics(mean_energies, speech_time, hesitations, responses, sentences_lengths,
-                                        interruptions)
+    # # plot outputs
+    # outputs.plot_wav_with_detection(sampling_rate, wav_file, vad, vad_joined, cross_talks, save_to)
+    # outputs.plot_speech_time_comparison(mean_energies, speech_time, save_to)
+    # outputs.plot_interruptions(interruptions, save_to)
+    # outputs.plot_responses_lengths(responses, sentences_lengths, save_to)
+    # outputs.plot_monolog_hesitations_histogram(hesitations, save_to)
+    #
+    # statistics.generate_text_statistics(mean_energies, speech_time, hesitations, responses, sentences_lengths,
+    #                                     interruptions)
