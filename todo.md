@@ -14,5 +14,18 @@
 
 # TODO
 4. Upravit algoritmus spojovani VAD
-5. Vytvorit realnsikulejsi nahravku
-6. Validovat lpc
+5. Validovat lpc
+
+
+# 15.1.
+Uvod
+Motivace
+ -> Terapie -> zpetna vazba
+nnavrh -> jak jsem se k tomu postavil
+schema hovoru -> diagram
+co uz mam hotovo 
+nahravka grafy
+zaver a budoucnost
+
+7.1. 9:00
+prezentace 

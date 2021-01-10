@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import fftpack
+from math import ceil
 
 # 15 ms not overlapping frame -> corresponding to 1000 // 15
 NORMALIZATION_COEFFICIENT = 67
@@ -8,9 +9,11 @@ NORMALIZATION_COEFFICIENT = 67
 
 def generate_graph(save_to, plot_name, fig):
     """Handler for graph generations"""
+    fig.tight_layout()
     if save_to:
-        plt.savefig(f'{save_to}/{plot_name}.png', dpi=1200)
-    fig.show()
+        plt.savefig(f'{save_to}/{plot_name}.png')
+    else:
+        fig.show()
 
 
 def count_percentage_with_values(values):
@@ -32,6 +35,7 @@ def plot_energy_with_wav(track, energies_per_segment):
     axs[0].plot(np.reshape(track, track_shape[0] * track_shape[1]))
     axs[1].set_title('Energy')
     axs[1].plot(energies_per_segment)
+    fig.tight_layout()
     fig.show()
 
 
@@ -62,13 +66,13 @@ def plot_wav_with_detection(sampling_rate, wav, vad_segments, joined_vad, cross_
 
 def plot_speech_time_comparison(mean_energies, speech_time, save_to):
     """Plots pie charts to show speech comparison"""
-    fig, axs = plt.subplots(2)
-    axs[0].set_title('Speech energy')
-    axs[0].pie(mean_energies, labels=['Therapist', 'Client'], autopct='%1.2f%%',
-               startangle=90)
-    axs[1].set_title('Speech time')
-    axs[1].pie(speech_time, labels=['Therapist', 'Client'], autopct='%1.2f%%',
-               startangle=90)
+    fig, ax = plt.subplots(1)
+    # axs[0].set_title('Speech energy')
+    # axs[0].pie(mean_energies, labels=['Therapist', 'Client'], autopct='%1.2f%%',
+    #            startangle=90)
+    ax.set_title('Speech time', fontsize=16)
+    ax.pie(speech_time, labels=['Therapist', 'Client'], autopct='%1.2f%%',
+           startangle=90)
     generate_graph(save_to, 'energy_and_speech_time', fig)
 
 
@@ -88,8 +92,8 @@ def create_time_histogram(data, titles, save_to, hist_name, bins):
         axes[index].spines["right"].set_visible(False)
         axes[index].tick_params(left=False, bottom=False)
         axes[index].set_ylabel("Probability")
-        axes[index].set_xlabel("Length (s)")
         axes[index].set_title(titles[index], fontsize=20)
+    axes[graphs - 1].set_xlabel("Length (s)")
     generate_graph(save_to, hist_name, fig)
 
 
@@ -97,15 +101,19 @@ def plot_responses_lengths(responses, sentences_lengths, save_to):
     """Plot sentences lengths and responses time"""
     create_time_histogram(responses, ['Therapist response time', 'Client response time'],
                           save_to, 'response_time', np.arange(0, 3.1, 0.3))
+    max_val = max(sentences_lengths[0].max() / NORMALIZATION_COEFFICIENT,
+                  sentences_lengths[1].max() / NORMALIZATION_COEFFICIENT)
+    step = ceil(max_val / 10)
+    max_val += step
     create_time_histogram(sentences_lengths,
                           ['Therapist sentences length', 'Client sentences length'], save_to,
-                          'sentences_length', np.arange(0, 31, 5))
+                          'sentences_length', np.arange(0, max_val, step))
 
 
 def plot_interruptions(interruptions, save_to):
     """Create pie chart with interruptions"""
     fig, ax = plt.subplots()
-    ax.set_title('Interruptions')
+    ax.set_title('Interruptions', fontsize=16)
     ax.pie(interruptions, labels=['Therapist', 'Client'], autopct=count_percentage_with_values(interruptions),
            startangle=90)
     generate_graph(save_to, 'interruptions', fig)
@@ -142,7 +150,7 @@ def plot_lpc_ftt(sig, sampling_frequency, lpc, coefficients):
     # The corresponding frequencies
     sample_freq = fftpack.fftfreq(sig.size, d=1 / sampling_frequency)
 
-    fig, axes = plt.subplots(2,1)
+    fig, axes = plt.subplots(2, 1)
 
     axes[0].plot(sample_freq, power)
     axes[1].plot(log_spectrum)
