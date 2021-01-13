@@ -86,20 +86,21 @@ def create_time_histogram(data, titles, save_to, hist_name, bins):
         labels = [f'{bins[i]:.1f} - {bins[i + 1]:.1f}' for i in range(len(bins) - 1)]
         count_sum = np.sum(counts)
         counts_probability = counts / count_sum
-        axes[index].bar(labels, counts_probability, width=0.5)
+        axes[index].bar(labels, counts_probability, width=0.5, color='C1')
         axes[index].grid(axis='y', color='black', linewidth=.5, alpha=.5)
+        axes[index].set_axisbelow(True)
         axes[index].spines["top"].set_visible(False)
         axes[index].spines["right"].set_visible(False)
         axes[index].tick_params(left=False, bottom=False)
         axes[index].set_ylabel("Probability")
         axes[index].set_title(titles[index], fontsize=20)
-    axes[graphs - 1].set_xlabel("Length (s)")
+    axes[graphs - 1].set_xlabel("Length [s]")
     generate_graph(save_to, hist_name, fig)
 
 
 def plot_responses_lengths(responses, sentences_lengths, save_to):
     """Plot sentences lengths and responses time"""
-    create_time_histogram(responses, ['Therapist response time', 'Client response time'],
+    create_time_histogram(responses, ['Therapist reaction time', 'Client reaction time'],
                           save_to, 'response_time', np.arange(0, 3.1, 0.3))
     max_val = max(sentences_lengths[0].max() / NORMALIZATION_COEFFICIENT,
                   sentences_lengths[1].max() / NORMALIZATION_COEFFICIENT)

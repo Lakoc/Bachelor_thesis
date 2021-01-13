@@ -21,7 +21,7 @@
 Uvod
 Motivace
  -> Terapie -> zpetna vazba
-nnavrh -> jak jsem se k tomu postavil
+navrh -> jak jsem se k tomu postavil
 schema hovoru -> diagram
 co uz mam hotovo 
 nahravka grafy

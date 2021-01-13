@@ -14,7 +14,7 @@ pre_emphasis_coefficient = 0.97
 energy_threshold = 50
 # number_of_lpc_coefficients = 10
 displayEnergy = False
-save_to = ''
+save_to = 'out'
 with_gmm = False
 
 if save_to and not os.path.exists(save_to):
