@@ -1,3 +1,3 @@
 # TODO
-4. Upravit algoritmus spojovani VAD
-5. Validovat lpc
+1. Energeticka diarizace
+2. Diarizace pomoci GMM

@@ -1,0 +1,11 @@
+file_path = '../data_to_delete/ukazka1/prezentace/X_16k.2.wav'
+window_size = 1 / 40  # 25ms
+overlap_size = 1 / 100  # 10ms
+remove_pitches_size = 0.35  # seconds
+hesitations_max_size_max_size = 2  # seconds
+pre_emphasis_coefficient = 0.97
+energy_threshold = 70
+# number_of_lpc_coefficients = 10
+displayEnergy = False
+save_to = 'output'
+with_gmm = False
