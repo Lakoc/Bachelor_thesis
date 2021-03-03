@@ -22,19 +22,17 @@ if params.save_to and not os.path.exists(params.save_to):
 # get wav file
 wav_file, sampling_rate = read_wav_file(params.file_path)
 
-# get pitches sizes in segments
-remove_pitches_size = int(params.remove_pitches_size / params.window_size)
-hesitations_max_size_max_size = int(params.hesitations_max_size_max_size / params.window_size)
-
 # TODO: VAD based on energy
 
 # if params.with_gmm:
 #     vad = process_voice_activity_detection_via_gmm(wav_file, remove_pitches_size, win_length=sampling_rate // 40)
 # else:
 #     # get parameters needed for next processing
-#     segmented_tracks = process_hamming(wav_file, params.pre_emphasis_coefficient, sampling_rate, params.window_size,
-#                                        params.overlap_size)
-#     energy_over_segments = calculate_energy_over_segments(segmented_tracks, params.displayEnergy)
+segmented_tracks = process_hamming(wav_file, params.pre_emphasis_coefficient, sampling_rate, params.window_size,
+                                   params.window_overlap)
+
+energy_over_segments = calculate_energy_over_segments(segmented_tracks)
+outputs.plot_energy_with_wav(segmented_tracks[:, :, 0], energy_over_segments[:, 0])
 #     zero_crossings = calculate_sign_changes(segmented_tracks)
 #     vad = process_voice_activity_detection_via_energy(energy_over_segments, zero_crossings, params.energy_threshold,
 #                                                       remove_pitches_size)
@@ -52,10 +50,10 @@ hesitations_max_size_max_size = int(params.hesitations_max_size_max_size / param
 #
 #     # # plot outputs
 #     outputs.plot_wav_with_detection(sampling_rate, wav_file, vad, vad_joined, cross_talks, params.save_to)
-    # outputs.plot_speech_time_comparison(mean_energies, speech_time, save_to)
-    # outputs.plot_interruptions(interruptions, save_to)
-    # outputs.plot_responses_lengths(responses, sentences_lengths, save_to)
-    # outputs.plot_monolog_hesitations_histogram(hesitations, save_to)
-    #
-    # statistics.generate_text_statistics(mean_energies, speech_time, hesitations, responses, sentences_lengths,
-    #                                     interruptions)
+# outputs.plot_speech_time_comparison(mean_energies, speech_time, save_to)
+# outputs.plot_interruptions(interruptions, save_to)
+# outputs.plot_responses_lengths(responses, sentences_lengths, save_to)
+# outputs.plot_monolog_hesitations_histogram(hesitations, save_to)
+#
+# statistics.generate_text_statistics(mean_energies, speech_time, hesitations, responses, sentences_lengths,
+#                                     interruptions)
