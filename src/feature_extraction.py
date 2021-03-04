@@ -3,7 +3,8 @@ import librosa
 import params
 from scipy.fftpack import dct
 from decorators import deprecated
-import matplotlib.pyplot as plt
+from scipy.ndimage.interpolation import shift
+from scipy.ndimage import convolve
 
 
 def calculate_energy_over_segments(segments):
@@ -23,13 +24,6 @@ def calculate_mfcc(segments, sampling_rate, mel_filters=40):
         # mel scale -> freq
         # M^-1(m) = 700 (10^(m/2595) -1)
     26-40 filter banks usually used"""
-
-    frames = segments[:, :, 0]
-
-    # Hermitian-symmetric, i.e. the negative frequency terms are just the complex conjugates -> no need for redundancy
-    # shannon theorem -> f/2.
-    magnitude = np.absolute(np.fft.rfft(frames, params.frequency_resolution))
-    power_spectrum = ((1.0 / params.frequency_resolution) * (magnitude ** 2))
 
     # Get mel bounds
     low_freq_mel = 0
@@ -66,8 +60,14 @@ def calculate_mfcc(segments, sampling_rate, mel_filters=40):
         for k in range(f_center, f_right):
             mel_bank[m - 1, k] = (freq_bins[m + 1] - k) / (freq_bins[m + 1] - freq_bins[m])
 
+    # Hermitian-symmetric, i.e. the negative frequency terms are just the complex conjugates, no need for redundancy
+    # shannon theorem -> f/2.
+    magnitude = np.absolute(np.fft.rfft(segments, params.frequency_resolution, axis=1))
+    power_spectrum = ((1.0 / params.frequency_resolution) * (magnitude ** 2))
+
     # Apply banks on power_spectrum
-    filter_banks = np.dot(power_spectrum, mel_bank.T)
+
+    filter_banks = np.transpose(np.dot(np.transpose(power_spectrum, [0, 2, 1]), mel_bank.T), [0, 2, 1])
 
     # Replace 0 with smallest float for numerical stability and
     filter_banks = np.where(filter_banks == 0, np.finfo(float).eps, filter_banks)
@@ -75,20 +75,44 @@ def calculate_mfcc(segments, sampling_rate, mel_filters=40):
 
     # Decorrelate filter banks and compress it
     mfcc = dct(filter_banks, axis=1, norm='ortho')
-    mfcc_compressed = mfcc[:, 1: (params.cepstral_coef_count + 1)]
+    mfcc_compressed = mfcc[:, 1: (params.cepstral_coef_count + 1), :]
 
     # Sinusoidal liftering used to de-emphasize higher MFCCs
     cep_lifter = 22
-    (n_frames, n_coef) = mfcc_compressed.shape
+    (_, n_coef, _) = mfcc_compressed.shape
     n = np.arange(n_coef)
     lift = 1 + (cep_lifter / 2) * np.sin(np.pi * n / cep_lifter)
-    mfcc_compressed *= lift
+    mfcc_compressed = np.transpose(lift * np.transpose(mfcc_compressed, [0, 2, 1]), [0, 2, 1])
 
-    # Improve SNR by subtracting mean value
+    # # Improve SNR by subtracting mean value
     filter_banks -= np.mean(filter_banks, axis=0)
     mfcc_compressed -= np.mean(mfcc_compressed, axis=0)
 
     return filter_banks, mfcc_compressed
+
+
+@deprecated
+def calculate_delta_slow(mfcc):
+    delta_neighbours = params.delta_neighbours
+    normalization = 2 * np.sum(np.arange(1, delta_neighbours + 1) ** 2)
+    neighbors = np.arange(-delta_neighbours, delta_neighbours + 1)
+    deltas = np.zeros(mfcc.shape)
+    for neighbor in neighbors:
+        deltas += neighbor * shift(mfcc, [0, -neighbor, 0])
+    return deltas / normalization
+
+
+def calculate_delta(mfcc):
+    delta_neighbours = params.delta_neighbours
+    normalization = 2 * np.sum(np.arange(1, delta_neighbours + 1) ** 2)
+    neighbors = np.flip(np.arange(-delta_neighbours, delta_neighbours + 1)).reshape((1, -1, 1))
+
+    mfcc = mfcc.transpose(1, 0, 2)
+    mfcc_padded = np.pad(mfcc, ((0, 0), (delta_neighbours, delta_neighbours), (0, 0)), 'constant', constant_values=0)
+
+    deltas = convolve(mfcc_padded, neighbors)
+    deltas = deltas / normalization
+    return deltas.transpose(1, 0, 2)
 
 
 @deprecated

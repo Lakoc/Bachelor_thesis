@@ -12,6 +12,7 @@ with_gmm = False
 
 frequency_resolution = 512
 cepstral_coef_count = 12
+delta_neighbours = 2
 
 # get pitches sizes in segments
 remove_pitches_size = int(remove_pitches_size / window_size)

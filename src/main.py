@@ -2,7 +2,7 @@ import src.outputs as outputs
 import src.params as params
 
 from src.preprocessing import process_hamming, read_wav_file, process_pre_emphasis
-from feature_extraction import calculate_energy_over_segments, calculate_mfcc
+from feature_extraction import calculate_energy_over_segments, calculate_mfcc, calculate_delta
 
 outputs.check_params()
 
@@ -16,4 +16,8 @@ segmented_tracks = process_hamming(signal, sampling_rate, params.window_size,
 energy_over_segments = calculate_energy_over_segments(segmented_tracks)
 # outputs.plot_energy_with_wav(segmented_tracks[:, :, 0], energy_over_segments[:, 0])
 
-mfcc = calculate_mfcc(segmented_tracks, sampling_rate)
+filter_banks, mfcc = calculate_mfcc(segmented_tracks, sampling_rate)
+
+delta_mfcc = calculate_delta(mfcc)
+delta_delta_mfcc = calculate_delta(delta_mfcc)
+
