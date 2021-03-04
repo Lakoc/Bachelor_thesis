@@ -2,9 +2,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import fftpack
 from math import ceil
+import os
+import params
 
 # 15 ms not overlapping frame -> corresponding to 1000 // 15
 NORMALIZATION_COEFFICIENT = 67
+
+
+def check_params():
+    """Check params from external file"""
+    if params.save_to and not os.path.exists(params.save_to):
+        os.makedirs(params.save_to)
 
 
 def generate_graph(save_to, plot_name, fig):

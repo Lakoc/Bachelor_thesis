@@ -1,4 +1,4 @@
-file_path = 'data/hedepy_test/treatmentTherapistShort.wav'
+file_path = 'data/hedepy_test/treatmentTherapist8kHz.wav'
 window_size = 0.025  # 25ms
 window_overlap = 0.015  # 15ms
 remove_pitches_size = 0.35  # seconds
@@ -9,6 +9,9 @@ number_of_lpc_coefficients = 10
 displayEnergy = False
 save_to = 'output'
 with_gmm = False
+
+frequency_resolution = 512
+cepstral_coef_count = 12
 
 # get pitches sizes in segments
 remove_pitches_size = int(remove_pitches_size / window_size)
