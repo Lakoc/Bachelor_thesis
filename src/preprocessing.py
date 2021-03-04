@@ -36,6 +36,7 @@ def process_hamming(signal, sampling_rate, window_size, window_overlap):
 
     zeros_to_append = np.zeros(signal_len_new - signal_len)
 
+    # TODO: Simplify
     def pad_segment_hamming(sig):
         amplified_signal_padded = np.append(sig, zeros_to_append)
         windows = amplified_signal_padded[indices.astype(np.int32, copy=False)]
