@@ -11,15 +11,15 @@ NORMALIZATION_COEFFICIENT = 67
 
 def check_params():
     """Check params from external file"""
-    if params.save_to and not os.path.exists(params.save_to):
-        os.makedirs(params.save_to)
+    if params.output_folder and not os.path.exists(params.output_folder):
+        os.makedirs(params.output_folder)
 
 
-def generate_graph(save_to, plot_name, fig):
+def generate_graph(output_folder, plot_name, fig):
     """Handler for graph generations"""
     fig.tight_layout()
-    if save_to:
-        plt.savefig(f'{save_to}/{plot_name}.png')
+    if output_folder:
+        plt.savefig(f'{output_folder}/{plot_name}.png')
     else:
         fig.show()
 
@@ -47,7 +47,24 @@ def plot_energy_with_wav(track, energies_per_segment):
     fig.show()
 
 
-def plot_wav_with_detection(sampling_rate, wav, vad_segments, joined_vad, cross_talks, save_to):
+def plot_vad_energy_with_wav(tracks, energies_per_segment, vads):
+    """Plots vad, wav and energy of signal"""
+    for i in range(0, 2):
+        track = tracks[:, i]
+        energy = energies_per_segment[:, i]
+        vad = vads[:, i]
+        fig, axs = plt.subplots(3)
+        axs[0].set_title('Vaw')
+        axs[0].plot(track)
+        axs[1].set_title('Energy')
+        axs[1].plot(energy)
+        axs[2].set_title('Vad')
+        axs[2].plot(vad)
+        fig.tight_layout()
+        fig.show()
+
+
+def plot_wav_with_detection(sampling_rate, wav, vad_segments, joined_vad, cross_talks, output_folder):
     """Plot signals with vad and cross talks"""
     fig, axs = plt.subplots(7, sharex=True, figsize=(14, 12))
     wav_len = len(wav[:, 0])
@@ -76,7 +93,7 @@ def plot_wav_with_detection(sampling_rate, wav, vad_segments, joined_vad, cross_
     axs[6].set_xlabel("Time [s]")
     axs[6].tick_params(bottom=True)
     axs[6].plot(time_vad, cross_talks, color='C1')
-    generate_graph(save_to, 'speech_vad', fig)
+    generate_graph(output_folder, 'speech_vad', fig)
 
     # fig, ax = plt.subplots(1, figsize=(12, 3))
     # ax.spines["top"].set_visible(False)
@@ -87,7 +104,7 @@ def plot_wav_with_detection(sampling_rate, wav, vad_segments, joined_vad, cross_
     # ax.get_yaxis().set_visible(False)
     # ax.tick_params(bottom=False, left=False)
     # ax.plot(time_audio, wav[:, 0], color='k')
-    # generate_graph(save_to, 'speech_Therapist', fig)
+    # generate_graph(output_folder, 'speech_Therapist', fig)
     #
     # fig, ax = plt.subplots(1, figsize=(12, 3))
     # ax.spines["top"].set_visible(False)
@@ -98,10 +115,10 @@ def plot_wav_with_detection(sampling_rate, wav, vad_segments, joined_vad, cross_
     # ax.get_yaxis().set_visible(False)
     # ax.tick_params(bottom=False, left=False)
     # ax.plot(time_audio, wav[:, 1], color='k')
-    # generate_graph(save_to, 'speech_Client', fig)
+    # generate_graph(output_folder, 'speech_Client', fig)
 
 
-def plot_speech_time_comparison(mean_energies, speech_time, save_to):
+def plot_speech_time_comparison(mean_energies, speech_time, output_folder):
     """Plots pie charts to show speech comparison"""
     fig, ax = plt.subplots(1)
     # axs[0].set_title('Speech energy')
@@ -110,10 +127,10 @@ def plot_speech_time_comparison(mean_energies, speech_time, save_to):
     ax.set_title('Speech time', fontsize=16)
     ax.pie(speech_time, labels=['Therapist', 'Client'], autopct='%1.2f%%',
            startangle=90)
-    generate_graph(save_to, 'energy_and_speech_time', fig)
+    generate_graph(output_folder, 'energy_and_speech_time', fig)
 
 
-def create_time_histogram(data, titles, save_to, hist_name, bins):
+def create_time_histogram(data, titles, output_folder, hist_name, bins):
     """Create histogram with normalized time values"""
     graphs = len(titles)
     fig, axes = plt.subplots(nrows=graphs, ncols=1, figsize=(8, 6), sharex=True, sharey=True)
@@ -132,35 +149,35 @@ def create_time_histogram(data, titles, save_to, hist_name, bins):
         axes[index].set_ylabel("Probability")
         axes[index].set_title(titles[index], fontsize=20)
     axes[graphs - 1].set_xlabel("Length [s]")
-    generate_graph(save_to, hist_name, fig)
+    generate_graph(output_folder, hist_name, fig)
 
 
-def plot_responses_lengths(responses, sentences_lengths, save_to):
+def plot_responses_lengths(responses, sentences_lengths, output_folder):
     """Plot sentences lengths and responses time"""
     create_time_histogram(responses, ['Therapist reaction time', 'Client reaction time'],
-                          save_to, 'response_time', np.arange(0, 3.1, 0.3))
+                          output_folder, 'response_time', np.arange(0, 3.1, 0.3))
     max_val = max(sentences_lengths[0].max() / NORMALIZATION_COEFFICIENT,
                   sentences_lengths[1].max() / NORMALIZATION_COEFFICIENT)
     step = ceil(max_val / 10)
     max_val += step
     create_time_histogram(sentences_lengths,
-                          ['Therapist sentences length', 'Client sentences length'], save_to,
+                          ['Therapist sentences length', 'Client sentences length'], output_folder,
                           'sentences_length', np.arange(0, max_val, step))
 
 
-def plot_interruptions(interruptions, save_to):
+def plot_interruptions(interruptions, output_folder):
     """Create pie chart with interruptions"""
     fig, ax = plt.subplots()
     ax.set_title('Interruptions', fontsize=16)
     ax.pie(interruptions, labels=['Therapist', 'Client'], autopct=count_percentage_with_values(interruptions),
            startangle=90)
-    generate_graph(save_to, 'interruptions', fig)
+    generate_graph(output_folder, 'interruptions', fig)
 
 
-def plot_monolog_hesitations_histogram(hesitations, save_to):
+def plot_monolog_hesitations_histogram(hesitations, output_folder):
     """Create histogram of hesitations"""
     create_time_histogram(hesitations, ['Therapist monolog hesitations', 'Client monolog hesitations'],
-                          save_to, 'monolog_hesitations', np.arange(0, 5.1, 0.5))
+                          output_folder, 'monolog_hesitations', np.arange(0, 5.1, 0.5))
 
 
 def plot_lpc_ftt(sig, sampling_frequency, lpc, coefficients):

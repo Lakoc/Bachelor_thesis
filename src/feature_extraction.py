@@ -1,16 +1,29 @@
 import numpy as np
 import librosa
 import params
-from scipy.fftpack import dct
+from scipy import fftpack, ndimage
 from decorators import deprecated
-from scipy.ndimage.interpolation import shift
-from scipy.ndimage import convolve
 
 
 def calculate_energy_over_segments(segments):
     """Iterate over all segments and count energy ( E = sum(x^2))"""
     signal_power2 = segments ** 2
     return np.sum(signal_power2, axis=1)
+
+
+def calculate_rmse(segments):
+    """Iterate over all segments and count root mean square energy( E = (1/N * sum(x^2))) ^ (1/2)"""
+    signal_power2 = segments ** 2
+    energy = np.sum(signal_power2, axis=1)
+    rmse = np.sqrt(energy / segments.shape[1])
+    return rmse
+
+
+def normalize_energy(energy):
+    """Normalize energy over segments"""
+    energy -= energy.mean()
+    energy /= energy.std()
+    return energy
 
 
 def calculate_mfcc(segments, sampling_rate, mel_filters=40):
@@ -74,35 +87,24 @@ def calculate_mfcc(segments, sampling_rate, mel_filters=40):
     filter_banks = 20 * np.log10(filter_banks)
 
     # Decorrelate filter banks and compress it
-    mfcc = dct(filter_banks, axis=1, norm='ortho')
+    mfcc = fftpack.dct(filter_banks, axis=1, norm='ortho')
     mfcc_compressed = mfcc[:, 1: (params.cepstral_coef_count + 1), :]
 
     # Sinusoidal liftering used to de-emphasize higher MFCCs
-    cep_lifter = 22
     (_, n_coef, _) = mfcc_compressed.shape
     n = np.arange(n_coef)
-    lift = 1 + (cep_lifter / 2) * np.sin(np.pi * n / cep_lifter)
+    lift = 1 + (params.lifter / 2) * np.sin(np.pi * n / params.lifter)
     mfcc_compressed = np.transpose(lift * np.transpose(mfcc_compressed, [0, 2, 1]), [0, 2, 1])
 
     # # Improve SNR by subtracting mean value
     filter_banks -= np.mean(filter_banks, axis=0)
     mfcc_compressed -= np.mean(mfcc_compressed, axis=0)
 
-    return filter_banks, mfcc_compressed
-
-
-@deprecated
-def calculate_delta_slow(mfcc):
-    delta_neighbours = params.delta_neighbours
-    normalization = 2 * np.sum(np.arange(1, delta_neighbours + 1) ** 2)
-    neighbors = np.arange(-delta_neighbours, delta_neighbours + 1)
-    deltas = np.zeros(mfcc.shape)
-    for neighbor in neighbors:
-        deltas += neighbor * shift(mfcc, [0, -neighbor, 0])
-    return deltas / normalization
+    return filter_banks, mfcc_compressed, power_spectrum
 
 
 def calculate_delta(mfcc):
+    """Calculate delta changes in mfcc features"""
     delta_neighbours = params.delta_neighbours
     normalization = 2 * np.sum(np.arange(1, delta_neighbours + 1) ** 2)
     neighbors = np.flip(np.arange(-delta_neighbours, delta_neighbours + 1)).reshape((1, -1, 1))
@@ -110,7 +112,7 @@ def calculate_delta(mfcc):
     mfcc = mfcc.transpose(1, 0, 2)
     mfcc_padded = np.pad(mfcc, ((0, 0), (delta_neighbours, delta_neighbours), (0, 0)), 'constant', constant_values=0)
 
-    deltas = convolve(mfcc_padded, neighbors)
+    deltas = ndimage.convolve(mfcc_padded, neighbors)
     deltas = deltas / normalization
     return deltas.transpose(1, 0, 2)
 

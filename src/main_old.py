@@ -21,11 +21,11 @@
 #     #     outputs.plot_lpc_ftt(segmented_tracks[0][i], sampling_rate, lpc[0][i], number_of_lpc_coefficients)
 #
 #     # # plot outputs
-#     outputs.plot_wav_with_detection(sampling_rate, wav_file, vad, vad_joined, cross_talks, params.save_to)
-# outputs.plot_speech_time_comparison(mean_energies, speech_time, save_to)
-# outputs.plot_interruptions(interruptions, save_to)
-# outputs.plot_responses_lengths(responses, sentences_lengths, save_to)
-# outputs.plot_monolog_hesitations_histogram(hesitations, save_to)
+#     outputs.plot_wav_with_detection(sampling_rate, wav_file, vad, vad_joined, cross_talks, params.output_folder)
+# outputs.plot_speech_time_comparison(mean_energies, speech_time, output_folder)
+# outputs.plot_interruptions(interruptions, output_folder)
+# outputs.plot_responses_lengths(responses, sentences_lengths, output_folder)
+# outputs.plot_monolog_hesitations_histogram(hesitations, output_folder)
 #
 # statistics.generate_text_statistics(mean_energies, speech_time, hesitations, responses, sentences_lengths,
 #                                     interruptions)
