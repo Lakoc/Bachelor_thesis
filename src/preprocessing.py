@@ -14,7 +14,7 @@ def process_pre_emphasis(signal, coefficient):
 
 
 def process_hamming(signal, sampling_rate, window_size, window_overlap):
-    """Process pre emphasis over input signal, segment it and apply window function"""
+    """Segment signal  it and apply window function"""
 
     if window_size < window_overlap:
         exit("Window size smaller than overlap!")
@@ -34,14 +34,13 @@ def process_hamming(signal, sampling_rate, window_size, window_overlap):
         np.arange(0, signal_len_new - window_size + window_stride, window_stride),
         (window_size, 1)).T
 
-    zeros_to_append = np.zeros(signal_len_new - signal_len)
+    # pad zeros to end for evenly segmented windows
+    zeros_to_append = signal_len_new - signal_len
+    signal_padded = np.pad(signal, ((0, zeros_to_append), (0, 0)), 'constant', constant_values=0)
 
-    # TODO: Simplify
-    def pad_segment_hamming(sig):
-        amplified_signal_padded = np.append(sig, zeros_to_append)
-        windows = amplified_signal_padded[indices.astype(np.int32, copy=False)]
-        windows *= np.hamming(window_size)
-        return windows
+    # split to segments
+    windows = signal_padded[indices.astype(np.int32, copy=False)]
 
-    # apply segmentation over each axis
-    return np.apply_along_axis(pad_segment_hamming, 0, signal)
+    # apply hamming window function on segments
+    windows = windows.transpose(0, 2, 1) * np.hamming(window_size)
+    return windows.transpose(0, 2, 1)
