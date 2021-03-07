@@ -36,7 +36,7 @@ diarization = gmm_mfcc_diarization_no_interruptions(mfcc_dd, vad)
 
 
 # outputs
-# outputs.diarization_to_files(diarization)
+outputs.diarization_to_files(diarization)
 
 # outputs.plot_energy_with_wav(segmented_tracks[:, :, 0], energy_over_segments[:, 0])
 # outputs.plot_vad_energy_with_wav(signal, energy_over_segments, vad)

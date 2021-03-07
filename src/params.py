@@ -24,6 +24,7 @@ med_filter = 0.35  # 350 ms
 med_filter_diar = 100  # Each segment represents 10 ms -> 100 segments = 1s
 second = 60
 minute = second * 60
+means_shift = 0.05
 
 # output folder
 output_folder = 'output'
