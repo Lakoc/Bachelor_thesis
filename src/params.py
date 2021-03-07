@@ -1,5 +1,5 @@
 # input file path
-file_path = 'data/hedepy_test/treatmentTherapist8kHz.wav'
+file_path = 'data_to_delete/ukazka1/prezentace/merged.wav'
 
 # preprocessing
 pre_emphasis_coefficient = 0.97
@@ -20,6 +20,10 @@ delta_neighbours = 2
 energy_threshold_interval = 0.1  # 100ms
 med_filter = 0.35  # 350 ms
 
+# diarization
+med_filter_diar = 100  # Each segment represents 10 ms -> 100 segments = 1s
+second = 60
+minute = second * 60
 
 # output folder
 output_folder = 'output'

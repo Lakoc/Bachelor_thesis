@@ -106,15 +106,30 @@ def calculate_mfcc(segments, sampling_rate, mel_filters=40):
 def calculate_delta(mfcc):
     """Calculate delta changes in mfcc features"""
     delta_neighbours = params.delta_neighbours
+
+    # Calculate normalization coefficient
     normalization = 2 * np.sum(np.arange(1, delta_neighbours + 1) ** 2)
+
+    # Create filter of neighbors for convolution
     neighbors = np.flip(np.arange(-delta_neighbours, delta_neighbours + 1)).reshape((1, -1, 1))
 
+    # Transpose and add zeros for exact sum start
     mfcc = mfcc.transpose(1, 0, 2)
     mfcc_padded = np.pad(mfcc, ((0, 0), (delta_neighbours, delta_neighbours), (0, 0)), 'constant', constant_values=0)
 
+    # Process convolution = sum over neighbors
     deltas = ndimage.convolve(mfcc_padded, neighbors)
+
+    # Normalize, transpose and extract padded segments
     deltas = deltas / normalization
-    return deltas.transpose(1, 0, 2)
+    deltas = deltas.transpose(1, 0, 2)
+    return deltas[delta_neighbours: deltas.shape[0] - delta_neighbours, :, :]
+
+
+def append_delta(mfcc, delta, d_delta):
+    """Append delta and delta - delta coefficients to mfcc features"""
+    mfcc_dd = np.append(mfcc, delta, axis=1)
+    return np.append(mfcc_dd, d_delta, axis=1)
 
 
 @deprecated
