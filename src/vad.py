@@ -1,9 +1,9 @@
 import numpy as np
 import params
-from decorators import deprecated
-from external import energy_vad
+from sklearn.mixture import GaussianMixture
 from scipy import ndimage
-import matplotlib.pyplot as plt
+from external import energy_vad
+from scipy.special import logsumexp
 
 
 def calculate_initial_threshold(energy_segments):
@@ -70,14 +70,29 @@ def energy_vad_threshold_with_adaptive_threshold(energy_segments):
     return vad
 
 
-def energy_gmm_based_vad(signal):
-    out, llhs = energy_vad.compute_vad(signal)
-    return out, llhs
+def energy_gmm_based_vad(normalized_energy):
+    """Estimate vad using gaussian mixture model"""
+    # Initialization of model
+    means = np.array([-1.00, 0.00, 1.00])[:, np.newaxis]
+    weights = np.array([1 / 3, 1 / 3, 1 / 3])
+    gmm = GaussianMixture(n_components=3, weights_init=weights, means_init=means)
 
-# @deprecated
-# def process_voice_activity_detection_via_gmm(wav_file, remove_pitches_size, win_length):
-#     """Process voice activity detection with gmm"""
-#     vad0, _ = energy_vad.compute_vad(wav_file[:, 0], win_length=win_length, win_overlap=win_length // 2)
-#     vad1, _ = energy_vad.compute_vad(wav_file[:, 1], win_length=win_length, win_overlap=win_length // 2)
-#     vad = [vad0, vad1]
-#     return post_process_vad_energy(vad, remove_pitches_size)
+    # Reshape input
+    normalized_energy = normalized_energy.reshape(-1, 1)
+
+    # Fit and predict posterior probabilities
+    gmm.fit(normalized_energy)
+
+    # Calculate likelihoods and transform to (0,1) interval
+    likelihoods = gmm.predict_proba(normalized_energy).reshape(-1, 2, 3)
+    shift = logsumexp(likelihoods, axis=2)
+    likelihoods = (likelihoods.transpose(2, 0, 1) - shift).transpose(1, 2, 0)
+    likelihoods = np.exp(likelihoods)
+
+    # If silence was detected with likelihood smaller than threshold, we mark segment as active
+    vad = likelihoods[:, :, 0] < params.min_likelihood
+
+    # Apply median filter
+    vad = ndimage.median_filter(vad, int(round(params.med_filter / params.window_stride)))
+
+    return vad

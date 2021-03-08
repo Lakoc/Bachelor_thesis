@@ -3,7 +3,6 @@ import params
 from scipy import ndimage
 from sklearn.mixture import GaussianMixture
 from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
 
 
 def energy_based_diarization_no_interruptions(energy, vad):

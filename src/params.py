@@ -19,6 +19,7 @@ delta_neighbours = 2
 # energy vad
 energy_threshold_interval = 0.1  # 100ms
 med_filter = 0.35  # 350 ms
+min_likelihood = 0.3  # 30%
 
 # diarization
 med_filter_diar = 100  # Each segment represents 10 ms -> 100 segments = 1s
