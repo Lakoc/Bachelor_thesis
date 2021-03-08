@@ -54,12 +54,11 @@ def plot_vad_energy_with_wav(tracks, energies_per_segment, vads):
         energy = energies_per_segment[:, i]
         vad = vads[:, i]
 
-
         fig, axs = plt.subplots()
         axs.set_title('Vaw with vad')
         x1 = np.linspace(0, 1, track.shape[0])
         x2 = np.linspace(0, 1, vad.shape[0])
-        axs.plot(x1,track)
+        axs.plot(x1, track)
         axs.plot(x2, vad * 1000)
         fig.tight_layout()
         fig.show()
@@ -226,20 +225,12 @@ def plot_lpc_ftt(sig, sampling_frequency, lpc, coefficients):
     fig.show()
 
 
-def diarization_to_files(diarization):
-    """Create diarization file providing for each speech segment speaker"""
-    speech_start = np.empty(diarization.shape, dtype=bool)
-    speech_start[0] = True
-    speech_start[1:] = np.not_equal(diarization[:-1], diarization[1:])
-    segment_indexes_starts = np.argwhere(speech_start).reshape(-1)
-    speaker = diarization[segment_indexes_starts]
-
-    segment_start_time = segment_indexes_starts * params.window_stride
-
+def diarization_to_files(speaker, segment_start):
+    """Create diarization file providing for each speech segment speaker and time bounds"""
     with open(f'{params.output_folder}/diarization', 'w') as file:
         for index, val in enumerate(speaker):
             if val == 0:
                 continue
             else:
                 file.write(
-                    f'{segment_start_time[index - 1]:.2f}\t{segment_start_time[index]:.2f}\t spk{val}\n')
+                    f'{segment_start[index - 1]:.2f}\t{segment_start[index]:.2f}\t spk{val}\n')

@@ -37,11 +37,22 @@ def gmm_mfcc_diarization_no_interruptions(mfcc_dd, vad):
     gmm.means_ = gmm_k_means.cluster_centers_[gmm_k_means.labels_] * params.means_shift + gmm.means_ * (
             1 - params.means_shift)
 
-    # Find best sitting gmm and choose speaker
+    # Predict over channels
     channel1_predict = gmm.predict_proba(mfcc_dd[:, :, 0])
     channel2_predict = gmm.predict_proba(mfcc_dd[:, :, 1])
+
+    # Sum predictions
     channel_predictions = channel1_predict + channel2_predict
-    diarization = gmm_clusters[np.argmax(channel_predictions, axis=1)] + 1
+
+    # Sum likelihoods of clusters
+    speaker1 = np.sum(channel_predictions[:, ~np.argwhere(gmm_clusters)], axis=1)
+    speaker2 = np.sum(channel_predictions[:, np.argwhere(gmm_clusters)], axis=1)
+
+    # Choose higher cluster likelihood
+    speakers = np.append(speaker1, speaker2, axis=1)
+    diarization = np.argmax(speakers, axis=1) + 1
+
+    # Remove nonactive segments
     diarization *= active_segments
 
     # Apply median filter

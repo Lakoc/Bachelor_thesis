@@ -6,13 +6,14 @@ from feature_extraction import calculate_energy_over_segments, normalize_energy,
     calculate_delta, append_delta
 from vad import energy_vad_threshold_with_adaptive_threshold, energy_gmm_based_vad
 from diarization import energy_based_diarization_no_interruptions, gmm_mfcc_diarization_no_interruptions
+from statistics import diarization_with_timing
 
 outputs.check_params()
 
 # get wav file and segment it
 wav_file, sampling_rate = read_wav_file(params.file_path)
+# wav_file = wav_file[:sampling_rate * 60, :]
 
-wav_file = wav_file[:sampling_rate * 60, :]
 signal = process_pre_emphasis(wav_file, params.pre_emphasis_coefficient)
 segmented_tracks = process_hamming(signal, sampling_rate, params.window_size,
                                    params.window_overlap)
@@ -29,13 +30,12 @@ mfcc_dd = append_delta(mfcc, delta_mfcc, calculate_delta(delta_mfcc))
 # vad = energy_vad_threshold_with_adaptive_threshold(root_mean_squared_energy)
 vad = energy_gmm_based_vad(energy_over_segments)
 
-
 # diarization
 # diarization = energy_based_diarization_no_interruptions(energy_over_segments, vad)
 diarization = gmm_mfcc_diarization_no_interruptions(mfcc, vad)
 
 
 # outputs
-# outputs.diarization_to_files(diarization)
+outputs.diarization_to_files(*diarization_with_timing(diarization))
 # outputs.plot_energy_with_wav(segmented_tracks[:, :, 0], energy_over_segments[:, 0])
-outputs.plot_vad_energy_with_wav(signal, energy_over_segments, vad)
+# outputs.plot_vad_energy_with_wav(signal, energy_over_segments, vad)

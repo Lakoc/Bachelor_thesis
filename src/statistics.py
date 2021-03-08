@@ -1,5 +1,5 @@
 import numpy as np
-
+import params
 
 # 15 ms not overlapping frame -> corresponding to 1000 // 15
 NORMALIZATION_COEFFICIENT = 67
@@ -200,3 +200,14 @@ def join_vad_and_count_hesitations(vad, hesitations_max_size):
     hesitations_filtered = hesitations[0][hesitations_ind_filtered[0]], hesitations[1][hesitations_ind_filtered[1]]
     return joined_vad, hesitations_filtered
 
+
+def diarization_with_timing(diarization):
+    """Process diarization output and extract speaker with time bounds"""
+    speech_start = np.empty(diarization.shape, dtype=bool)
+    speech_start[0] = True
+    speech_start[1:] = np.not_equal(diarization[:-1], diarization[1:])
+    segment_indexes_starts = np.argwhere(speech_start).reshape(-1)
+    speaker = diarization[segment_indexes_starts]
+
+    segment_start_time = segment_indexes_starts * params.window_stride
+    return speaker, segment_start_time
