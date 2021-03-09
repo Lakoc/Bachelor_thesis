@@ -61,4 +61,5 @@ def gmm_mfcc_diarization_no_interruptions(mfcc_dd, vad):
 
     # Apply median filter
     diarization = ndimage.median_filter(diarization, params.med_filter_diar)
+    llhs = ndimage.median_filter(llhs, params.med_filter_diar)
     return diarization, llhs
