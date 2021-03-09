@@ -225,7 +225,7 @@ def plot_lpc_ftt(sig, sampling_frequency, lpc, coefficients):
     fig.show()
 
 
-def diarization_to_files(speaker, segment_start):
+def diarization_to_files(speaker, segment_time, llhs):
     """Create diarization file providing for each speech segment speaker and time bounds"""
     with open(f'{params.output_folder}/diarization', 'w') as file:
         for index, val in enumerate(speaker):
@@ -233,4 +233,4 @@ def diarization_to_files(speaker, segment_start):
                 continue
             else:
                 file.write(
-                    f'{segment_start[index - 1]:.2f}\t{segment_start[index]:.2f}\t spk{val}\n')
+                    f'{segment_time[index]:.2f}\t{segment_time[index + 1]:.2f}\t spk{val} {llhs[index]:.2f}\n')

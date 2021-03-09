@@ -3,6 +3,7 @@ import params
 from scipy import ndimage
 from sklearn.mixture import GaussianMixture
 from sklearn.cluster import KMeans
+from decorators import timeit
 
 
 def energy_based_diarization_no_interruptions(energy, vad):
@@ -15,6 +16,7 @@ def energy_based_diarization_no_interruptions(energy, vad):
     return diarized
 
 
+@timeit
 def gmm_mfcc_diarization_no_interruptions(mfcc_dd, vad):
     """Train Gaussian mixture models with mfcc features over speech segments"""
 
@@ -51,10 +53,12 @@ def gmm_mfcc_diarization_no_interruptions(mfcc_dd, vad):
     # Choose higher cluster likelihood
     speakers = np.append(speaker1, speaker2, axis=1)
     diarization = np.argmax(speakers, axis=1) + 1
+    llhs = np.max(speakers, axis=1) / 2
 
     # Remove nonactive segments
     diarization *= active_segments
+    llhs *= active_segments
 
     # Apply median filter
     diarization = ndimage.median_filter(diarization, params.med_filter_diar)
-    return diarization
+    return diarization, llhs

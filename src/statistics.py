@@ -1,5 +1,6 @@
 import numpy as np
 import params
+from decorators import timeit
 
 # 15 ms not overlapping frame -> corresponding to 1000 // 15
 NORMALIZATION_COEFFICIENT = 67
@@ -201,13 +202,39 @@ def join_vad_and_count_hesitations(vad, hesitations_max_size):
     return joined_vad, hesitations_filtered
 
 
-def diarization_with_timing(diarization):
+@timeit
+def diarization_with_timing(diarization, llhs):
     """Process diarization output and extract speaker with time bounds"""
     speech_start = np.empty(diarization.shape, dtype=bool)
     speech_start[0] = True
     speech_start[1:] = np.not_equal(diarization[:-1], diarization[1:])
-    segment_indexes_starts = np.argwhere(speech_start).reshape(-1)
-    speaker = diarization[segment_indexes_starts]
+    segment_indexes = np.argwhere(speech_start).reshape(-1)
+    speaker = diarization[segment_indexes]
 
-    segment_start_time = segment_indexes_starts * params.window_stride
-    return speaker, segment_start_time
+    # Append end of audio
+    segment_indexes = np.append(segment_indexes, diarization.shape[0])
+
+    """Create masked memory view"""
+    # Extract mask starts, ends and calculate mask_len for normalization
+    start = segment_indexes[:-1]
+    end = segment_indexes[1:]
+    mask_len = end - start
+
+    # Create mask from start to end
+    start = start.reshape(-1, 1)
+    end = end.reshape(-1, 1)
+    indices = np.arange(llhs.size)
+    mask = (indices < start) | (indices >= end)
+
+    # Create view over data not copying them
+    as_strided = np.lib.stride_tricks.as_strided
+    strided = as_strided(llhs, mask.shape, (0, llhs.strides[0]))
+
+    # Combine with mask
+    masked_arr = np.ma.array(strided, mask=mask)
+
+    # Sum likelihoods and normalize by mask_len
+    llhs = np.sum(masked_arr, axis=1) / mask_len
+
+    segment_time = segment_indexes * params.window_stride
+    return speaker, segment_time, llhs

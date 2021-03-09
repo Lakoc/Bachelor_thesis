@@ -2,8 +2,8 @@ import numpy as np
 import params
 from sklearn.mixture import GaussianMixture
 from scipy import ndimage
-from external import energy_vad
 from scipy.special import logsumexp
+from decorators import timeit
 
 
 def calculate_initial_threshold(energy_segments):
@@ -26,6 +26,7 @@ def energy_vad_threshold(energy_segments):
     return vad
 
 
+@timeit
 def energy_vad_threshold_with_adaptive_threshold(energy_segments):
     """Process vad with adaptive energy thresholding
     http://www.iaeng.org/IJCS/issues_v36/issue_4/IJCS_36_4_16.pdf
@@ -70,6 +71,7 @@ def energy_vad_threshold_with_adaptive_threshold(energy_segments):
     return vad
 
 
+@timeit
 def energy_gmm_based_vad(normalized_energy):
     """Estimate vad using gaussian mixture model"""
     # Initialization of model
