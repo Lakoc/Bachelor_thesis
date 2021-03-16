@@ -2,7 +2,7 @@ import numpy as np
 import librosa
 import params
 from scipy import fftpack, ndimage
-from decorators import deprecated, timeit
+from helpers.decorators import deprecated, timeit
 
 
 def calculate_energy_over_segments(segments):
@@ -21,9 +21,10 @@ def calculate_rmse(segments):
 
 def normalize_energy(energy):
     """Normalize energy over segments"""
-    energy -= energy.mean()
-    energy /= energy.std()
-    return energy
+    normalized_energy = np.copy(energy)
+    normalized_energy -= normalized_energy.mean()
+    normalized_energy /= normalized_energy.std()
+    return normalized_energy
 
 
 @timeit
@@ -125,6 +126,7 @@ def calculate_delta(mfcc):
     # Normalize, transpose and extract padded segments
     deltas = deltas / normalization
     deltas = deltas.transpose(1, 0, 2)
+    # TODO: check
     return deltas[delta_neighbours: deltas.shape[0] - delta_neighbours, :, :]
 
 

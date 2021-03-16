@@ -225,7 +225,7 @@ def plot_lpc_ftt(sig, sampling_frequency, lpc, coefficients):
     fig.show()
 
 
-def diarization_to_files(speaker, segment_time, llhs):
+def diarization_to_files(speaker, segment_time):
     """Create diarization file providing for each speech segment speaker and time bounds"""
     with open(f'{params.output_folder}/diarization', 'w') as file:
         for index, val in enumerate(speaker):
@@ -233,4 +233,25 @@ def diarization_to_files(speaker, segment_time, llhs):
                 continue
             else:
                 file.write(
-                    f'{segment_time[index]:.2f}\t{segment_time[index + 1]:.2f}\t spk{val} {llhs[index]:.2f}\n')
+                    f'{segment_time[index]:.2f}\t{segment_time[index + 1]:.2f}\t spk{val}\n')
+
+
+def diarization_likelihood_plot(i, j, speaker1, speaker2, active_segments, hit_rate):
+    fig, axs = plt.subplots(figsize=(40, 10))
+    axs.set_title('Speaker match')
+
+    axs.plot(np.where(active_segments, speaker1, np.mean(speaker1))[6000:7000])
+    axs.plot(np.where(active_segments, speaker2, np.mean(speaker2))[6000:7000])
+    axs.vlines([265, 463, 652], np.min(speaker1), np.max(speaker1))
+
+    fig.tight_layout()
+    # fig.show()
+    plt.savefig(f'out/{i}-{j}_hit{hit_rate:.3f}.png')
+    plt.close(fig)
+    #
+    # fig, axs = plt.subplots(figsize=(40, 10))
+    # axs.set_title('Speaker ')
+    # axs.plot(speaker1_active[0:7000])
+    # axs.plot(speaker2_active[0:7000])
+    # fig.tight_layout()
+    # fig.show()

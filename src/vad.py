@@ -3,7 +3,7 @@ import params
 from sklearn.mixture import GaussianMixture
 from scipy import ndimage
 from scipy.special import logsumexp
-from decorators import timeit
+from helpers.decorators import timeit
 
 
 def calculate_initial_threshold(energy_segments):

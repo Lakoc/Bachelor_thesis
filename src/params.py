@@ -11,9 +11,7 @@ window_stride = window_size - window_overlap  # 10ms
 # mfcc
 frequency_resolution = 512
 cepstral_coef_count = 12
-
 lifter = 22
-
 delta_neighbours = 2
 
 # energy vad
@@ -22,10 +20,15 @@ med_filter = 0.35  # 350 ms
 min_likelihood = 0.3  # 30%
 
 # diarization
-med_filter_diar = 100  # Each segment represents 10 ms -> 100 segments = 1s
+gmm_max_iterations = 100
+gmm_error_rate = 1e-3
+filter_diar = 100  # Each segment represents 10 ms -> 100 segments = 1s
 second = 60
 minute = second * 60
 means_shift = 0.05
+energy_percentile = 20  # Take 20% of high energy difference frames
+propagation_size = 10
+prop_coef = 0.5
 
 # output folder
 output_folder = 'output'
