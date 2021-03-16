@@ -15,8 +15,8 @@ def gmm_mfcc_diarization_no_interruptions_1channel(mfcc_dd, vad, energy):
     # Train gmm
     gmm1 = MyGmm(n_components=32, verbose=1, covariance_type='diag').fit(channel1_mfcc)
     gmm2 = deepcopy(gmm1)
-    gmm1.update_centers(channel1_mfcc[energy_difference > 0.5], params.means_shift)
-    gmm2.update_centers(channel1_mfcc[energy_difference < -0.5], params.means_shift)
+    gmm1.update_centers(channel1_mfcc[energy_difference > 0.5], params.model_means_shift)
+    gmm2.update_centers(channel1_mfcc[energy_difference < -0.5], params.model_means_shift)
 
     speaker1 = gmm1.score_samples(mfcc_dd[:, :, 0])
     speaker2 = gmm2.score_samples(mfcc_dd[:, :, 0])

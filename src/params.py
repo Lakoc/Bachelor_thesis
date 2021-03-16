@@ -20,15 +20,16 @@ med_filter = 0.35  # 350 ms
 min_likelihood = 0.3  # 30%
 
 # diarization
-gmm_max_iterations = 100
-gmm_error_rate = 1e-3
-filter_diar = 100  # Each segment represents 10 ms -> 100 segments = 1s
-second = 60
-minute = second * 60
-means_shift = 0.05
-energy_percentile = 20  # Take 20% of high energy difference frames
+gmm_max_iterations = 500
+gmm_error_rate = 1e-5
+
 propagation_size = 10
 prop_coef = 0.5
+mean_filter_diar = 100  # Each segment represents 10 ms -> 100 segments = 1s
+median_filter_diar = 20
+
+likelihood_percentile = 20  # Take 20% of highest likelihood frames
+model_means_shift = 0.05
 
 # output folder
 output_folder = 'output'

@@ -1,6 +1,5 @@
 import numpy as np
 from scipy import ndimage
-
 import params
 
 
@@ -63,7 +62,7 @@ def likelihood_propagation_matrix(likelihood):
 
     """Sum propagation and add mean filter for even smoother effect"""
     likelihood_smoothed = front_propagated + back_propagated
-    likelihood_smoothed = mean_filter2d(likelihood_smoothed, params.filter_diar)
+    likelihood_smoothed = mean_filter2d(likelihood_smoothed, params.mean_filter_diar)
 
     return likelihood_smoothed
 
@@ -75,16 +74,16 @@ def single_gmm_update(gmm1, gmm2, features, data_full, active_segments_index):
     data_to_train = data_full[active_segments_index]
 
     # Find data on which should model update
-    high_bound = np.percentile(data_to_train, 100 - params.energy_percentile)
-    low_bound = np.percentile(data_to_train, params.energy_percentile)
+    high_bound = np.percentile(data_to_train, 100 - params.likelihood_percentile)
+    low_bound = np.percentile(data_to_train, params.likelihood_percentile)
 
     # Extract features
     features1 = features_active[data_to_train > high_bound]
     features2 = features_active[data_to_train < low_bound]
 
     # Update models
-    gmm1.update_centers(features1, params.means_shift)
-    gmm2.update_centers(features2, params.means_shift)
+    gmm1.update_centers(features1, params.model_means_shift)
+    gmm2.update_centers(features2, params.model_means_shift)
 
     # Score samples
     speaker1 = gmm1.score_samples(features)
@@ -92,3 +91,9 @@ def single_gmm_update(gmm1, gmm2, features, data_full, active_segments_index):
     likelihoods = np.append(speaker1.reshape(-1, 1), speaker2.reshape(-1, 1), axis=1)
 
     return likelihoods
+
+
+def smoother_diarization(diarized):
+    """Remove small segments from diarization"""
+    diarized = ndimage.median_filter(diarized, params.median_filter_diar)
+    return diarized

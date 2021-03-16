@@ -4,10 +4,7 @@ from scipy import ndimage
 from copy import deepcopy
 from helpers.decorators import timeit
 from gmm import MyGmm
-import outputs
-from statistics import diarization_with_timing
-from tests import calculate_success_rate
-from helpers.helpers import extract_features_for_diarization, likelihood_propagation_matrix, single_gmm_update
+from helpers.diarization_helpers import extract_features_for_diarization, likelihood_propagation_matrix, single_gmm_update
 from debug.debug_outputs import plot_6_7k
 
 
@@ -16,7 +13,8 @@ def return_diarization_index(likelihoods, active_segments):
     diarization = np.argmax(likelihoods, axis=1)
     diarization += 1
     diarization *= active_segments
-    return diarization
+    likelihoods_diff = likelihoods[:, 0] - likelihoods[:, 1]
+    return diarization, likelihoods_diff
 
 
 def energy_based_diarization_no_interruptions(energy, vad):
@@ -25,7 +23,7 @@ def energy_based_diarization_no_interruptions(energy, vad):
     higher_energy = np.argmax(energy, axis=1)
     vad_summed = np.sum(vad, axis=1)
     diarized = np.where(vad_summed > 0, higher_energy + 1, 0)
-    diarized = ndimage.median_filter(diarized, params.filter_diar)
+    diarized = ndimage.median_filter(diarized, params.mean_filter_diar)
     return diarized
 
 
@@ -49,20 +47,19 @@ def gmm_mfcc_diarization_no_interruptions_2channels_single_iteration(mfcc_dd, va
     likelihoods_smoothed = likelihood_propagation_matrix(likelihoods)
 
     # Test plot
-    plot_6_7k(likelihoods, active_segments)
     plot_6_7k(likelihoods_smoothed, active_segments)
 
-    diarization = return_diarization_index(likelihoods_smoothed, active_segments)
+    diarization, likelihoods_difference = return_diarization_index(likelihoods_smoothed, active_segments)
 
-    outputs.diarization_to_files(*diarization_with_timing(diarization))
-    calculate_success_rate.main()
-
-    # likelihoods = single_gmm_update(gmm1, gmm2, features, llhs, active_segments_index)
+    """Second iteration on learned likelihoods if needed"""
+    # likelihoods = single_gmm_update(gmm1, gmm2, features, likelihoods_difference, active_segments_index)
     # likelihoods_smoothed = likelihood_propagation_matrix(likelihoods)
-    # diarization, llhs = choose_speaker(likelihoods_smoothed, active_segments, None, None, None)
-    # diarization += 1
-    # diarization *= active_segments
-    # outputs.diarization_to_files(*diarization_with_timing(diarization, llhs))
+    #
+    # # Test plot
+    # plot_6_7k(likelihoods_smoothed, active_segments)
+    #
+    # diarization, likelihoods_difference = return_diarization_index(likelihoods_smoothed, active_segments)
+    # outputs.diarization_to_files(*diarization_with_timing(diarization))
     # calculate_success_rate.main()
 
     return diarization
