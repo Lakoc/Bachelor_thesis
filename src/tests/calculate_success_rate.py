@@ -7,7 +7,7 @@ regex = re.compile(r'(\d*\.\d*)\s*(\d*\.\d*)\s*spk(\d)')
 
 def extract(l):
     x = regex.search(l)
-    return int(float(x[1]) * 100), int(float(x[2]) * 100), 3 - int(x[3])
+    return int(float(x[1]) * 100), int(float(x[2]) * 100), int(x[3])
 
 
 def calculate_success_rate():
@@ -34,12 +34,12 @@ def calculate_success_rate():
                 from_t, to_t, value = extract(line)
                 l2[from_t: to_t + 1] = value
 
-
             vad = np.sum(np.logical_and(l1, l2)) / np.sum(np.logical_or(l1, l2))
             different = np.logical_and(np.logical_and((l1 != l2), l1 != 0), l2 != 0)
             likelihood = 1 - np.mean(different)
             print(f'Vad hit rate:{vad}')
             print(f'Diarization hit rate:{likelihood}')
+
 
 if __name__ == '__main__':
     calculate_success_rate()
