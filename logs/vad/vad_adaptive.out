@@ -1,0 +1,48 @@
+function [energy_vad_threshold_with_adaptive_threshold] finished in 943 ms
+Vad hit rate:0.819
+False positive vad:0.024 (Marked as non-active, although speech was present)
+True negative vad:0.156 (Marked as active, although speech was not present)
+function [energy_vad_threshold_with_adaptive_threshold] finished in 945 ms
+Vad hit rate:0.819
+False positive vad:0.024 (Marked as non-active, although speech was present)
+True negative vad:0.156 (Marked as active, although speech was not present)
+function [energy_vad_threshold_with_adaptive_threshold] finished in 937 ms
+Vad hit rate:0.819
+False positive vad:0.024 (Marked as non-active, although speech was present)
+True negative vad:0.156 (Marked as active, although speech was not present)
+function [energy_vad_threshold_with_adaptive_threshold] finished in 948 ms
+Vad hit rate:0.819
+False positive vad:0.024 (Marked as non-active, although speech was present)
+True negative vad:0.156 (Marked as active, although speech was not present)
+function [energy_vad_threshold_with_adaptive_threshold] finished in 944 ms
+Vad hit rate:0.819
+False positive vad:0.024 (Marked as non-active, although speech was present)
+True negative vad:0.156 (Marked as active, although speech was not present)
+function [energy_vad_threshold_with_adaptive_threshold] finished in 936 ms
+Vad hit rate:0.819
+False positive vad:0.024 (Marked as non-active, although speech was present)
+True negative vad:0.156 (Marked as active, although speech was not present)
+function [energy_vad_threshold_with_adaptive_threshold] finished in 945 ms
+Vad hit rate:0.819
+False positive vad:0.024 (Marked as non-active, although speech was present)
+True negative vad:0.156 (Marked as active, although speech was not present)
+function [energy_vad_threshold_with_adaptive_threshold] finished in 957 ms
+Vad hit rate:0.819
+False positive vad:0.024 (Marked as non-active, although speech was present)
+True negative vad:0.156 (Marked as active, although speech was not present)
+function [energy_vad_threshold_with_adaptive_threshold] finished in 947 ms
+Vad hit rate:0.819
+False positive vad:0.024 (Marked as non-active, although speech was present)
+True negative vad:0.156 (Marked as active, although speech was not present)
+function [energy_vad_threshold_with_adaptive_threshold] finished in 961 ms
+Vad hit rate:0.819
+False positive vad:0.024 (Marked as non-active, although speech was present)
+True negative vad:0.156 (Marked as active, although speech was not present)
+function [energy_vad_threshold_with_adaptive_threshold] finished in 948 ms
+Vad hit rate:0.819
+False positive vad:0.024 (Marked as non-active, although speech was present)
+True negative vad:0.156 (Marked as active, although speech was not present)
+function [energy_vad_threshold_with_adaptive_threshold] finished in 946 ms
+Vad hit rate:0.819
+False positive vad:0.024 (Marked as non-active, although speech was present)
+True negative vad:0.156 (Marked as active, although speech was not present)

@@ -1,0 +1,72 @@
+function [energy_gmm_based_vad] finished in 4097 ms
+Vad hit rate:0.921
+False positive vad:0.044 (Marked as non-active, although speech was present)
+True negative vad:0.035 (Marked as active, although speech was not present)
+Only diarization hit rate:0.951
+System hit rate overall:0.876
+function [energy_gmm_based_vad] finished in 4102 ms
+Vad hit rate:0.920
+False positive vad:0.043 (Marked as non-active, although speech was present)
+True negative vad:0.037 (Marked as active, although speech was not present)
+Only diarization hit rate:0.952
+System hit rate overall:0.876
+function [energy_gmm_based_vad] finished in 5110 ms
+Vad hit rate:0.921
+False positive vad:0.044 (Marked as non-active, although speech was present)
+True negative vad:0.035 (Marked as active, although speech was not present)
+Only diarization hit rate:0.951
+System hit rate overall:0.876
+function [energy_gmm_based_vad] finished in 5057 ms
+Vad hit rate:0.921
+False positive vad:0.044 (Marked as non-active, although speech was present)
+True negative vad:0.035 (Marked as active, although speech was not present)
+Only diarization hit rate:0.951
+System hit rate overall:0.876
+function [energy_gmm_based_vad] finished in 5177 ms
+Vad hit rate:0.921
+False positive vad:0.044 (Marked as non-active, although speech was present)
+True negative vad:0.035 (Marked as active, although speech was not present)
+Only diarization hit rate:0.951
+System hit rate overall:0.876
+function [energy_gmm_based_vad] finished in 4974 ms
+Vad hit rate:0.921
+False positive vad:0.044 (Marked as non-active, although speech was present)
+True negative vad:0.035 (Marked as active, although speech was not present)
+Only diarization hit rate:0.951
+System hit rate overall:0.876
+function [energy_gmm_based_vad] finished in 5471 ms
+Vad hit rate:0.921
+False positive vad:0.044 (Marked as non-active, although speech was present)
+True negative vad:0.035 (Marked as active, although speech was not present)
+Only diarization hit rate:0.951
+System hit rate overall:0.876
+function [energy_gmm_based_vad] finished in 5262 ms
+Vad hit rate:0.920
+False positive vad:0.043 (Marked as non-active, although speech was present)
+True negative vad:0.037 (Marked as active, although speech was not present)
+Only diarization hit rate:0.952
+System hit rate overall:0.876
+function [energy_gmm_based_vad] finished in 4415 ms
+Vad hit rate:0.921
+False positive vad:0.044 (Marked as non-active, although speech was present)
+True negative vad:0.035 (Marked as active, although speech was not present)
+Only diarization hit rate:0.951
+System hit rate overall:0.876
+function [energy_gmm_based_vad] finished in 5434 ms
+Vad hit rate:0.921
+False positive vad:0.044 (Marked as non-active, although speech was present)
+True negative vad:0.035 (Marked as active, although speech was not present)
+Only diarization hit rate:0.951
+System hit rate overall:0.876
+function [energy_gmm_based_vad] finished in 5148 ms
+Vad hit rate:0.920
+False positive vad:0.044 (Marked as non-active, although speech was present)
+True negative vad:0.036 (Marked as active, although speech was not present)
+Only diarization hit rate:0.952
+System hit rate overall:0.876
+function [energy_gmm_based_vad] finished in 3784 ms
+Vad hit rate:0.921
+False positive vad:0.044 (Marked as non-active, although speech was present)
+True negative vad:0.035 (Marked as active, although speech was not present)
+Only diarization hit rate:0.951
+System hit rate overall:0.876

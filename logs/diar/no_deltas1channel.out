@@ -1,0 +1,409 @@
+function [energy_gmm_based_vad] finished in 3742 ms
+Initialization 0
+  Iteration 10
+  Iteration 20
+  Iteration 30
+  Iteration 40
+  Iteration 50
+  Iteration 60
+  Iteration 70
+  Iteration 80
+  Iteration 90
+  Iteration 100
+  Iteration 110
+  Iteration 120
+  Iteration 130
+Initialization converged: True
+function [gmm_mfcc_diarization_no_interruptions_1channel] finished in 21230 ms
+Vad hit rate:0.913
+False positive vad:0.040 (Marked as non-active, although speech was present)
+True negative vad:0.048 (Marked as active, although speech was not present)
+Only diarization hit rate:0.880
+System hit rate overall:0.803
+function [energy_gmm_based_vad] finished in 5954 ms
+Initialization 0
+  Iteration 10
+  Iteration 20
+  Iteration 30
+  Iteration 40
+  Iteration 50
+  Iteration 60
+  Iteration 70
+  Iteration 80
+  Iteration 90
+  Iteration 100
+  Iteration 110
+  Iteration 120
+  Iteration 130
+  Iteration 140
+  Iteration 150
+  Iteration 160
+  Iteration 170
+  Iteration 180
+  Iteration 190
+  Iteration 200
+  Iteration 210
+  Iteration 220
+  Iteration 230
+  Iteration 240
+  Iteration 250
+  Iteration 260
+  Iteration 270
+  Iteration 280
+  Iteration 290
+  Iteration 300
+  Iteration 310
+  Iteration 320
+  Iteration 330
+  Iteration 340
+  Iteration 350
+  Iteration 360
+Initialization converged: True
+function [gmm_mfcc_diarization_no_interruptions_1channel] finished in 54607 ms
+Vad hit rate:0.913
+False positive vad:0.040 (Marked as non-active, although speech was present)
+True negative vad:0.048 (Marked as active, although speech was not present)
+Only diarization hit rate:0.870
+System hit rate overall:0.794
+function [energy_gmm_based_vad] finished in 5175 ms
+Initialization 0
+  Iteration 10
+  Iteration 20
+  Iteration 30
+  Iteration 40
+  Iteration 50
+  Iteration 60
+  Iteration 70
+  Iteration 80
+  Iteration 90
+  Iteration 100
+  Iteration 110
+  Iteration 120
+  Iteration 130
+  Iteration 140
+  Iteration 150
+  Iteration 160
+  Iteration 170
+  Iteration 180
+  Iteration 190
+  Iteration 200
+  Iteration 210
+  Iteration 220
+  Iteration 230
+  Iteration 240
+  Iteration 250
+  Iteration 260
+  Iteration 270
+Initialization converged: True
+function [gmm_mfcc_diarization_no_interruptions_1channel] finished in 42403 ms
+Vad hit rate:0.913
+False positive vad:0.040 (Marked as non-active, although speech was present)
+True negative vad:0.047 (Marked as active, although speech was not present)
+Only diarization hit rate:0.880
+System hit rate overall:0.804
+function [energy_gmm_based_vad] finished in 5372 ms
+Initialization 0
+  Iteration 10
+  Iteration 20
+  Iteration 30
+  Iteration 40
+  Iteration 50
+  Iteration 60
+  Iteration 70
+  Iteration 80
+  Iteration 90
+  Iteration 100
+  Iteration 110
+  Iteration 120
+  Iteration 130
+  Iteration 140
+  Iteration 150
+  Iteration 160
+  Iteration 170
+  Iteration 180
+  Iteration 190
+  Iteration 200
+  Iteration 210
+  Iteration 220
+Initialization converged: True
+function [gmm_mfcc_diarization_no_interruptions_1channel] finished in 32531 ms
+Vad hit rate:0.913
+False positive vad:0.040 (Marked as non-active, although speech was present)
+True negative vad:0.047 (Marked as active, although speech was not present)
+Only diarization hit rate:0.873
+System hit rate overall:0.797
+function [energy_gmm_based_vad] finished in 4716 ms
+Initialization 0
+  Iteration 10
+  Iteration 20
+  Iteration 30
+  Iteration 40
+  Iteration 50
+  Iteration 60
+  Iteration 70
+  Iteration 80
+  Iteration 90
+  Iteration 100
+  Iteration 110
+  Iteration 120
+  Iteration 130
+  Iteration 140
+  Iteration 150
+  Iteration 160
+  Iteration 170
+  Iteration 180
+  Iteration 190
+  Iteration 200
+  Iteration 210
+  Iteration 220
+  Iteration 230
+  Iteration 240
+  Iteration 250
+  Iteration 260
+  Iteration 270
+  Iteration 280
+  Iteration 290
+Initialization converged: True
+function [gmm_mfcc_diarization_no_interruptions_1channel] finished in 41968 ms
+Vad hit rate:0.913
+False positive vad:0.040 (Marked as non-active, although speech was present)
+True negative vad:0.047 (Marked as active, although speech was not present)
+Only diarization hit rate:0.880
+System hit rate overall:0.804
+function [energy_gmm_based_vad] finished in 4206 ms
+Initialization 0
+  Iteration 10
+  Iteration 20
+  Iteration 30
+  Iteration 40
+  Iteration 50
+  Iteration 60
+  Iteration 70
+  Iteration 80
+  Iteration 90
+  Iteration 100
+  Iteration 110
+  Iteration 120
+  Iteration 130
+  Iteration 140
+  Iteration 150
+  Iteration 160
+  Iteration 170
+  Iteration 180
+  Iteration 190
+  Iteration 200
+  Iteration 210
+  Iteration 220
+  Iteration 230
+  Iteration 240
+  Iteration 250
+  Iteration 260
+  Iteration 270
+  Iteration 280
+  Iteration 290
+  Iteration 300
+  Iteration 310
+  Iteration 320
+  Iteration 330
+  Iteration 340
+  Iteration 350
+Initialization converged: True
+function [gmm_mfcc_diarization_no_interruptions_1channel] finished in 49460 ms
+Vad hit rate:0.913
+False positive vad:0.040 (Marked as non-active, although speech was present)
+True negative vad:0.047 (Marked as active, although speech was not present)
+Only diarization hit rate:0.875
+System hit rate overall:0.799
+function [energy_gmm_based_vad] finished in 5632 ms
+Initialization 0
+  Iteration 10
+  Iteration 20
+  Iteration 30
+  Iteration 40
+  Iteration 50
+  Iteration 60
+  Iteration 70
+  Iteration 80
+  Iteration 90
+  Iteration 100
+  Iteration 110
+  Iteration 120
+  Iteration 130
+  Iteration 140
+  Iteration 150
+  Iteration 160
+  Iteration 170
+  Iteration 180
+  Iteration 190
+  Iteration 200
+  Iteration 210
+  Iteration 220
+  Iteration 230
+  Iteration 240
+  Iteration 250
+  Iteration 260
+  Iteration 270
+  Iteration 280
+  Iteration 290
+  Iteration 300
+  Iteration 310
+  Iteration 320
+  Iteration 330
+Initialization converged: True
+function [gmm_mfcc_diarization_no_interruptions_1channel] finished in 47160 ms
+Vad hit rate:0.913
+False positive vad:0.041 (Marked as non-active, although speech was present)
+True negative vad:0.047 (Marked as active, although speech was not present)
+Only diarization hit rate:0.874
+System hit rate overall:0.797
+function [energy_gmm_based_vad] finished in 5482 ms
+Initialization 0
+  Iteration 10
+  Iteration 20
+  Iteration 30
+  Iteration 40
+  Iteration 50
+  Iteration 60
+  Iteration 70
+  Iteration 80
+  Iteration 90
+  Iteration 100
+  Iteration 110
+  Iteration 120
+  Iteration 130
+  Iteration 140
+  Iteration 150
+  Iteration 160
+  Iteration 170
+  Iteration 180
+  Iteration 190
+  Iteration 200
+  Iteration 210
+  Iteration 220
+Initialization converged: True
+function [gmm_mfcc_diarization_no_interruptions_1channel] finished in 32466 ms
+Vad hit rate:0.913
+False positive vad:0.040 (Marked as non-active, although speech was present)
+True negative vad:0.047 (Marked as active, although speech was not present)
+Only diarization hit rate:0.878
+System hit rate overall:0.802
+function [energy_gmm_based_vad] finished in 4654 ms
+Initialization 0
+  Iteration 10
+  Iteration 20
+  Iteration 30
+  Iteration 40
+  Iteration 50
+  Iteration 60
+  Iteration 70
+  Iteration 80
+Initialization converged: True
+function [gmm_mfcc_diarization_no_interruptions_1channel] finished in 14225 ms
+Vad hit rate:0.913
+False positive vad:0.041 (Marked as non-active, although speech was present)
+True negative vad:0.047 (Marked as active, although speech was not present)
+Only diarization hit rate:0.879
+System hit rate overall:0.802
+function [energy_gmm_based_vad] finished in 5037 ms
+Initialization 0
+  Iteration 10
+  Iteration 20
+  Iteration 30
+  Iteration 40
+  Iteration 50
+  Iteration 60
+  Iteration 70
+  Iteration 80
+  Iteration 90
+  Iteration 100
+  Iteration 110
+  Iteration 120
+  Iteration 130
+  Iteration 140
+  Iteration 150
+  Iteration 160
+  Iteration 170
+  Iteration 180
+  Iteration 190
+  Iteration 200
+  Iteration 210
+  Iteration 220
+  Iteration 230
+  Iteration 240
+  Iteration 250
+  Iteration 260
+  Iteration 270
+  Iteration 280
+  Iteration 290
+  Iteration 300
+  Iteration 310
+  Iteration 320
+  Iteration 330
+  Iteration 340
+  Iteration 350
+  Iteration 360
+  Iteration 370
+  Iteration 380
+  Iteration 390
+  Iteration 400
+  Iteration 410
+  Iteration 420
+Initialization converged: True
+function [gmm_mfcc_diarization_no_interruptions_1channel] finished in 61406 ms
+Vad hit rate:0.913
+False positive vad:0.040 (Marked as non-active, although speech was present)
+True negative vad:0.047 (Marked as active, although speech was not present)
+Only diarization hit rate:0.881
+System hit rate overall:0.804
+function [energy_gmm_based_vad] finished in 4489 ms
+Initialization 0
+  Iteration 10
+  Iteration 20
+  Iteration 30
+  Iteration 40
+  Iteration 50
+  Iteration 60
+  Iteration 70
+  Iteration 80
+  Iteration 90
+  Iteration 100
+  Iteration 110
+  Iteration 120
+  Iteration 130
+  Iteration 140
+  Iteration 150
+  Iteration 160
+  Iteration 170
+Initialization converged: True
+function [gmm_mfcc_diarization_no_interruptions_1channel] finished in 25727 ms
+Vad hit rate:0.913
+False positive vad:0.040 (Marked as non-active, although speech was present)
+True negative vad:0.047 (Marked as active, although speech was not present)
+Only diarization hit rate:0.883
+System hit rate overall:0.806
+function [energy_gmm_based_vad] finished in 5309 ms
+Initialization 0
+  Iteration 10
+  Iteration 20
+  Iteration 30
+  Iteration 40
+  Iteration 50
+  Iteration 60
+  Iteration 70
+  Iteration 80
+  Iteration 90
+  Iteration 100
+  Iteration 110
+  Iteration 120
+  Iteration 130
+  Iteration 140
+  Iteration 150
+  Iteration 160
+  Iteration 170
+Initialization converged: True
+function [gmm_mfcc_diarization_no_interruptions_1channel] finished in 26185 ms
+Vad hit rate:0.913
+False positive vad:0.040 (Marked as non-active, although speech was present)
+True negative vad:0.047 (Marked as active, although speech was not present)
+Only diarization hit rate:0.870
+System hit rate overall:0.794
