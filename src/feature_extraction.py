@@ -27,7 +27,6 @@ def normalize_energy(energy):
     return normalized_energy
 
 
-@timeit
 def calculate_mfcc(segments, sampling_rate, mel_filters=40):
     """Extract mfcc from segments,
     inspired by http://practicalcryptography.com/miscellaneous/machine-learning/guide-mel-frequency-cepstral-coefficients-mfccs/#eqn1
@@ -105,7 +104,6 @@ def calculate_mfcc(segments, sampling_rate, mel_filters=40):
     return filter_banks, mfcc_compressed, power_spectrum
 
 
-@timeit
 def calculate_delta(mfcc):
     """Calculate delta changes in mfcc features"""
     delta_neighbours = params.delta_neighbours

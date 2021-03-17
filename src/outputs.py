@@ -47,11 +47,10 @@ def plot_energy_with_wav(track, energies_per_segment):
     fig.show()
 
 
-def plot_vad_energy_with_wav(tracks, energies_per_segment, vads):
+def plot_vad_wav(tracks, vads):
     """Plots vad, wav and energy of signal"""
     for i in range(0, 2):
         track = tracks[:, i]
-        energy = energies_per_segment[:, i]
         vad = vads[:, i]
 
         fig, axs = plt.subplots()

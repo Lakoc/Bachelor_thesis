@@ -16,7 +16,7 @@ delta_neighbours = 2
 
 # energy vad
 energy_threshold_interval = 0.1  # 100ms
-med_filter = 0.35  # 350 ms
+med_filter = 0.5  # 500 ms
 min_likelihood = 0.3  # 30%
 
 # diarization

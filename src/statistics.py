@@ -202,7 +202,6 @@ def join_vad_and_count_hesitations(vad, hesitations_max_size):
     return joined_vad, hesitations_filtered
 
 
-@timeit
 def diarization_with_timing(diarization):
     """Process diarization output and extract speaker with time bounds"""
     speech_start = np.empty(diarization.shape, dtype=bool)

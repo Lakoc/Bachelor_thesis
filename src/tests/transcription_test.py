@@ -16,8 +16,8 @@ def extract_transcribed(line):
 
 
 def calculate_success_rate():
-    with open(f'../{params.output_folder}/diarization', 'r') as f1:
-        with open(f'../data_to_delete/transcription/M_16k.2.trs', 'r') as f2:
+    with open(f'{params.output_folder}/diarization', 'r') as f1:
+        with open(f'data_to_delete/transcription/M_16k.2.trs', 'r') as f2:
             content = f2.read()
             soup = BeautifulSoup(content, "lxml")
             items = soup.findAll('turn'
@@ -42,11 +42,20 @@ def calculate_success_rate():
                 from_t, to_t, value = extract_transcribed(line)
                 l2[from_t: to_t + 1] = value
 
-            vad = np.sum(np.logical_and(l1, l2)) / np.sum(np.logical_or(l1, l2))
+            # active_segments_count = np.sum(l2 > 0)
+            # vad_x = np.where(l1 > 0, 1, -1)
+            # vad_multiplied = vad_x * (l2 > 0).astype(int)
+            # vad = np.sum(vad_multiplied) / active_segments_count
+            false_positive_vad = np.sum(np.logical_and(l1 > 0, l2 == 0)) / max_val
+            true_negative_vad = np.sum(np.logical_and(l1 == 0, l2 > 0)) / max_val
+            vad = 1 - false_positive_vad - true_negative_vad
 
             overall_likelihood = np.mean(l1 == l2)
-            print(f'Vad hit rate:{vad}')
-            print(f'Diarization hit rate:{overall_likelihood}')
+            print(f'Vad hit rate:{vad:.3f}')
+            print(f'False positive vad:{false_positive_vad:.3f} (Marked as non-active, although speech was present)')
+            print(f'True negative vad:{true_negative_vad:.3f} (Marked as active, although speech was not present)')
+            print(f'Only diarization hit rate:{(overall_likelihood / vad):.3f}')
+            print(f'System hit rate overall:{overall_likelihood:.3f}')
 
 
 if __name__ == '__main__':
