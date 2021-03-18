@@ -24,6 +24,7 @@ def energy_based_diarization_no_interruptions(energy, vad):
     """"""
     higher_energy = np.argmax(energy, axis=1)
     vad_summed = np.sum(vad, axis=1)
+    plot_6_7k(energy, vad_summed)
     diarized = np.where(vad_summed > 0, higher_energy + 1, 0)
     diarized = ndimage.median_filter(diarized, params.mean_filter_diar)
     return diarized
@@ -68,7 +69,7 @@ def gmm_mfcc_diarization_no_interruptions_1channel_k_means(mfcc, vad, energy):
     k_means = KMeans(n_clusters=2, verbose=1, max_iter=params.gmm_max_iterations).fit(mfcc_active)
 
     clusters = k_means.predict(mfcc)
-    likelihood = np.sum(mfcc - k_means.cluster_centers_[clusters], axis=1) ** 2
+    likelihood = np.sum(mfcc - k_means.cluster_centers_[0], axis=1) ** 2
 
     # Train UBM GMM - speaker independent
     features = np.append(mfcc, energy[:, np.newaxis], axis=1)
@@ -112,7 +113,7 @@ def gmm_mfcc_diarization_no_interruptions_2channels_single_iteration(mfcc, vad, 
     likelihoods_smoothed = likelihood_propagation_matrix(likelihoods)
 
     # Test plot
-    # plot_6_7k(likelihoods_smoothed, active_segments)
+    plot_6_7k(likelihoods_smoothed, active_segments)
 
     diarization, likelihoods_difference = return_diarization_index(likelihoods_smoothed, active_segments)
 

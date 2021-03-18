@@ -1,1 +1,9 @@
-ctvrtek 11.3. 10:00 setkani na FIT
+pondeli 10:00
+i-vectory
+text
+der- diarization error rate
+       False Alarm + Miss + Overlap + Confusion
+DER = ------------------------------------------
+                   Reference Length
+
+forward, backward propagation

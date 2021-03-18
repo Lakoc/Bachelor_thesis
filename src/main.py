@@ -41,9 +41,9 @@ vad = energy_gmm_based_vad(root_mean_squared_energy)
 """Diarization"""
 # diarization = energy_based_diarization_no_interruptions(root_mean_squared_energy, vad)
 # diarization = gmm_mfcc_diarization_no_interruptions_1channel(mfcc, vad, root_mean_squared_energy)
-# diarization = gmm_mfcc_diarization_no_interruptions_2channels_single_iteration(mfcc_dd, vad, root_mean_squared_energy)
+diarization = gmm_mfcc_diarization_no_interruptions_2channels_single_iteration(mfcc_dd, vad, root_mean_squared_energy)
 # diarization = gmm_mfcc_diarization_no_interruptions_1channel_k_means(mfcc[:, :, 0], vad, root_mean_squared_energy[:, 0])
-diarization = gmm_mfcc_diarization_no_interruptions_2channels_2iterations(mfcc_dd, vad, root_mean_squared_energy)
+# diarization = gmm_mfcc_diarization_no_interruptions_2channels_2iterations(mfcc_dd, vad, root_mean_squared_energy)
 
 """Outputs"""
 outputs.diarization_to_files(*diarization_with_timing(smoother_diarization(diarization)))

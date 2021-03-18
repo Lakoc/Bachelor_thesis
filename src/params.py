@@ -10,7 +10,7 @@ window_stride = window_size - window_overlap  # 10ms
 
 # mfcc
 frequency_resolution = 512
-cepstral_coef_count = 12
+cepstral_coef_count = 8
 lifter = 22
 delta_neighbours = 2
 
@@ -26,7 +26,7 @@ gmm_error_rate = 1e-5
 propagation_size = 10
 prop_coef = 0.5
 mean_filter_diar = 100  # Each segment represents 10 ms -> 100 segments = 1s
-median_filter_diar = 20
+median_filter_diar = 100
 
 likelihood_percentile = 20  # Take 20% of highest likelihood frames
 model_means_shift = 0.05
