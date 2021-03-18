@@ -101,7 +101,7 @@ def gmm_mfcc_diarization_no_interruptions_2channels_single_iteration(mfcc, vad, 
 
     # Train UBM GMM - speaker independent
     features_active = features[active_segments_index]
-    gmm = MyGmm(n_components=32, verbose=1, covariance_type='diag', max_iter=params.gmm_max_iterations,
+    gmm = MyGmm(n_components=32, covariance_type='diag', max_iter=params.gmm_max_iterations,
                 tol=params.gmm_error_rate).fit(features_active)
 
     # Create model for each speaker

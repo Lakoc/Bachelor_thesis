@@ -10,7 +10,7 @@ window_stride = window_size - window_overlap  # 10ms
 
 # mfcc
 frequency_resolution = 512
-cepstral_coef_count = 8
+cepstral_coef_count = 12
 lifter = 22
 delta_neighbours = 2
 
@@ -20,8 +20,8 @@ med_filter = 0.5  # 500 ms
 min_likelihood = 0.3  # 30%
 
 # diarization
-gmm_max_iterations = 500
-gmm_error_rate = 1e-5
+gmm_max_iterations = 100
+gmm_error_rate = 1e-3
 
 propagation_size = 10
 prop_coef = 0.5
