@@ -1,9 +1,21 @@
 pondeli 10:00
-i-vectory
-text
 der- diarization error rate
        False Alarm + Miss + Overlap + Confusion
 DER = ------------------------------------------
                    Reference Length
 
 forward, backward propagation
+
+
+V článku jsou mfcc popsány jako: "The features used in our experiments are standard 19 MFCCs plus energy, with no deltas. No mean nor variance normalization are applied in the feature extraction..." Z kódu lze vyčíst, že se jedná o koeficienty vypočtené nad rámci o velikosti 10ms, avšak nevím jaké bylo použito okno, kosinová transformace a zda byl použit nějaký lifter, preemfáze. V knihovně v jazyce python, kterou jste mi posilal  v zimním semestru  se nachází funkce
+
+```
+
+
+def mfcc_htk(x, window, noverlap, fbank_mx, nfft=None,
+             _0="last", _E=None, NUMCEPS=12,
+             USEPOWER=False, RAWENERGY=True, PREEMCOEF=0.97, CEPLIFTER=22.0, ZMEANSOURCE=False,
+             ENORMALISE=True, ESCALE=0.1, SILFLOOR=50.0, USEHAMMING=True):
+```
+
+Mohu předpokládat, že defaultní parametry této funkce byly pravděpodobně využity pro extrakci "features" v ukázce? 

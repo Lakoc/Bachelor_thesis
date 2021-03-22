@@ -1,6 +1,6 @@
 # input file path
-file_path = 'data_to_delete/ukazka1/prezentace/merged.wav'
-
+file_path = 'data_to_delete/transcribed/same_room/session2/stereo.wav'
+transcription_path = 'data_to_delete/transcribed/same_room/session2/transcription.trs'
 # preprocessing
 pre_emphasis_coefficient = 0.97
 
@@ -16,8 +16,8 @@ delta_neighbours = 2
 
 # energy vad
 energy_threshold_interval = 0.1  # 100ms
-med_filter = 0.5  # 500 ms
-min_likelihood = 0.3  # 30%
+med_filter = 0.25  # 250 ms
+min_likelihood = 0.30  # 30%
 
 # diarization
 gmm_max_iterations = 100
@@ -33,6 +33,11 @@ model_means_shift = 0.05
 
 # output folder
 output_folder = 'output'
+
+
+# tests
+transcription_plot = True
+
 
 # OLD
 hesitations_max_size_max_size = 2  # seconds

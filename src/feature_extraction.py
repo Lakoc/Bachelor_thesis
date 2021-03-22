@@ -3,6 +3,7 @@ import librosa
 import params
 from scipy import fftpack, ndimage
 from helpers.decorators import deprecated, timeit
+from external import features
 
 
 def calculate_energy_over_segments(segments):
@@ -25,6 +26,18 @@ def normalize_energy(energy):
     normalized_energy -= normalized_energy.mean()
     normalized_energy /= normalized_energy.std()
     return normalized_energy
+
+
+def calculate_mfcc_external(signal, sampling_rate):
+    filter_bank = features.mel_fbank_mx(params.window_size * sampling_rate, sampling_rate)
+    mfcc = features.mfcc_htk(signal, window=params.window_size * sampling_rate,
+                              noverlap=int(params.window_overlap * sampling_rate), fbank_mx=filter_bank, NUMCEPS=18,
+                              _0='first', _E='last')
+    np.savetxt('features.txt', mfcc)
+    exit(0)
+    # np.savetxt('features2.txt', mfcc2)
+    # np.savetxt('features_sum.txt', mfcc1 + mfcc2)
+    # mfcc = np.append(mfcc1, mfcc2, axis=2)
 
 
 def calculate_mfcc(segments, sampling_rate, mel_filters=40):
@@ -101,6 +114,7 @@ def calculate_mfcc(segments, sampling_rate, mel_filters=40):
     filter_banks -= np.mean(filter_banks, axis=0)
     mfcc_compressed -= np.mean(mfcc_compressed, axis=0)
 
+    np.savetxt('features.txt', mfcc_compressed[:, :, 0])
     return filter_banks, mfcc_compressed, power_spectrum
 
 
