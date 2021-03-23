@@ -34,8 +34,8 @@ X = np.loadtxt("features/same_room_session1/features.txt")
 ref = np.loadtxt("features/same_room_session1/ref.txt", dtype=int)
 
 # keep only frames with one speaker (to make scoring simple)
-X = X[ref > 1]
-ref = ref[ref > 1] - 2
+X = X[np.logical_and(ref > 1, ref < 4)]
+ref = ref[np.logical_and(ref > 1, ref < 4)] - 2
 
 VtiEV = VB_diarization.precalculate_VtiEV(V, iE)
 

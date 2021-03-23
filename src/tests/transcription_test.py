@@ -40,7 +40,7 @@ def calculate_success_rate():
             #     from_t, to_t, value = extract_transcribed(line)
             #     reference_val[from_t: to_t + 1] = 0 if value == 0 else value +1
             #
-            # np.savetxt('ref_test.txt', reference_val, fmt='%i')
+            # np.savetxt('ref.txt', reference_val, fmt='%i')
 
             lines1 = f1.readlines()
 
