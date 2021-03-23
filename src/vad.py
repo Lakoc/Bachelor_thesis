@@ -4,6 +4,7 @@ from sklearn.mixture import GaussianMixture
 from scipy import ndimage
 from scipy.special import logsumexp
 from helpers.decorators import timeit
+from helpers.propagation import forward_backward
 
 
 def calculate_initial_threshold(energy_segments):
@@ -98,9 +99,51 @@ def energy_gmm_based_vad(normalized_energy):
     likelihoods = np.exp(likelihoods)
 
     # If silence was detected with likelihood smaller than threshold, we mark segment as active
-    vad = likelihoods[:, :, 0] < params.min_likelihood
+    vad = likelihoods[:, :, 0] < params.min_silence_likelihood
 
     # Apply median filter
     vad = ndimage.median_filter(vad, int(round(params.med_filter / params.window_stride)))
+
+    return vad
+
+
+def energy_gmm_based_vad_propagation(normalized_energy):
+    """Estimate vad using gaussian mixture model"""
+    # Initialization of model
+    means = np.array(
+        [np.min(normalized_energy), (np.max(normalized_energy) + np.min(normalized_energy)) / 2,
+         np.max(normalized_energy)])[
+            :, np.newaxis]
+    weights = np.array([1 / 3, 1 / 3, 1 / 3])
+
+    gmm = GaussianMixture(n_components=3, weights_init=weights, covariance_type='spherical', means_init=means)
+
+    # Fit and predict posterior probabilities for each channel
+    gmm.fit(normalized_energy[:, 0][:, np.newaxis])
+    likelihoods1 = gmm.predict_proba(normalized_energy[:, 0][:, np.newaxis])
+    shift = logsumexp(likelihoods1, axis=1)
+    likelihoods1 = np.exp(likelihoods1 - shift[:, np.newaxis])
+
+    gmm.fit(normalized_energy[:, 1][:, np.newaxis])
+    likelihoods2 = gmm.predict_proba(normalized_energy[:, 1][:, np.newaxis])
+    shift = logsumexp(likelihoods2, axis=1)
+    likelihoods2 = np.exp(likelihoods2 - shift[:, np.newaxis])
+
+    # init propagation matrix
+    vad_min_speech_dur = params.vad_min_speech_dur
+    n_tokens = likelihoods1.shape[1]
+    sp = np.ones(n_tokens) / n_tokens
+    tr = np.eye(vad_min_speech_dur * n_tokens, k=1)
+    ip = np.zeros(vad_min_speech_dur * n_tokens)
+    tr[vad_min_speech_dur - 1::vad_min_speech_dur, 0::vad_min_speech_dur] = (1 - params.vad_loop_probability) * sp
+    tr[(np.arange(1, n_tokens + 1) * vad_min_speech_dur - 1,) * 2] += params.vad_loop_probability
+    ip[::vad_min_speech_dur] = sp
+
+    # hmm backward, forward propagation, and threshold silence component
+    likelihood_propagated, _, _, _ = forward_backward(likelihoods1, tr, ip)
+    vad1 = likelihood_propagated[:, 0] < params.min_silence_likelihood
+    likelihood_propagated, _, _, _ = forward_backward(likelihoods2, tr, ip)
+    vad2 = likelihood_propagated[:, 0] < params.min_silence_likelihood
+    vad = np.append(vad1[:, np.newaxis], vad2[:, np.newaxis], axis=1)
 
     return vad

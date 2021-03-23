@@ -4,8 +4,8 @@ transcription_path = 'data_to_delete/transcribed/same_room/session2/transcriptio
 # preprocessing
 pre_emphasis_coefficient = 0.97
 
-window_size = 0.025  # 25ms
-window_overlap = 0.015  # 15ms
+window_size = 0.02  # 20ms
+window_overlap = 0.01  # 10ms
 window_stride = window_size - window_overlap  # 10ms
 
 # mfcc
@@ -16,8 +16,12 @@ delta_neighbours = 2
 
 # energy vad
 energy_threshold_interval = 0.1  # 100ms
-med_filter = 0.25  # 250 ms
-min_likelihood = 0.30  # 30%
+med_filter = 0.1  # 250 ms
+min_silence_likelihood = 0.95  # 95%
+
+# vad hmm
+vad_min_speech_dur = 1
+vad_loop_probability = 0.95
 
 # diarization
 gmm_max_iterations = 100
@@ -34,10 +38,9 @@ model_means_shift = 0.05
 # output folder
 output_folder = 'output'
 
-
 # tests
 transcription_plot = True
-
+collar_size = 250  # ms
 
 # OLD
 hesitations_max_size_max_size = 2  # seconds

@@ -49,11 +49,11 @@ def plot_energy_with_wav(track, energies_per_segment):
 
 def plot_vad_wav(tracks, vads):
     """Plots vad, wav and energy of signal"""
-    for i in range(0, 2):
+    for i in range(0, 1):
         track = tracks[:, i]
         vad = vads[:, i]
 
-        fig, axs = plt.subplots()
+        fig, axs = plt.subplots(figsize=(12, 4))
         axs.set_title('Vaw with vad')
         x1 = np.linspace(0, 1, track.shape[0])
         x2 = np.linspace(0, 1, vad.shape[0])

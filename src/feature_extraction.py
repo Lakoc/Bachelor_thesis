@@ -28,18 +28,6 @@ def normalize_energy(energy):
     return normalized_energy
 
 
-def calculate_mfcc_external(signal, sampling_rate):
-    filter_bank = features.mel_fbank_mx(params.window_size * sampling_rate, sampling_rate)
-    mfcc = features.mfcc_htk(signal, window=params.window_size * sampling_rate,
-                              noverlap=int(params.window_overlap * sampling_rate), fbank_mx=filter_bank, NUMCEPS=18,
-                              _0='first', _E='last')
-    np.savetxt('features.txt', mfcc)
-    exit(0)
-    # np.savetxt('features2.txt', mfcc2)
-    # np.savetxt('features_sum.txt', mfcc1 + mfcc2)
-    # mfcc = np.append(mfcc1, mfcc2, axis=2)
-
-
 def calculate_mfcc(segments, sampling_rate, mel_filters=40):
     """Extract mfcc from segments,
     inspired by http://practicalcryptography.com/miscellaneous/machine-learning/guide-mel-frequency-cepstral-coefficients-mfccs/#eqn1
@@ -114,7 +102,7 @@ def calculate_mfcc(segments, sampling_rate, mel_filters=40):
     filter_banks -= np.mean(filter_banks, axis=0)
     mfcc_compressed -= np.mean(mfcc_compressed, axis=0)
 
-    np.savetxt('features.txt', mfcc_compressed[:, :, 0])
+    # np.savetxt('features.txt', mfcc_compressed[:, :, 0])
     return filter_banks, mfcc_compressed, power_spectrum
 
 
