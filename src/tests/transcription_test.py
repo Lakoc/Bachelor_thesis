@@ -71,6 +71,8 @@ def calculate_success_rate():
                 ax.plot(miss, label='miss', color='red')
                 ax.plot(false_alarm, label='false_alarm', color='blue')
                 ax.plot(confusion, label='confusion', color='green')
+                # ax.plot(reference_val * (reference_val > 0).astype('i1'))
+                # ax.plot(hyp)
                 fig.legend()
                 fig.show()
 

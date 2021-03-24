@@ -139,10 +139,10 @@ def energy_gmm_based_vad_propagation(normalized_energy):
     tr[(np.arange(1, n_tokens + 1) * vad_min_speech_dur - 1,) * 2] += params.vad_loop_probability
     ip[::vad_min_speech_dur] = sp
 
-    # hmm backward, forward propagation, and threshold silence component
-    likelihood_propagated, _, _, _ = forward_backward(likelihoods1, tr, ip)
+    # HMM backward, forward propagation, and threshold silence component
+    likelihood_propagated, _, _, _ = forward_backward(likelihoods1.repeat(vad_min_speech_dur, axis=1), tr, ip)
     vad1 = likelihood_propagated[:, 0] < params.min_silence_likelihood
-    likelihood_propagated, _, _, _ = forward_backward(likelihoods2, tr, ip)
+    likelihood_propagated, _, _, _ = forward_backward(likelihoods2.repeat(vad_min_speech_dur, axis=1), tr, ip)
     vad2 = likelihood_propagated[:, 0] < params.min_silence_likelihood
     vad = np.append(vad1[:, np.newaxis], vad2[:, np.newaxis], axis=1)
 

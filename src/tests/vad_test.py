@@ -27,7 +27,10 @@ def vad_test(vad):
             reference[from_t + collar_one_side: to_t + 1 - collar_one_side] = value
             reference[to_t + 1 - collar_one_side: np.min([to_t + 1 + collar_one_side, max_val])] = -1
 
-        hyp = np.logical_or(vad[:, 0], vad[:, 1])
+        hyp = np.logical_or(vad[:, 0], vad[:, 1]).astype('i1')
+        hyp_ind = np.argwhere(np.abs(hyp[:-1] - hyp[1:]))
+        lens = hyp_ind[1:] - hyp_ind[:-1]
+        # print(lens)
         hyp = np.append(hyp, np.zeros(max_val - len(hyp)))
 
         miss = np.logical_and(reference > 0, hyp == 0)
@@ -37,6 +40,8 @@ def vad_test(vad):
             fig, ax = plt.subplots(figsize=(12, 4))
             ax.plot(miss, label='miss', color='red')
             ax.plot(false_alarm, label='false_alarm', color='blue')
+            # ax.plot(reference > 0, label='reference', color='green')
+            # ax.plot(hyp > 0, label='hyp', color='red')
             fig.legend()
             fig.show()
 

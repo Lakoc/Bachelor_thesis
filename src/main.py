@@ -2,8 +2,9 @@ import outputs
 import params
 from preprocessing import process_hamming, read_wav_file, process_pre_emphasis
 from feature_extraction import calculate_energy_over_segments, normalize_energy, calculate_rmse, calculate_mfcc, \
-    calculate_delta, append_delta, calculate_mfcc_external
-from vad import energy_vad_threshold_with_adaptive_threshold, energy_gmm_based_vad, energy_vad_threshold, energy_gmm_based_vad_propagation
+    calculate_delta, append_delta
+from vad import energy_vad_threshold_with_adaptive_threshold, energy_gmm_based_vad, energy_vad_threshold, \
+    energy_gmm_based_vad_propagation
 from diarization import gmm_mfcc_diarization_no_interruptions_2channels_single_iteration, \
     gmm_mfcc_diarization_no_interruptions_1channel, energy_based_diarization_no_interruptions, \
     gmm_mfcc_diarization_no_interruptions_1channel_k_means, gmm_mfcc_diarization_no_interruptions_2channels_2iterations
@@ -31,7 +32,6 @@ normalized_energy = normalize_energy(energy)
 root_mean_squared_energy = calculate_rmse(segmented_tracks)
 
 filter_banks, mfcc, power_spectrum = calculate_mfcc(segmented_tracks, sampling_rate)
-# mfcc = calculate_mfcc_external(wav_file, sampling_rate)
 delta_mfcc = calculate_delta(mfcc)
 mfcc_dd = append_delta(mfcc, delta_mfcc, calculate_delta(delta_mfcc))
 
@@ -51,8 +51,14 @@ diarization = gmm_mfcc_diarization_no_interruptions_2channels_single_iteration(m
 """Outputs"""
 outputs.diarization_to_files(*diarization_with_timing(diarization))
 # outputs.plot_energy_with_wav(segmented_tracks[:, :, 0], energy_over_segments[:, 0])
-# outputs.plot_vad_wav(signal, vad)
+outputs.plot_vad_wav(signal, vad)
 
 """Tests"""
-vad_test(vad)
+# vad_test(vad)
 calculate_success_rate()
+
+"""Matlab difference"""
+# vad = np.loadtxt('matlab_test/vad.txt')
+# vad = vad[:, np.newaxis]
+# vad = np.append(vad, vad, axis=1)
+# vad_test(vad)

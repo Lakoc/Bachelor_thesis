@@ -31,3 +31,22 @@ def forward_backward(lls, tr, ip):
     tll = logsumexp(lfw[-1])
     sp = np.exp(lfw + lbw - tll)
     return sp, tll, lfw, lbw
+
+
+def mean_filter(arr, k):
+    """Process mean filter over array of k-elements on each side,
+    changing filter size on start and end of array to smoother output"""
+    kernel = np.ones(2 * k + 1) / (2 * k + 1)
+
+    if kernel.shape[0] > arr.shape[0]:
+        kernel = np.zeros(arr.shape[0])
+
+    front = np.empty(k)
+    back = np.empty(k)
+    for i in range(k):
+        front[i] = np.mean(arr[0: +i + k + 1])
+        back[i] = np.mean(arr[arr.shape[0] - k - 1 - i:])
+    out = np.convolve(arr, kernel, mode='same')
+    out[0:k] = front
+    out[arr.shape[0] - k:] = np.flip(back)
+    return out

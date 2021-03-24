@@ -1,6 +1,8 @@
 import numpy as np
 from scipy import ndimage
 import params
+from helpers.propagation import mean_filter, forward_backward
+import matplotlib.pyplot as plt
 
 
 def extract_features_for_diarization(mfcc_dd, vad, energy):
@@ -19,13 +21,13 @@ def extract_features_for_diarization(mfcc_dd, vad, energy):
 
     # Difference
     energy_difference = (np.log(channel1_energy) - np.log(channel2_energy)).reshape(-1)
+    energy_difference_filtered = mean_filter(energy_difference, params.energy_diff_filter)
 
     # Append all features together
     features_ch1 = np.append(channel1_energy, channel1_mfcc, axis=1)
     features_ch2 = np.append(channel2_energy, channel2_mfcc, axis=1)
-    features = np.append(features_ch1, features_ch2, axis=1)
 
-    return active_segments, active_segments_index, features, energy_difference
+    return active_segments, active_segments_index, features_ch1, features_ch2, energy_difference_filtered
 
 
 def extract_features_for_diarization_with_delta(mfcc, delta, delta_delta, vad, energy):
@@ -80,18 +82,17 @@ def mean_filter2d(data, filter_size):
 
 def likelihood_propagation_matrix(likelihood):
     """Front and back propagation"""
-    powers = np.arange(0, min(likelihood.shape[0], params.propagation_size))
-    power_filter = params.prop_coef ** powers
-    convolved, index_start = convolve2d_with_zeros(likelihood, power_filter)
-    front_propagated = convolved[index_start: index_start + likelihood.shape[0], :]
+    diar_min_speech_dur = params.diar_min_speech_dur
+    n_tokens = likelihood.shape[1]
+    sp = np.ones(n_tokens) / n_tokens
+    tr = np.eye(diar_min_speech_dur * n_tokens, k=1)
+    ip = np.zeros(diar_min_speech_dur * n_tokens)
+    tr[diar_min_speech_dur - 1::diar_min_speech_dur, 0::diar_min_speech_dur] = (1 - params.diar_loop_prob) * sp
+    tr[(np.arange(1, n_tokens + 1) * diar_min_speech_dur - 1,) * 2] += params.diar_loop_prob
+    ip[::diar_min_speech_dur] = sp
 
-    flipped = np.flip(likelihood, axis=0)
-    convolved, index_start = convolve2d_with_zeros(flipped, power_filter)
-    back_propagated = np.flip(convolved[index_start: index_start + likelihood.shape[0], :], axis=0)
-
-    """Sum propagation and add mean filter for even smoother effect"""
-    likelihood_smoothed = front_propagated + back_propagated
-    likelihood_smoothed = mean_filter2d(likelihood_smoothed, params.mean_filter_diar)
+    # hmm backward, forward propagation, and threshold silence component
+    likelihood_smoothed, _, _, _ = forward_backward(likelihood.repeat(diar_min_speech_dur, axis=1), tr, ip)
 
     return likelihood_smoothed
 
