@@ -12,7 +12,7 @@ from statistics import diarization_with_timing
 from helpers.diarization_helpers import smoother_diarization
 from tests.transcription_test import calculate_success_rate
 from tests.vad_test import vad_test
-import numpy as np
+import outputs_text
 
 """Params check"""
 outputs.check_params()
@@ -31,7 +31,10 @@ energy = calculate_energy_over_segments(segmented_tracks)
 normalized_energy = normalize_energy(energy)
 root_mean_squared_energy = calculate_rmse(segmented_tracks)
 
-filter_banks, mfcc, power_spectrum = calculate_mfcc(segmented_tracks, sampling_rate)
+outputs_text.energy(signal[0:sampling_rate * 2, 0], energy[0:sampling_rate * 2, 0],
+                    root_mean_squared_energy[0:sampling_rate * 2, 0])
+
+filter_banks, mfcc, power_spectrum = calculate_mfcc(segmented_tracks, sampling_rate, params.cepstral_coef_count)
 delta_mfcc = calculate_delta(mfcc)
 mfcc_dd = append_delta(mfcc, delta_mfcc, calculate_delta(delta_mfcc))
 

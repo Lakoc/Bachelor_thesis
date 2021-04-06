@@ -1,6 +1,6 @@
 # input file path
-file_path = 'data_to_delete/transcribed/same_room/session2/stereo.wav'
-transcription_path = 'data_to_delete/transcribed/same_room/session2/transcription.trs'
+file_path = 'data_to_delete/transcribed/same_room/session1/stereo.wav'
+transcription_path = 'data_to_delete/transcribed/same_room/session1/transcription.trs'
 # preprocessing
 pre_emphasis_coefficient = 0.97
 
@@ -10,7 +10,7 @@ window_stride = window_size - window_overlap  # 10ms
 
 # mfcc
 frequency_resolution = 512
-cepstral_coef_count = 12
+cepstral_coef_count = 10
 lifter = 22
 delta_neighbours = 2
 
@@ -38,7 +38,7 @@ output_folder = 'output'
 
 # tests
 transcription_plot = True
-collar_size = 25  # ms
+collar_size = 25  # x 10ms
 
 # OLD
 hesitations_max_size_max_size = 2  # seconds

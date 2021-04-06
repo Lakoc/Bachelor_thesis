@@ -4,6 +4,7 @@ import params
 from scipy import fftpack, ndimage
 from helpers.decorators import deprecated, timeit
 from external import features
+import matplotlib.pyplot as plt
 
 
 def calculate_energy_over_segments(segments):
@@ -28,7 +29,7 @@ def normalize_energy(energy):
     return normalized_energy
 
 
-def calculate_mfcc(segments, sampling_rate, mel_filters=40):
+def calculate_mfcc(segments, sampling_rate, mel_filters):
     """Extract mfcc from segments,
     inspired by http://practicalcryptography.com/miscellaneous/machine-learning/guide-mel-frequency-cepstral-coefficients-mfccs/#eqn1
     and https://haythamfayek.com/2016/04/21/speech-processing-for-machine-learning.html
@@ -54,6 +55,7 @@ def calculate_mfcc(segments, sampling_rate, mel_filters=40):
 
     # Create zeros bank
     mel_bank = np.zeros((mel_filters, int(np.floor(params.frequency_resolution / 2 + 1))))
+
 
     """For each filter get left, center, right sampled frequency -
     The first filter bank will start at the first point, reach its peak at the second point, 
@@ -84,6 +86,9 @@ def calculate_mfcc(segments, sampling_rate, mel_filters=40):
 
     filter_banks = np.transpose(np.dot(np.transpose(power_spectrum, [0, 2, 1]), mel_bank.T), [0, 2, 1])
 
+    # fig, ax = plt.subplots()
+    # ax.plot(mel_bank.transpose(1,0))
+    # fig.show()
     # Replace 0 with smallest float for numerical stability and
     filter_banks = np.where(filter_banks == 0, np.finfo(float).eps, filter_banks)
     filter_banks = 20 * np.log10(filter_banks)

@@ -129,7 +129,7 @@ def energy_gmm_based_vad_propagation(normalized_energy):
     shift = logsumexp(likelihoods2, axis=1)
     likelihoods2 = np.exp(likelihoods2 - shift[:, np.newaxis])
 
-    # init propagation matrix
+    # Init propagation matrix
     vad_min_speech_dur = params.vad_min_speech_dur
     n_tokens = likelihoods1.shape[1]
     sp = np.ones(n_tokens) / n_tokens
