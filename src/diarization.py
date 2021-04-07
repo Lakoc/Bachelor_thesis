@@ -18,10 +18,8 @@ def return_diarization_index(likelihoods, active_segments):
     likelihoods_diff = likelihoods[:, 0] - likelihoods[:, 1]
     return diarization, likelihoods_diff
 
-
 def energy_based_diarization_no_interruptions(energy, vad):
     """Simple energy based diarization, if voice activity was detected, choose higher energy as speaker"""
-    """"""
     higher_energy = np.argmax(energy, axis=1)
     vad_summed = np.sum(vad, axis=1)
     plot_6_7k(energy, vad_summed)

@@ -5,6 +5,7 @@ from scipy import ndimage
 from scipy.special import logsumexp
 from helpers.decorators import timeit
 from helpers.propagation import forward_backward
+import matplotlib.pyplot as plt
 
 
 def calculate_initial_threshold(energy_segments):
@@ -62,7 +63,6 @@ def energy_vad_threshold_with_adaptive_threshold(energy_segments):
 
         # Actualize lambda and calculate threshold
         lam = np.maximum(lam_min, (e_max_ref - e_min) / e_max_ref)
-        # lam = np.maximum(lam_min, (e_max - e_min) / e_max)
         threshold = (1 - lam) * e_max + lam * e_min
 
         # 1 - speech, 0 - non speech

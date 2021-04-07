@@ -1,19 +1,5 @@
-1. Vylepsit detekci recove aktivity?
-2. Zahrnout do textu GMM/HMM?
-3. Popisovat VBx nebo pouze porovnat vysledky?
-4. Rozdelit skript na online, stejna mistnost nebo jen podminit? (jaky mikrofon se pouziva)
-5. Ktere klasifikatory jsou pro deepsy nejdulezitejsi? (pripadne kontakt na spravce webu)
-6. Lze v rámci apache licence v2 zahrnout do bakalarky?
-
-
-
-HTKbook
-
-@book{Young2006, added-at = {2009-10-10T00:08:43.000+0200}, author = {Young, Steve J. and Kershaw, D. and Odell, J. and Ollason, D. and Valtchev, V. and Woodland, P.}, biburl = {https://www.bibsonomy.org/bibtex/21c3944c5f6aab2b528f8320d8ed72ab6/lran022}, interhash = {fdfefe2db65b3d0b3cd6aa4db4b5a497}, intrahash = {1c3944c5f6aab2b528f8320d8ed72ab6}, keywords = {imported}, publisher = {Cambridge University Press}, timestamp = {2009-10-10T00:08:47.000+0200}, title = {{The HTK Book Version 3.4}}, year = 2006 }
-
-https://dspace.tul.cz/handle/15240/20989?show=full
-
 ZOOm h2n
 zlepseni nahravani
 
-kapitola 2.1  bod 3 , bod 4, nahravani sezeni 2.2 umistete diktafonvycuc 4 CH
+
+patek 10

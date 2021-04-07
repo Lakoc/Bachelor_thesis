@@ -16,8 +16,8 @@ delta_neighbours = 2
 
 # energy vad
 energy_threshold_interval = 0.1  # 100ms
-med_filter = 0.1  # 250 ms
-min_silence_likelihood = 0.95 # 95%
+med_filter = 0.25
+min_silence_likelihood = 0.3
 
 # vad hmm
 vad_min_speech_dur = 1

@@ -4,6 +4,7 @@ from scipy import fftpack
 from math import ceil
 import os
 import params
+import re
 
 # 15 ms not overlapping frame -> corresponding to 1000 // 15
 NORMALIZATION_COEFFICIENT = 67
@@ -224,7 +225,7 @@ def plot_lpc_ftt(sig, sampling_frequency, lpc, coefficients):
     fig.show()
 
 
-def diarization_to_files(speaker, segment_time):
+def diarization_to_file(speaker, segment_time):
     """Create diarization file providing for each speech segment speaker and time bounds"""
     with open(f'{params.output_folder}/diarization', 'w') as file:
         for index, val in enumerate(speaker):
@@ -233,6 +234,64 @@ def diarization_to_files(speaker, segment_time):
             else:
                 file.write(
                     f'{segment_time[index]:.2f}\t{segment_time[index + 1]:.2f}\t spk{val}\n')
+
+
+def diarization_to_rttm_file(path, speaker, segment_time):
+    file_name = path.split(".")[0].split('/')[-1]
+    path = f'{path.split(".")[0]}.rttm'
+    with open(path, 'w') as file:
+        for index, val in enumerate(speaker):
+            if val == 0:
+                continue
+            else:
+                file.write(
+                    f'SPEAKER {file_name} 1 {segment_time[index]:.3f} {(float(segment_time[index + 1]) - float(segment_time[index])):.3f} <NA> <NA> spk{val} <NA> <NA>\n')
+
+
+def online_session_to_rttm(path, vad):
+    file_name = path.split(".")[0].split('/')[-1]
+    path = f'{path.split(".")[0]}.rttm'
+    speech_start_spk1 = np.empty(vad.shape[0], dtype=bool)
+    speech_start_spk1[0] = True
+    speech_start_spk1[1:] = np.not_equal(vad[:-1, 0], vad[1:, 0])
+    segment_indexes1 = np.argwhere(speech_start_spk1).reshape(-1)
+
+    speech_start_spk2 = np.empty(vad.shape[0], dtype=bool)
+    speech_start_spk2[0] = True
+    speech_start_spk2[1:] = np.not_equal(vad[:-1, 1], vad[1:, 1])
+    segment_indexes2 = np.argwhere(speech_start_spk2).reshape(-1)
+    # Append end of audio
+    segment_indexes = np.append(segment_indexes1, segment_indexes2)
+
+    start_time_index = np.argsort(segment_indexes)
+    len_indexes1 = segment_indexes1.shape[0]
+
+    segment_indexes1 = np.append(segment_indexes1, vad.shape[0])
+    segment_indexes2 = np.append(segment_indexes2, vad.shape[0])
+    with open(path, 'w') as file:
+        for index in start_time_index:
+            if index < len_indexes1:
+                start_time = segment_indexes1[index]
+                speech = vad[start_time,0]
+                if not speech:
+                    continue
+                speaker = 1
+                end_time = segment_indexes1[index + 1]
+            else:
+                index = index - len_indexes1
+                start_time = segment_indexes2[index]
+                speech = vad[start_time, 1]
+                if not speech:
+                    continue
+                speaker = 2
+                end_time = segment_indexes2[index + 1]
+
+            start_time *= params.window_stride
+            end_time *= params.window_stride
+            time = end_time - start_time
+
+            file.write(
+                    f'SPEAKER {file_name} {speaker} {start_time:.3f} {time:.3f} <NA> <NA> {speaker} <NA> <NA>\n')
 
 
 def diarization_likelihood_plot(i, j, speaker1, speaker2, active_segments, hit_rate):

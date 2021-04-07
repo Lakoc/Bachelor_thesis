@@ -49,7 +49,7 @@ diarization = gmm_mfcc_diarization_no_interruptions_2channels_single_iteration(m
 # diarization = gmm_mfcc_diarization_no_interruptions_2channels_2iterations(mfcc_dd, vad, root_mean_squared_energy)
 
 """Outputs"""
-outputs.diarization_to_files(*diarization_with_timing(diarization))
+outputs.diarization_to_file(*diarization_with_timing(diarization))
 # outputs.plot_energy_with_wav(segmented_tracks[:, :, 0], energy_over_segments[:, 0])
 outputs.plot_vad_wav(signal, vad)
 

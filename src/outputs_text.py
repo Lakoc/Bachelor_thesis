@@ -5,6 +5,7 @@ from scipy import fftpack, ndimage
 from sklearn.mixture import GaussianMixture
 from helpers.propagation import forward_backward
 from scipy.special import logsumexp
+import params
 
 
 def preemphasis(signal, pre_signal, Fs):
@@ -42,11 +43,23 @@ def segmentation(signal, sampling_rate, window_size, window_overlap):
     frame2 = np.zeros(size)
     frame3 = np.zeros(size)
     frame4 = np.zeros(size)
+    frame1[:] = np.nan
+    frame2[:] = np.nan
+    frame3[:] = np.nan
+    frame4[:] = np.nan
 
+    frame1[0] = 0
+    frame1[window_size] = 0
     frame1[1:window_size] = 250
     frame2[window_stride:window_stride + window_size] = 350
+    frame2[window_stride] = 0
+    frame2[window_stride + window_size] = 0
     frame3[2 * window_stride:2 * window_stride + window_size] = 450
+    frame3[2 * window_stride] = 0
+    frame3[2 * window_stride + window_size] = 0
     frame4[3 * window_stride:3 * window_stride + window_size] = 550
+    frame4[3 * window_stride] = 0
+    frame4[3 * window_stride + window_size] = 0
 
     fig, ax = plt.subplots(figsize=(10, 4))
     ax.tick_params(axis='both', which='both', bottom=False, top=False, left=False, labelbottom=False, labelleft=False)
@@ -55,10 +68,11 @@ def segmentation(signal, sampling_rate, window_size, window_overlap):
     ax.spines['bottom'].set_visible(False)
     ax.spines['top'].set_visible(False)
     ax.plot(signal[:3 * window_stride + window_size, 0], label='Signál')
-    ax.plot(frame1, color='black', label='Okno')
-    ax.plot(frame2, color='black')
-    ax.plot(frame3, color='black')
-    ax.plot(frame4, color='black')
+    ax.plot(frame1, label='Okno 1', linewidth=3.0)
+    ax.plot(frame2, label='Okno 2', linewidth=3.0)
+    ax.plot(frame3, label='Okno 3', linewidth=3.0)
+    ax.plot(frame4, label='Okno 4', linewidth=3.0)
+    ax.plot(np.zeros(size), color='black')
     ax.legend()
     fig.tight_layout()
 
@@ -66,74 +80,75 @@ def segmentation(signal, sampling_rate, window_size, window_overlap):
 
 
 def hamming_rectangular():
-    fig, ax = plt.subplots(figsize=(10, 4))
-    ax.spines['right'].set_visible(False)
-    ax.spines['top'].set_visible(False)
+    fig, axs = plt.subplots(ncols=2, figsize=(10, 4), sharex=True, sharey=True)
+    axs[0].set_title('Hammingovo okno')
+    axs[0].spines['right'].set_visible(False)
+    axs[0].spines['top'].set_visible(False)
+    axs[0].set_ylabel('Amplituda')
+    axs[0].set_xlabel('Vzorek')
 
-    ax.plot(np.hamming(1000))
-    fig.tight_layout()
+    axs[0].plot(np.hamming(1000))
 
-    plt.savefig('../thesis_text/Anal-za-audio-hovoru-mezi-dv-ma-astn-ky/obrazky-figures/hamming.pdf')
-
-    fig, ax = plt.subplots(figsize=(10, 4))
-
-    ax.spines['right'].set_visible(False)
-    ax.spines['top'].set_visible(False)
-    window = np.hamming(100)
-    A = np.fft.fft(window, 8000) / 50
-    mag = np.abs(np.fft.fftshift(A))
-    response = 20 * np.log10(mag)
-    response = np.clip(response, -100, 100)
-    plt.plot(response)
-    ax.set_ylabel('Velikost [dB]')
-    ax.set_xlabel('Frekvence [Hz]')
-    fig.tight_layout()
-
-    plt.savefig('../thesis_text/Anal-za-audio-hovoru-mezi-dv-ma-astn-ky/obrazky-figures/hamming_spektrum.pdf')
-
-    fig, ax = plt.subplots(figsize=(10, 4))
-    ax.spines['right'].set_visible(False)
-    ax.spines['top'].set_visible(False)
-
-    fig.tight_layout()
     x = np.zeros(1000)
     x[1:999] = 1
-    ax.plot(x)
+    axs[1].set_title('Pravoúhlé okno')
+    axs[1].spines['right'].set_visible(False)
+    axs[1].spines['top'].set_visible(False)
+    axs[1].set_xlabel('Vzorek')
+    axs[1].plot(x)
+    fig.tight_layout()
 
-    plt.savefig('../thesis_text/Anal-za-audio-hovoru-mezi-dv-ma-astn-ky/obrazky-figures/rectangular.pdf')
+    plt.savefig('../thesis_text/Anal-za-audio-hovoru-mezi-dv-ma-astn-ky/obrazky-figures/hamming_rectangular.pdf')
 
-    fig, ax = plt.subplots(figsize=(10, 4))
-    ax.spines['right'].set_visible(False)
-    ax.spines['top'].set_visible(False)
-    window = np.ones(100)
-    A = np.fft.fft(window, 8000) / 50
-    mag = np.abs(np.fft.fftshift(A))
-    response = 20 * np.log10(mag)
-    response = np.clip(response, -100, 100)
-    ax.set_ylabel('Velikost [dB]')
-    ax.set_xlabel('Frekvence [Hz]')
-    plt.plot(response)
+    fig, axs = plt.subplots(ncols=2, figsize=(10, 4), sharex=True, sharey=True)
 
-    plt.savefig('../thesis_text/Anal-za-audio-hovoru-mezi-dv-ma-astn-ky/obrazky-figures/rectangular_spectrum.pdf')
+    axs[0].set_title('Frekvenční odezva Hammingova okno')
+    axs[0].spines['right'].set_visible(False)
+    axs[0].spines['top'].set_visible(False)
+    window = np.hamming(51)
+    A = np.fft.fft(window, 2048) / (len(window) / 2.0)
+    freq = np.linspace(-0.5, 0.5, len(A))
+    response = 20 * np.log10(np.abs(np.fft.fftshift(A / abs(A).max())))
+    axs[0].plot(freq, response)
+    axs[0].set_ylabel('Normalizovaná velikost [dB]')
+    axs[0].set_xlabel('Normalizovaná frekvence [cyklů / vzorek]')
+
+    axs[1].set_title('Frekvenční odezva pravoúhlého okna')
+    axs[1].spines['right'].set_visible(False)
+    axs[1].spines['top'].set_visible(False)
+    window = np.ones(51)
+    A = np.fft.fft(window, 2048) / (len(window) / 2.0)
+    freq = np.linspace(-0.5, 0.5, len(A))
+    response = 20 * np.log10(np.abs(np.fft.fftshift(A / abs(A).max())))
+    axs[1].plot(freq, response)
+    axs[1].axis([-0.5, 0.5, -120, 0])
+    axs[1].set_xlabel('Normalizovaná frekvence [cyklů / vzorek]')
+    fig.tight_layout()
+    plt.savefig(
+        '../thesis_text/Anal-za-audio-hovoru-mezi-dv-ma-astn-ky/obrazky-figures/hamming_rectangular_spektrum.pdf')
 
 
-def energy(signal, energy, rmse):
-    fig, axs = plt.subplots(nrows=2, figsize=(7, 6), sharex=True)
+def energy(signal, energy, rmse, Fs):
+    fig, axs = plt.subplots(ncols=2, figsize=(10, 4), sharex=True)
 
-    linear = np.linspace(0, len(signal), len(energy))
+    # energy = 20 * np.log10(energy)
+    # rmse = 20 * np.log10(rmse)
+    linear = np.linspace(0, len(signal) / Fs, len(energy))
 
     axs[0].set_ylabel('Energie')
+    axs[0].set_xlabel('Čas [s]')
     axs[0].spines['right'].set_visible(False)
     axs[0].spines['top'].set_visible(False)
     axs[0].plot(linear, energy, label='Energie')
 
     axs[1].set_ylabel('Střední kvadratická energie')
-    axs[1].set_xlabel('Čas [n]')
+    axs[1].set_xlabel('Čas [s]')
     axs[1].spines['right'].set_visible(False)
     axs[1].spines['top'].set_visible(False)
     axs[1].plot(linear, rmse, label='Střední kvadratická energie')
     fig.tight_layout()
     plt.savefig('../thesis_text/Anal-za-audio-hovoru-mezi-dv-ma-astn-ky/obrazky-figures/energy.pdf')
+    # plt.show()
 
 
 def mel_bank(segments):
@@ -215,12 +230,13 @@ def mel_bank(segments):
     filter_banks -= np.mean(filter_banks, axis=0)
     mfcc_compressed -= np.mean(mfcc_compressed, axis=0)
 
-    fig, axs = plt.subplots(nrows=2, ncols=2, figsize=(14, 4))
+    fig, axs = plt.subplots(nrows=2, ncols=2, figsize=(10, 4))
 
+    linear_time = np.linspace(0, params.window_size * 1000, len(segments[0, :, 0]))
     axs[0, 0].set_title('Preemfázovaný vstupní signál')
-    axs[0, 0].plot(segments[0, :, 0], label='Signál')
+    axs[0, 0].plot(linear_time, segments[0, :, 0], label='Signál')
     axs[0, 0].set_ylabel('Amplituda')
-    axs[0, 0].set_xlabel('Čas [n]')
+    axs[0, 0].set_xlabel('Čas [ms]')
     axs[0, 0].spines['right'].set_visible(False)
     axs[0, 0].spines['top'].set_visible(False)
 
@@ -235,38 +251,41 @@ def mel_bank(segments):
     axs[1, 0].set_title('Logaritmus energií na výstupech filtrů')
     axs[1, 0].plot(filter_banks[0, :, 0], label='Energie')
     axs[1, 0].set_ylabel('Velikost')
-    axs[1, 0].set_xlabel('Koeficient [n]')
+    axs[1, 0].set_xlabel('Koeficient')
     axs[1, 0].spines['right'].set_visible(False)
     axs[1, 0].spines['top'].set_visible(False)
 
     axs[1, 1].set_title('Mel-frekvenční cepstralní koefienty')
-    axs[1, 1].plot(mfcc[0, 1:, 0], label='Energie')
+    axs[1, 1].plot(mfcc[0, :, 0], label='Energie')
     axs[1, 1].set_ylabel('Velikost')
-    axs[1, 1].set_xlabel('Koeficient [n]')
+    axs[1, 1].set_xlabel('Koeficient')
     axs[1, 1].spines['right'].set_visible(False)
     axs[1, 1].spines['top'].set_visible(False)
     fig.tight_layout()
     plt.savefig('../thesis_text/Anal-za-audio-hovoru-mezi-dv-ma-astn-ky/obrazky-figures/mfcc.pdf')
+    # plt.show()
 
 
-def VAD_sample(signal):
+def VAD_sample(signal, Fs):
     fig, ax = plt.subplots(figsize=(7, 4))
     sig = signal[40000:100000, 0]
     window = np.zeros(len(sig))
     window[13000:37500] = 1
     window[45000:58000] = 1
-    ax.plot(sig / np.max(signal) * 10, label='Signál')
-    ax.plot(window, label='Řečová aktivita', color='black')
+    linear = np.linspace(0, 600000 / Fs, 60000)
+    ax.plot(linear, sig / np.max(signal) * 10, label='Signál')
+    ax.plot(linear, window, label='Řečová aktivita', color='black', linewidth=3.0)
     ax.set_ylabel('Velikost')
-    ax.set_xlabel('Čas [n]')
+    ax.set_xlabel('Čas [s]')
     ax.spines['right'].set_visible(False)
     ax.spines['top'].set_visible(False)
     ax.legend()
     fig.tight_layout()
     plt.savefig('../thesis_text/Anal-za-audio-hovoru-mezi-dv-ma-astn-ky/obrazky-figures/signal_vad.pdf')
+    # plt.show()
 
 
-def VAD_sample_smooth(signal):
+def VAD_sample_smooth(signal, Fs):
     fig, ax = plt.subplots(figsize=(7, 4))
     sig = signal[40000:500000, 0]
     window = np.zeros(len(sig))
@@ -275,38 +294,46 @@ def VAD_sample_smooth(signal):
     window[243000:390000] = 1
     window[440000:] = 1
     window[-1] = 0
-    ax.plot(sig / np.max(signal) * 10, label='Signál')
-    ax.plot(window, label='Vyhlazená detekce řečové aktivity', color='black')
+
+    linear = np.linspace(0, (500000 - 40000) / Fs, (500000 - 40000))
+
+    ax.plot(linear, sig / np.max(signal) * 10, label='Signál')
+    ax.plot(linear, window, label='Vyhlazená detekce řečové aktivity', color='black', linewidth=3.0)
     ax.set_ylabel('Velikost')
-    ax.set_xlabel('Čas [n]')
+    ax.set_xlabel('Čas [s]')
     ax.spines['right'].set_visible(False)
     ax.spines['top'].set_visible(False)
     ax.legend()
     fig.tight_layout()
     plt.savefig('../thesis_text/Anal-za-audio-hovoru-mezi-dv-ma-astn-ky/obrazky-figures/signal_vad_smooth.pdf')
+    # plt.show()
 
-def VAD_threshold(signal):
+
+def VAD_threshold(signal, Fs):
     fig, ax = plt.subplots(figsize=(7, 4))
+    linear = np.linspace(0, (100000 - 40000) / Fs, (100000 - 40000))
+
     sig = signal[40000:100000, 0]
     window = np.zeros(len(sig))
     window[13200:36300] = 1
     window[45500:58000] = 1
     threshold = np.zeros(len(sig))
     threshold += 0.05
-    ax.plot(sig / np.max(signal) * 10, label='Signál')
-    ax.plot(window, label='Řečová aktivita', color='black')
-    ax.plot(threshold, label='Práh', color='C1')
+    ax.plot(linear, sig / np.max(signal) * 10, label='Signál')
+    ax.plot(linear, window, label='Řečová aktivita', color='black', linewidth=3.0)
+    ax.plot(linear, threshold, label='Práh', color='C1')
     ax.set_ylabel('Velikost')
-    ax.set_xlabel('Čas [n]')
+    ax.set_xlabel('Čas [s]')
     ax.spines['right'].set_visible(False)
     ax.spines['top'].set_visible(False)
     ax.legend()
     fig.tight_layout()
     plt.savefig('../thesis_text/Anal-za-audio-hovoru-mezi-dv-ma-astn-ky/obrazky-figures/signal_vad_threshold.pdf')
+    # plt.show()
+
 
 def VAD_adaptive_threshold(energy_segments):
-
-    energy_segments = energy_segments[0:1000,:]
+    energy_segments = energy_segments[0:1000, :]
     med_filter = 0.1  # 250 ms
     window_stride = 0.01  # 10ms
 
@@ -321,7 +348,7 @@ def VAD_adaptive_threshold(energy_segments):
 
     vad = np.zeros(energy_segments.shape, dtype="i1")
     threshold_arr = np.zeros(energy_segments.shape)
-    e_min_arr = np.zeros(energy_segments.shape )
+    e_min_arr = np.zeros(energy_segments.shape)
     e_max_arr = np.zeros(energy_segments.shape)
 
     # Lambda min in case of too fast scaling
@@ -343,7 +370,6 @@ def VAD_adaptive_threshold(energy_segments):
         lam = np.maximum(lam_min, (e_max_ref - e_min) / e_max_ref)
         threshold = (1 - lam) * e_max + lam * e_min
 
-
         threshold_arr[index] = threshold
         e_max_arr[index] = e_max_ref
         e_min_arr[index] = e_min
@@ -352,33 +378,36 @@ def VAD_adaptive_threshold(energy_segments):
         vad[index] = segment > threshold
 
     # apply median filter to remove unwanted
-    vad = ndimage.median_filter(vad, int(round(med_filter / window_stride)))
+    vad = ndimage.median_filter(vad, int(round(med_filter / window_stride) * 4))
 
-    fig, axs = plt.subplots(nrows=2,figsize=(7, 4), sharex=True)
-    # ax.plot(vad[:,0], label='Řečová aktivita', color='black')
-    axs[0].plot(e_min_arr[:,0], label='Minimální energie')
-    axs[0].plot(e_max_arr[:,0], label='Maximální energie')
+    time = np.linspace(0, 10, 1000)
+    fig, axs = plt.subplots(nrows=2, figsize=(7, 4), sharex=True)
+    axs[0].plot(time, e_min_arr[:, 0], label='Minimální energie')
+    axs[0].plot(time, e_max_arr[:, 0], label='Maximální energie')
 
     axs[0].set_ylabel('Velikost')
     axs[0].spines['right'].set_visible(False)
     axs[0].spines['top'].set_visible(False)
     axs[0].legend()
 
-    axs[1].plot(energy_segments[:,0], label='Energie')
-    axs[1].plot(threshold_arr[:,0], label='Práh')
+    axs[1].plot(time, energy_segments[:, 0], label='Energie')
+    axs[1].plot(time, threshold_arr[:, 0], label='Práh')
+    axs[1].plot(time, vad[:, 0] * np.max(energy_segments[:, 0]), label='Řečová aktivita', color='black', linewidth=3.0)
     axs[1].set_ylabel('Velikost')
-    axs[1].set_xlabel('Segment [n]')
+    axs[1].set_xlabel('Čas [s]')
     axs[1].spines['right'].set_visible(False)
     axs[1].spines['top'].set_visible(False)
     axs[1].legend()
     fig.tight_layout()
     plt.savefig('../thesis_text/Anal-za-audio-hovoru-mezi-dv-ma-astn-ky/obrazky-figures/vad_adaptive.pdf')
+    # plt.show()
 
 
 def VAD_gmm(normalized_energy):
     min_silence_likelihood = 0.95  # 95%
     vad_min_speech_dur = 1
     vad_loop_probability = 0.999
+    normalized_energy = normalized_energy[0:1000, :]
 
     means = np.array(
         [np.min(normalized_energy), (np.max(normalized_energy) + np.min(normalized_energy)) / 2,
@@ -406,34 +435,48 @@ def VAD_gmm(normalized_energy):
     # HMM backward, forward propagation, and threshold silence component
     likelihood_propagated, _, _, _ = forward_backward(likelihoods1.repeat(vad_min_speech_dur, axis=1), tr, ip)
 
-    likelihood_propagated = likelihood_propagated[0:8000,:]
-    fig, ax = plt.subplots(figsize=(12, 4))
-    ax.plot(likelihood_propagated[:,0], label='Pravděpodobnost ticha')
-    ax.plot(likelihood_propagated[:,1], label='Pravděpodobnost šumu')
-    ax.plot(likelihood_propagated[:,2], label='Pravděpodobnost řeči')
-    ax.set_ylabel('Velikost')
-    ax.set_xlabel('Segment [n]')
-    ax.spines['right'].set_visible(False)
-    ax.spines['top'].set_visible(False)
-    ax.legend()
+    time = np.linspace(0, 10, 1000)
+
+    fig, axs = plt.subplots(nrows=2, figsize=(10, 4), sharex=True)
+    axs[0].plot(time, likelihoods1[:, 0], label='Pravděpodobnost ticha')
+    axs[0].plot(time, likelihoods1[:, 1], label='Pravděpodobnost tiché řeči / šumu')
+    axs[0].plot(time, likelihoods1[:, 2], label='Pravděpodobnost řeči')
+    axs[0].set_ylabel('Velikost')
+    axs[0].set_xlabel('Segment')
+    axs[0].spines['right'].set_visible(False)
+    axs[0].spines['top'].set_visible(False)
+    axs[0].legend()
+
+    vad = (likelihood_propagated[:, 0] < 0.95).astype(np.float)
+    vad *= np.max(normalized_energy[:, 0])
+    axs[1].plot(time, normalized_energy[:, 0], label='Energie')
+    axs[1].plot(time, vad, label='Řečová aktivita', color='black', linewidth=3.0)
+    axs[1].set_ylabel('Velikost')
+    axs[1].set_xlabel('Čas [s]')
+    axs[1].spines['right'].set_visible(False)
+    axs[1].spines['top'].set_visible(False)
+    axs[1].legend()
     fig.tight_layout()
     plt.savefig('../thesis_text/Anal-za-audio-hovoru-mezi-dv-ma-astn-ky/obrazky-figures/vad_gmm.pdf')
+    # plt.show()
 
 
-def diarization(signal):
+def diarization(signal, Fs):
     fig, ax = plt.subplots(figsize=(7, 4))
     sig = signal[40000:100000, 0]
+    time = np.linspace(0, 60000 / Fs, 60000)
     window1 = np.zeros(len(sig))
     window2 = np.zeros(len(sig))
     window1[13000:37500] = 1
     window2[45000:58000] = 1
-    ax.plot(sig / np.max(signal) * 10, label='Signál')
-    ax.plot(window1, label='Řečová aktivita terapeuta')
-    ax.plot(window2, label='Řečová aktivita klienta')
+    ax.plot(time, sig / np.max(signal) * 10, label='Signál')
+    ax.plot(time, window1, label='Řečová aktivita terapeuta', linewidth=3.0)
+    ax.plot(time, window2, label='Řečová aktivita klienta', linewidth=3.0)
     ax.set_ylabel('Velikost')
-    ax.set_xlabel('Čas [n]')
+    ax.set_xlabel('Čas [s]')
     ax.spines['right'].set_visible(False)
     ax.spines['top'].set_visible(False)
     ax.legend()
     fig.tight_layout()
     plt.savefig('../thesis_text/Anal-za-audio-hovoru-mezi-dv-ma-astn-ky/obrazky-figures/diarization.pdf')
+    # plt.show()
