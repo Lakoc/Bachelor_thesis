@@ -16,12 +16,18 @@ delta_neighbours = 2
 
 # energy vad
 energy_threshold_interval = 0.1  # 100ms
-med_filter = 0.25
-min_silence_likelihood = 0.3
+med_filter = 0.2
+
+
+# maximum system sensitivity
+min_silence_likelihood = 0.8
+transition_matrix = [[0.9, 0.05, 0.05], [0.05, 0.9, 0.05], [0.05, 0.05, 0.9]]
+filter_non_active = 0.2
+filter_active = 0.2
 
 # vad hmm
 vad_min_speech_dur = 1
-vad_loop_probability = 0.999
+vad_loop_probability = 0.9
 
 # diarization
 energy_diff_filter = 50

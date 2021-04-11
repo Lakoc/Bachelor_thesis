@@ -50,7 +50,7 @@ def plot_energy_with_wav(track, energies_per_segment):
 
 def plot_vad_wav(tracks, vads):
     """Plots vad, wav and energy of signal"""
-    for i in range(0, 1):
+    for i in range(0, 2):
         track = tracks[:, i]
         vad = vads[:, i]
 
@@ -59,7 +59,7 @@ def plot_vad_wav(tracks, vads):
         x1 = np.linspace(0, 1, track.shape[0])
         x2 = np.linspace(0, 1, vad.shape[0])
         axs.plot(x1, track)
-        axs.plot(x2, vad * 1000)
+        axs.plot(x2, vad * np.max(track))
         fig.tight_layout()
         fig.show()
 
@@ -245,7 +245,7 @@ def diarization_to_rttm_file(path, speaker, segment_time):
                 continue
             else:
                 file.write(
-                    f'SPEAKER {file_name} 1 {segment_time[index]:.3f} {(float(segment_time[index + 1]) - float(segment_time[index])):.3f} <NA> <NA> spk{val} <NA> <NA>\n')
+                    f'SPEAKER {file_name} {val} {segment_time[index]:.3f} {(float(segment_time[index + 1]) - float(segment_time[index])):.3f} <NA> <NA> {val} <NA> <NA>\n')
 
 
 def online_session_to_rttm(path, vad):

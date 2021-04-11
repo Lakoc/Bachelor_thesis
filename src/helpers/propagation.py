@@ -1,6 +1,9 @@
 import numpy as np
 from scipy.special import logsumexp
 
+import params
+from helpers.decorators import timeit
+
 
 def forward_backward(lls, tr, ip):
     """
@@ -50,3 +53,30 @@ def mean_filter(arr, k):
     out[0:k] = front
     out[arr.shape[0] - k:] = np.flip(back)
     return out
+
+
+def segments_filter(arr, filter_size, value_to_filter):
+    """Remove segments containing provided value shorter than filter_size"""
+    if filter_size <= 0:
+        return arr
+
+    filter_size = int(filter_size / params.window_stride)
+    segment_start = np.empty(arr.shape, dtype=bool)
+    segment_start[0] = True
+    segment_start[1:] = np.not_equal(arr[:-1], arr[1:])
+    segment_indexes = np.argwhere(segment_start).reshape(-1)
+    segment_indexes = np.append(segment_indexes, arr.shape)
+    segments = np.append(segment_indexes[:-1][:, np.newaxis], segment_indexes[1:][:, np.newaxis], axis=1)
+
+    value_to_replace = 1 - value_to_filter
+    for index in range(segments.shape[0]):
+        segment = segments[index]
+        if arr[segment[0]] == value_to_filter and segment[1] - segment[0] < filter_size:
+            if value_to_replace == 0 or index == 0 or index == segments.shape[0] - 1:
+                arr[segment[0]:segment[1]] = value_to_replace
+            else:
+                pre_segment_len = segments[index - 1][1] - segments[index - 1][0]
+                post_segment_len = segments[index + 1][1] - segments[index + 1][0]
+                if post_segment_len > filter_size and pre_segment_len >  filter_size:
+                    arr[segment[0]:segment[1]] = value_to_replace
+    return arr

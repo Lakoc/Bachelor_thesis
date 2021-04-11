@@ -5,7 +5,7 @@ from scipy.io import wavfile
 def read_wav_file(path):
     """Read wav file and returns numpy array and sampling rate"""
     sampling_rate, wav_file = wavfile.read(path)
-    return wav_file.astype(int), sampling_rate
+    return wav_file, sampling_rate
 
 
 def process_pre_emphasis(signal, coefficient):

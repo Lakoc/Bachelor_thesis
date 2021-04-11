@@ -3,7 +3,7 @@ from matplotlib.ticker import MaxNLocator
 import numpy as np
 from scipy import fftpack, ndimage
 from sklearn.mixture import GaussianMixture
-from helpers.propagation import forward_backward
+from helpers.propagation import forward_backward, segments_filter
 from scipy.special import logsumexp
 import params
 
@@ -403,63 +403,63 @@ def VAD_adaptive_threshold(energy_segments):
     # plt.show()
 
 
-def VAD_gmm(normalized_energy):
-    min_silence_likelihood = 0.95  # 95%
-    vad_min_speech_dur = 1
-    vad_loop_probability = 0.999
-    normalized_energy = normalized_energy[0:1000, :]
-
-    means = np.array(
-        [np.min(normalized_energy), (np.max(normalized_energy) + np.min(normalized_energy)) / 2,
-         np.max(normalized_energy)])[
-            :, np.newaxis]
+def VAD_gmm(energy, signal, Fs):
+    """Estimate vad using gaussian mixture model"""
+    # Initialization of model
+    means = np.array([np.min(energy), (np.max(energy) + np.min(energy)) / 2, np.max(energy)])[:, np.newaxis]
     weights = np.array([1 / 3, 1 / 3, 1 / 3])
 
-    gmm = GaussianMixture(n_components=3, weights_init=weights, covariance_type='spherical', means_init=means)
+    gmm = GaussianMixture(n_components=3, max_iter=300, tol=1e-5, weights_init=weights, covariance_type='spherical',
+                          means_init=means)
 
     # Fit and predict posterior probabilities for each channel
-    gmm.fit(normalized_energy[:, 0][:, np.newaxis])
-    likelihoods1 = gmm.predict_proba(normalized_energy[:, 0][:, np.newaxis])
-    shift = logsumexp(likelihoods1, axis=1)
-    likelihoods1 = np.exp(likelihoods1 - shift[:, np.newaxis])
+    gmm.fit(energy[:, 0][:, np.newaxis])
+    likelihoods1 = gmm.predict_proba(energy[:, 0][:, np.newaxis])
 
-    # Init propagation matrix
+    # Init propagation matrix for sil likelihood smoothing
+    vad_min_speech_dur = params.vad_min_speech_dur
     n_tokens = likelihoods1.shape[1]
     sp = np.ones(n_tokens) / n_tokens
-    tr = np.eye(vad_min_speech_dur * n_tokens, k=1)
     ip = np.zeros(vad_min_speech_dur * n_tokens)
-    tr[vad_min_speech_dur - 1::vad_min_speech_dur, 0::vad_min_speech_dur] = (1 - vad_loop_probability) * sp
-    tr[(np.arange(1, n_tokens + 1) * vad_min_speech_dur - 1,) * 2] += vad_loop_probability
     ip[::vad_min_speech_dur] = sp
+    tr = np.array(params.transition_matrix)
 
     # HMM backward, forward propagation, and threshold silence component
-    likelihood_propagated, _, _, _ = forward_backward(likelihoods1.repeat(vad_min_speech_dur, axis=1), tr, ip)
+    likelihood_propagated1, _, _, _ = forward_backward(likelihoods1, tr, ip)
+    vad1 = likelihood_propagated1[:, 0] < params.min_silence_likelihood
 
-    time = np.linspace(0, 10, 1000)
+    # Smooth activity segments and create arr containing both speakers
+    vad1 = segments_filter(segments_filter(vad1, params.filter_size_non, 1), params.filter_size_active, 0)
 
-    fig, axs = plt.subplots(nrows=2, figsize=(10, 4), sharex=True)
-    axs[0].plot(time, likelihoods1[:, 0], label='Pravděpodobnost ticha')
-    axs[0].plot(time, likelihoods1[:, 1], label='Pravděpodobnost tiché řeči / šumu')
-    axs[0].plot(time, likelihoods1[:, 2], label='Pravděpodobnost řeči')
-    axs[0].set_ylabel('Velikost')
-    axs[0].set_xlabel('Segment')
+    fig, axs = plt.subplots(nrows=3, sharex=True, figsize=(10, 6))
+    height = np.max(signal[0:Fs * 20:, 0])
+    time = np.linspace(0, 20, 2000)
+    time1 = np.linspace(0, 20, Fs * 20)
+    threshold = np.full(2000, params.min_silence_likelihood)
+
+    axs[0].plot(time, likelihoods1[0:2000, 0], label='Ticho')
+    axs[0].plot(time, likelihoods1[0:2000, 1], label='Šum / tichá řeč')
+    axs[0].plot(time, likelihoods1[0:2000, 2], label='Řeč')
     axs[0].spines['right'].set_visible(False)
     axs[0].spines['top'].set_visible(False)
     axs[0].legend()
+    axs[0].set_ylabel('Pravděpodobnost')
 
-    vad = (likelihood_propagated[:, 0] < 0.95).astype(np.float)
-    vad *= np.max(normalized_energy[:, 0])
-    axs[1].plot(time, normalized_energy[:, 0], label='Energie')
-    axs[1].plot(time, vad, label='Řečová aktivita', color='black', linewidth=3.0)
-    axs[1].set_ylabel('Velikost')
-    axs[1].set_xlabel('Čas [s]')
+    axs[1].plot(time, likelihood_propagated1[0:2000, 0], label='Pravděpodobnost ticha')
+    axs[1].plot(time, threshold, label='Práh')
     axs[1].spines['right'].set_visible(False)
     axs[1].spines['top'].set_visible(False)
+    axs[1].set_ylabel('Velikost')
     axs[1].legend()
-    fig.tight_layout()
-    plt.savefig('../thesis_text/Anal-za-audio-hovoru-mezi-dv-ma-astn-ky/obrazky-figures/vad_gmm.pdf')
-    # plt.show()
 
+    axs[2].plot(time, vad1[0:2000], label='Řečová aktivita', color='black', linewidth=3)
+    axs[2].plot(time1, signal[0:20 * Fs, 0] / height, label='Normalizovaný signál')
+    axs[2].spines['right'].set_visible(False)
+    axs[2].spines['top'].set_visible(False)
+    axs[2].set_ylabel('Velikost')
+    axs[2].legend()
+    axs[2].set_xlabel('Čas [s]')
+    plt.savefig('../thesis_text/Anal-za-audio-hovoru-mezi-dv-ma-astn-ky/obrazky-figures/vad_gmm.pdf')
 
 def diarization(signal, Fs):
     fig, ax = plt.subplots(figsize=(7, 4))
@@ -479,4 +479,27 @@ def diarization(signal, Fs):
     ax.legend()
     fig.tight_layout()
     plt.savefig('../thesis_text/Anal-za-audio-hovoru-mezi-dv-ma-astn-ky/obrazky-figures/diarization.pdf')
+    # plt.show()
+
+def cross_talk(signal, Fs):
+
+    fig, axs = plt.subplots(nrows=2, figsize=(7, 4), sharey=True, sharex=True)
+    sig1 = signal[0:100000, 0]
+    sig2 = signal[0:100000, 1]
+    time = np.linspace(0, 100000 / Fs, 100000)
+
+    axs[0].plot(time, sig1 , label='Kanál 1', color='C0')
+    axs[0].set_ylabel('Velikost')
+    axs[0].spines['right'].set_visible(False)
+    axs[0].spines['top'].set_visible(False)
+    axs[0].legend()
+
+    axs[1].plot(time, sig2, label='Kanál 2', color='C1')
+    axs[1].set_ylabel('Velikost')
+    axs[1].set_xlabel('Čas [s]')
+    axs[1].spines['right'].set_visible(False)
+    axs[1].spines['top'].set_visible(False)
+    axs[1].legend()
+    fig.tight_layout()
+    plt.savefig('../thesis_text/Anal-za-audio-hovoru-mezi-dv-ma-astn-ky/obrazky-figures/cross_talk.pdf')
     # plt.show()

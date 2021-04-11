@@ -13,6 +13,7 @@ from helpers.diarization_helpers import smoother_diarization
 from tests.transcription_test import calculate_success_rate
 from tests.vad_test import vad_test
 import outputs_text
+import numpy as np
 
 """Params check"""
 outputs.check_params()
@@ -21,6 +22,8 @@ outputs.check_params()
 wav_file, sampling_rate = read_wav_file(params.file_path)
 # wav_file = wav_file[:sampling_rate * 60, :]
 
+outputs_text.cross_talk(wav_file, sampling_rate)
+exit(0)
 """Segmentation"""
 signal = process_pre_emphasis(wav_file, params.pre_emphasis_coefficient)
 segmented_tracks = process_hamming(signal, sampling_rate, params.window_size,
@@ -40,7 +43,8 @@ mfcc_dd = append_delta(mfcc, delta_mfcc, calculate_delta(delta_mfcc))
 # vad = energy_vad_threshold_with_adaptive_threshold(root_mean_squared_energy)
 # vad = energy_gmm_based_vad(root_mean_squared_energy)
 vad = energy_gmm_based_vad_propagation(root_mean_squared_energy)
-
+# outputs_text.VAD_gmm(root_mean_squared_energy, signal, sampling_rate)
+# exit(0)
 """Diarization"""
 # diarization = energy_based_diarization_no_interruptions(root_mean_squared_energy, vad)
 # diarization = gmm_mfcc_diarization_no_interruptions_1channel(mfcc, vad, root_mean_squared_energy)
