@@ -3,7 +3,7 @@ from os import listdir, remove, makedirs
 from os.path import isfile, exists, join as path_join
 import re
 from scipy.io.wavfile import write
-from preprocessing import read_wav_file
+from audio_processing.preprocessing import read_wav_file
 
 path = sys.argv[1]
 

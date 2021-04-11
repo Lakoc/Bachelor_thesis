@@ -1,19 +1,13 @@
-import outputs
+from outputs import outputs
 import params
-from preprocessing import process_hamming, read_wav_file, process_pre_emphasis
-from feature_extraction import calculate_energy_over_segments, normalize_energy, calculate_rmse, calculate_mfcc, \
+from audio_processing.preprocessing import process_hamming, read_wav_file, process_pre_emphasis
+from audio_processing.feature_extraction import calculate_energy_over_segments, normalize_energy, calculate_rmse, calculate_mfcc, \
     calculate_delta, append_delta
-from vad import energy_vad_threshold_with_adaptive_threshold, energy_gmm_based_vad, energy_vad_threshold, \
-    energy_gmm_based_vad_propagation
-from diarization import gmm_mfcc_diarization_no_interruptions_2channels_single_iteration, \
-    gmm_mfcc_diarization_no_interruptions_1channel, energy_based_diarization_no_interruptions, \
-    gmm_mfcc_diarization_no_interruptions_1channel_k_means, gmm_mfcc_diarization_no_interruptions_2channels_2iterations
-from statistics import diarization_with_timing
-from helpers.diarization_helpers import smoother_diarization
+from audio_processing.vad import energy_gmm_based_vad_propagation
+from audio_processing.diarization import gmm_mfcc_diarization_no_interruptions_2channels_single_iteration
+from outputs.statistics import diarization_with_timing
 from tests.transcription_test import calculate_success_rate
-from tests.vad_test import vad_test
-import outputs_text
-import numpy as np
+import outputs.outputs_text
 
 """Params check"""
 outputs.check_params()

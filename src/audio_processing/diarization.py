@@ -3,7 +3,7 @@ import params
 from scipy import ndimage
 from copy import deepcopy
 from helpers.decorators import timeit
-from gmm import MyGmm
+from helpers.gmm import MyGmm
 from helpers.diarization_helpers import extract_features_for_diarization, likelihood_propagation_matrix, \
     single_gmm_update
 from debug.debug_outputs import plot_6_7k

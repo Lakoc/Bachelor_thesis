@@ -1,20 +1,20 @@
 from os import listdir, makedirs
 from os.path import isfile, join, exists
-import outputs
+from audio_processing import vad as vad_module
+from outputs import outputs
 import params
-from preprocessing import process_hamming, read_wav_file, process_pre_emphasis
-from feature_extraction import calculate_rmse, calculate_mfcc, calculate_energy_over_segments, normalize_energy
-import vad as vad_module
-from diarization import gmm_mfcc_diarization_no_interruptions_2channels_single_iteration
-from statistics import diarization_with_timing
+from audio_processing.preprocessing import process_hamming, read_wav_file, process_pre_emphasis
+from audio_processing.feature_extraction import calculate_rmse, calculate_mfcc
+from audio_processing.diarization import gmm_mfcc_diarization_no_interruptions_2channels_single_iteration
+from outputs.statistics import diarization_with_timing
 from progress.bar import Bar
 from argparse import ArgumentParser
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='Module for processing diarization over wav files in provided directory.')
-    parser.add_argument('--src', type=str,
+    parser.add_argument('--src', type=str, required=True,
                         help='source path of wav files')
-    parser.add_argument('--dest', type=str,
+    parser.add_argument('--dest', type=str, required=True,
                         help='destination path for rttm files')
 
     args = parser.parse_args()

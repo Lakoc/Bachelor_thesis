@@ -1,4 +1,4 @@
-from src import gmm
+from helpers import gmm
 import numpy as np
 import matplotlib.pyplot as plt
 

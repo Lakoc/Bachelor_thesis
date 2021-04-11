@@ -2,17 +2,17 @@ from argparse import ArgumentParser
 from os import makedirs, listdir
 from os.path import isfile, exists, join
 from progress.bar import Bar
-from speech2word import process_file
+from helpers.speech2word import process_file
 
 if __name__ == '__main__':
     parser = ArgumentParser(
         description='Module for processing transcription over wav and rttm files in provided directory.')
-    parser.add_argument('--src', type=str,
+    parser.add_argument('--src', type=str, required=True,
                         help='source path of wav and rttm files')
-    parser.add_argument('--dest', type=str,
+    parser.add_argument('--dest', type=str, required=True,
                         help='destination path for txt files')
 
-    parser.add_argument('--language', type=str,
+    parser.add_argument('--language', type=str, required=True,
                         help='language tag for recognition')
 
     args = parser.parse_args()

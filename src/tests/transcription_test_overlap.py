@@ -1,7 +1,6 @@
 import re
 import numpy as np
 from os.path import join
-import matplotlib.pyplot as plt
 
 regex = re.compile(r'SPEAKER \S* \d ([\d.]*) ([\d.]*) <NA> <NA> (\d).*')
 

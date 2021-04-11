@@ -215,3 +215,7 @@ def diarization_with_timing(diarization):
 
     segment_time = segment_indexes * params.window_stride
     return speaker, segment_time
+
+
+def get_stats(vad, transcription):
+    return {}
