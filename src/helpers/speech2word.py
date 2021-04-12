@@ -55,5 +55,5 @@ def process_file(src, dst, file, language):
                             out = '<UNKNOWN>'
 
                         f2.write(
-                            f'Channel {channel} ({start:.3f}, {duration:.3f}): {out}\n')
+                            f'Channel {channel} ({start:.2f}, {duration:.2f}): {out}\n')
     clean(tmp_dir)

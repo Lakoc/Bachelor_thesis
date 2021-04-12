@@ -1,10 +1,12 @@
 from argparse import ArgumentParser
-from os import makedirs, listdir
-from os.path import isfile, exists, join
+from os import listdir
+from os.path import isfile, join
+
 from progress.bar import Bar
-from helpers.load_files import load_transcription, load_vad_from_rttm
+from helpers.load_files import load_transcription, load_vad_from_rttm, load_energy
 from helpers.create_html_output import create_output
 from outputs.statistics import get_stats
+from helpers.dir_exist import create_if_not_exist
 
 if __name__ == '__main__':
     parser = ArgumentParser(
@@ -20,18 +22,16 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    if not exists(args.dest):
-        print(f'Creating directory {args.dest}')
-        makedirs(args.dest)
+    create_if_not_exist(args.dest)
 
-    print(f'Listing files in {args.src}')
-    files = [f for f in listdir(args.src) if isfile(join(args.src, f)) and f.endswith(f'.wav')]
+    files = [f for f in listdir(args.src) if isfile(join(args.src, f)) and f.endswith(f'.rttm')]
 
     with Bar(f'Processing files in {args.src}', max=len(files)) as bar:
         for file in files:
-            file_name = file.split('.wav')[0]
-            vad = load_vad_from_rttm(f'{join(args.src, file_name)}.rttm')
+            file_name = file.split('.rttm')[0]
+            energy = load_energy(f'{join(args.src, file_name)}.energy')
+            vad = load_vad_from_rttm(f'{join(args.src, file_name)}.rttm', energy.shape[0])
             transcription = load_transcription(f'{join(args.src, file_name)}.txt')
-            stats = get_stats(vad, transcription)
-            create_output(stats,args.template, f'{join(args.dest, file_name)}.html')
+            stats = get_stats(vad, transcription, energy)
+            create_output(stats, args.template, args.dest, file_name)
             bar.next()

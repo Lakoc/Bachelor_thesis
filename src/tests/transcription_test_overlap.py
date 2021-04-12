@@ -7,8 +7,8 @@ regex = re.compile(r'SPEAKER \S* \d ([\d.]*) ([\d.]*) <NA> <NA> (\d).*')
 
 def extract(line):
     x = regex.search(line)
-    start = int(float(x[1]) * 1000)
-    return start, start + int(float(x[2]) * 1000), int(x[3])
+    start = int(float(x[1]) * 100)
+    return start, start + int(float(x[2]) * 100), int(x[3])
 
 
 def calculate_success_rate(ref_path, filename, output_path, collar_size, verbose):

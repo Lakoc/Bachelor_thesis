@@ -1,8 +1,9 @@
 from argparse import ArgumentParser
-from os import makedirs, listdir
-from os.path import isfile, exists, join
+from os import listdir
+from os.path import isfile, join
 from progress.bar import Bar
 from helpers.speech2word import process_file
+from helpers.dir_exist import create_if_not_exist
 
 if __name__ == '__main__':
     parser = ArgumentParser(
@@ -17,9 +18,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    if not exists(args.dest):
-        print(f'Creating directory {args.dest}')
-        makedirs(args.dest)
+    create_if_not_exist(args.dest)
 
     print(f'Listing files in {args.src}')
     files = [f for f in listdir(args.src) if isfile(join(args.src, f)) and f.endswith(f'.wav')]

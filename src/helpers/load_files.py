@@ -7,28 +7,28 @@ transcription_regex = re.compile(r'Channel (\d) \(([\d.]*), ([\d.]*)\): (.*)')
 
 def extract_rttm_line(line):
     match = rttm_regex.search(line)
-    start = int(float(match[1]) * 1000)
-    return start, start + int(float(match[2]) * 1000), int(match[3])
+    start = int(float(match[1]) * 100)
+    return start, start + int(float(match[2]) * 100), int(match[3])
+
 
 def extract_transcription_line(line):
     match = transcription_regex.search(line)
-    start = int(float(match[2]) * 1000)
-    return start, int(match[1]), None if match[4] == '<UNKNOWN>' else match[4]
+    start = int(float(match[2]) * 100)
+    duration = int(float(match[3]) * 100)
+    return start, duration, int(match[1]), None if match[4] == '<UNKNOWN>' else match[4]
 
-def load_vad_from_rttm(path):
+
+def load_vad_from_rttm(path, size):
     with open(path, 'r') as file:
         lines = file.readlines()
 
-        arr_extracted = []
+        vad = np.zeros((size, 2))
+
         for line in lines:
-            arr_extracted.append(extract_rttm_line(line))
-
-        vad = np.zeros((arr_extracted[-1][1], 2))
-
-        for speech_tuple in arr_extracted:
+            speech_tuple = extract_rttm_line(line)
             vad[speech_tuple[0]: speech_tuple[1], speech_tuple[2] - 1] = 1
 
-        return vad
+        return vad.astype('i1')
 
 
 def load_transcription(path):
@@ -39,8 +39,14 @@ def load_transcription(path):
         for line in lines:
             arr_extracted.append(extract_transcription_line(line))
 
-        transcriptions = {'0': {}, '1': {}}
+        transcriptions = {'0': {'segments': {}}, '1': {'segments': {}}}
         for speech_tuple in arr_extracted:
-            transcriptions[f'{speech_tuple[1] - 1}'][f'{speech_tuple[0]}'] = speech_tuple[2]
+            transcriptions[f'{speech_tuple[2] - 1}']['segments'][f'{speech_tuple[0]}-{speech_tuple[1]}'] = {
+                'text': speech_tuple[3]}
 
         return transcriptions
+
+
+def load_energy(path):
+    rmse = np.loadtxt(path)
+    return rmse

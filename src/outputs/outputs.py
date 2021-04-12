@@ -16,13 +16,10 @@ def check_params():
         os.makedirs(params.output_folder)
 
 
-def generate_graph(output_folder, plot_name, fig):
+def generate_graph(path, fig):
     """Handler for graph generations"""
     fig.tight_layout()
-    if output_folder:
-        plt.savefig(f'{output_folder}/{plot_name}.png')
-    else:
-        fig.show()
+    plt.savefig(path)
 
 
 def count_percentage_with_values(values):
@@ -128,16 +125,13 @@ def plot_wav_with_detection(sampling_rate, wav, vad_segments, joined_vad, cross_
     # generate_graph(output_folder, 'speech_Client', fig)
 
 
-def plot_speech_time_comparison(mean_energies, speech_time, output_folder):
+def plot_speech_time_comparison(speech_time, path):
     """Plots pie charts to show speech comparison"""
     fig, ax = plt.subplots(1)
-    # axs[0].set_title('Speech energy')
-    # axs[0].pie(mean_energies, labels=['Therapist', 'Client'], autopct='%1.2f%%',
-    #            startangle=90)
-    ax.set_title('Speech time', fontsize=16)
-    ax.pie(speech_time, labels=['Therapist', 'Client'], autopct='%1.2f%%',
+    ax.set_title('Poměr řeči', fontsize=16)
+    ax.pie(speech_time, labels=['Terapeut', 'Klient'], autopct='%1.2f%%',
            startangle=90)
-    generate_graph(output_folder, 'energy_and_speech_time', fig)
+    generate_graph(path, fig)
 
 
 def create_time_histogram(data, titles, output_folder, hist_name, bins):
@@ -245,12 +239,25 @@ def diarization_to_rttm_file(path, speaker, segment_time):
                 continue
             else:
                 file.write(
-                    f'SPEAKER {file_name} {val} {segment_time[index]:.3f} {(float(segment_time[index + 1]) - float(segment_time[index])):.3f} <NA> <NA> {val} <NA> <NA>\n')
+                    f'SPEAKER {file_name} {val} {segment_time[index]:.2f} {(float(segment_time[index + 1]) - float(segment_time[index])):.2f} <NA> <NA> {val} <NA> <NA>\n')
 
+def diarization_with_timing(diarization):
+    """Process diarization output and extract speaker with time bounds"""
+    speech_start = np.empty(diarization.shape, dtype=bool)
+    speech_start[0] = True
+    speech_start[1:] = np.not_equal(diarization[:-1], diarization[1:])
+    segment_indexes = np.argwhere(speech_start).reshape(-1)
+    speaker = diarization[segment_indexes]
+
+    # Append end of audio
+    segment_indexes = np.append(segment_indexes, diarization.shape[0])
+
+    segment_time = segment_indexes * params.window_stride
+    return speaker, segment_time
 
 def online_session_to_rttm(path, vad):
-    file_name = path.split(".")[0].split('/')[-1]
-    path = f'{path.split(".")[0]}.rttm'
+    file_name = path.split('/')[-1]
+    path = f'{path}.rttm'
     speech_start_spk1 = np.empty(vad.shape[0], dtype=bool)
     speech_start_spk1[0] = True
     speech_start_spk1[1:] = np.not_equal(vad[:-1, 0], vad[1:, 0])
@@ -272,7 +279,7 @@ def online_session_to_rttm(path, vad):
         for index in start_time_index:
             if index < len_indexes1:
                 start_time = segment_indexes1[index]
-                speech = vad[start_time,0]
+                speech = vad[start_time, 0]
                 if not speech:
                     continue
                 speaker = 1
@@ -291,7 +298,7 @@ def online_session_to_rttm(path, vad):
             time = end_time - start_time
 
             file.write(
-                    f'SPEAKER {file_name} {speaker} {start_time:.3f} {time:.3f} <NA> <NA> {speaker} <NA> <NA>\n')
+                f'SPEAKER {file_name} {speaker} {start_time:.2f} {time:.2f} <NA> <NA> {speaker} <NA> <NA>\n')
 
 
 def diarization_likelihood_plot(i, j, speaker1, speaker2, active_segments, hit_rate):

@@ -6,14 +6,70 @@
 </head>
 
 <body>
-<h1>Souhrnná zpráva o proběhlém sezení</h1>
+<h1 id="session_title">Souhrnná zpráva o sezení č. ###</h1>
+<div class="param">
+    <h2>Poměr mluvy</h2>
+    <img width="300" height="200"  id="figure-speech_ratio" src="placeholder.png" alt="Speech_ratio">
+    <p>Terapeut je výrazně aktivnější, v porovnání s ostaními sezeními je poměr doby mluvy terapeuta k mluvě klienta
+        taktéž nadstandartně vysoký.</p>
+</div>
 
-<h2>Hlasitost</h2>
-<h2>Poměr řeči/ticha</h2>
-<h2>Skákání do řeči</h2>
-<h2>Reakční doba</h2>
+<div class="param">
+    <h2>Hlasitost</h2>
+    <p>Následující tabulka poukazuje na energeticky nejvýznamější segmenty řeči mluvčích. Je pravděpodobné, že v těchto
+        momentech chtěl mluvčí zdůraznit určitý aspekt. Mohlo taktéž dojít k rozrušení mluvčího.</p>
+    <table>
+        <tr>
+            <th>Čas [s]</th>
+            <th>Hlasitost oproti střední hlasitosti aktivních segmentů</th>
+            <th>Přepis</th>
+        </tr>
+         <tr>
+            <td>0.26 - 3.52</td>
+            <td>120%</td>
+            <td>Mám opravdu zlost.</td>
+        </tr>
+         <tr>
+            <td>65.26 - 69.52</td>
+            <td>160%</td>
+            <td>To si určitě nepřeji.</td>
+        </tr>
+    </table>
+</div>
+
+<div class="param">
+    <h2>Skákání do řeči</h2>
+    <img width="300" height="200" id="figure-cross_talk" src="placeholder.png" alt="Cross_talk">
+    <img width="300" height="200"  id="figure-cross_talk_others" src="placeholder.png" alt="Cross_talk_others">
+
+    <p>Terapeut nadměrně vyrušuje klienta.</p>
+    <p>Jedná se o záměr?</p>
+
+</div>
+
+<div class="param">
+    <h2>Reakční doba</h2>
+    <img width="300" height="200" id="figure-reaction" src="placeholder.png" alt="Reaction">
+    <p>Klientovi trvá odpověď podstatně déle než je standardní. Standardní hodnota se pohybuje mezi 0.2 s - 3 s.</p>
+
+</div>
 <h2>Délka spojitých úseků mluvy</h2>
 <h2>Rychlost řeči</h2>
+
+<div>
+    <h2>Přílohy</h2>
+    <a id="attachment-transcription" href="" download="Transcription">
+        Transkripce
+    </a>
+
+    <a id="attachment-audio" href="" download="Audio">
+        Audio nahrávka
+    </a>
+
+     <a id="attachment-vad" href="" download="VAD">
+        Detekce řečové aktivity
+    </a>
+</div>
 
 </body>
 </html>

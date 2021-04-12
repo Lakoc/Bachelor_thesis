@@ -1,10 +1,10 @@
 import sys
-from os import listdir, remove, makedirs
-from os.path import isfile, exists, join as path_join
+from os import listdir, remove
+from os.path import isfile, join as path_join
 import re
 from scipy.io.wavfile import write
 from audio_processing.preprocessing import read_wav_file
-
+from helpers.dir_exist import create_if_not_exist
 path = sys.argv[1]
 
 files = [f.split('.')[0] for f in listdir(path) if isfile(path_join(path, f)) and f.endswith(f'.wav')]
@@ -39,8 +39,7 @@ rttm_reg = re.compile(r'(.*) (.*) (\d) ([\d.]*) ([\d.]*) (<NA>) (<NA>) (\d)')
 separator = '/'
 path_new = f'{separator.join(path.split("/")[0:-2])}/dev'
 
-if not exists(path_new):
-    makedirs(path_new)
+create_if_not_exist(path_new)
 
 for file in files:
     with open(f"{path_join(path, file)}.rttm", 'r') as f:

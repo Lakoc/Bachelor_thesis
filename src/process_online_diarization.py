@@ -1,5 +1,8 @@
-from os import listdir, makedirs
-from os.path import isfile, join, exists
+from os import listdir
+from os.path import isfile, join
+from helpers.dir_exist import create_if_not_exist
+import numpy as np
+
 from audio_processing import vad as vad_module
 from outputs import outputs
 import params
@@ -53,20 +56,20 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    if not exists(args.dest):
-        print(f'Creating directory {args.dest}')
-        makedirs(args.dest)
+    create_if_not_exist(args.dest)
 
     print(f'Listing files in {args.src}')
     files = [f for f in listdir(args.src) if isfile(join(args.src, f)) and f.endswith(f'.wav')]
 
     with Bar(f'Processing files in {args.src}', max=len(files)) as bar:
-        for file_name in files:
-            wav_file, sampling_rate = read_wav_file(join(args.src, file_name))
+        for file in files:
+            file_name = file.split(".wav")[0]
+            wav_file, sampling_rate = read_wav_file(join(args.src, file))
             signal = process_pre_emphasis(wav_file, params.pre_emphasis_coefficient)
             segmented_tracks = process_hamming(signal, sampling_rate, params.window_size,
                                                params.window_overlap)
             root_mean_squared_energy = calculate_rmse(segmented_tracks)
+            np.savetxt(f'{join(args.dest, file_name)}.energy', root_mean_squared_energy)
             vad = vad_module.energy_gmm_based_vad_propagation(root_mean_squared_energy)
             outputs.online_session_to_rttm(join(args.dest, file_name), vad)
             bar.next()
