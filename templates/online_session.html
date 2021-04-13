@@ -2,16 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Online session statistics</title>
+    <title>Souhrnná zpráva o sezení</title>
+    <link rel="stylesheet" href="online_session.css">
 </head>
 
 <body>
 <h1 id="session_title">Souhrnná zpráva o sezení č. ###</h1>
 <div class="param">
-    <h2>Poměr mluvy</h2>
-    <img width="300" height="200"  id="figure-speech_ratio" src="placeholder.png" alt="Speech_ratio">
-    <p>Terapeut je výrazně aktivnější, v porovnání s ostaními sezeními je poměr doby mluvy terapeuta k mluvě klienta
-        taktéž nadstandartně vysoký.</p>
+    <h2 class="param_title">Poměr mluvy</h2>
+    <div class="row_picture">
+        <div class="image_caption">
+            <img id="figure-speech_ratio" src="placeholder.png" alt="Speech_ratio">
+            <p class="param_text" id="speech_ratio_current">AAA</p>
+        </div>
+        <div class="image_caption">
+            <img id="figure-speech_ratio_overall" src="placeholder.png"
+                 alt="Speech_ratio_overall">
+            <p class="param_text" id="speech_ratio_overall">BBB</p>
+        </div>
+    </div>
 </div>
 
 <div class="param">
@@ -24,12 +33,12 @@
             <th>Hlasitost oproti střední hlasitosti aktivních segmentů</th>
             <th>Přepis</th>
         </tr>
-         <tr>
+        <tr>
             <td>0.26 - 3.52</td>
             <td>120%</td>
             <td>Mám opravdu zlost.</td>
         </tr>
-         <tr>
+        <tr>
             <td>65.26 - 69.52</td>
             <td>160%</td>
             <td>To si určitě nepřeji.</td>
@@ -40,7 +49,7 @@
 <div class="param">
     <h2>Skákání do řeči</h2>
     <img width="300" height="200" id="figure-cross_talk" src="placeholder.png" alt="Cross_talk">
-    <img width="300" height="200"  id="figure-cross_talk_others" src="placeholder.png" alt="Cross_talk_others">
+    <img width="300" height="200" id="figure-cross_talk_others" src="placeholder.png" alt="Cross_talk_others">
 
     <p>Terapeut nadměrně vyrušuje klienta.</p>
     <p>Jedná se o záměr?</p>
@@ -56,7 +65,7 @@
 <h2>Délka spojitých úseků mluvy</h2>
 <h2>Rychlost řeči</h2>
 
-<div>
+<div class="attachments">
     <h2>Přílohy</h2>
     <a id="attachment-transcription" href="" download="Transcription">
         Transkripce
@@ -66,7 +75,7 @@
         Audio nahrávka
     </a>
 
-     <a id="attachment-vad" href="" download="VAD">
+    <a id="attachment-vad" href="" download="VAD">
         Detekce řečové aktivity
     </a>
 </div>

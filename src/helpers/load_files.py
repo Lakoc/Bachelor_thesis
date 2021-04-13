@@ -1,5 +1,7 @@
 import re
 import numpy as np
+import json
+import params
 
 rttm_regex = re.compile(r'SPEAKER \S* \d ([\d.]*) ([\d.]*) <NA> <NA> (\d).*')
 transcription_regex = re.compile(r'Channel (\d) \(([\d.]*), ([\d.]*)\): (.*)')
@@ -7,14 +9,14 @@ transcription_regex = re.compile(r'Channel (\d) \(([\d.]*), ([\d.]*)\): (.*)')
 
 def extract_rttm_line(line):
     match = rttm_regex.search(line)
-    start = int(float(match[1]) * 100)
-    return start, start + int(float(match[2]) * 100), int(match[3])
+    start = int(float(match[1]) / params.window_stride)
+    return start, start + int(float(match[2]) / params.window_stride), int(match[3])
 
 
 def extract_transcription_line(line):
     match = transcription_regex.search(line)
-    start = int(float(match[2]) * 100)
-    duration = int(float(match[3]) * 100)
+    start = int(float(match[2]) / params.window_stride)
+    duration = int(float(match[3]) / params.window_stride)
     return start, duration, int(match[1]), None if match[4] == '<UNKNOWN>' else match[4]
 
 
@@ -47,6 +49,18 @@ def load_transcription(path):
         return transcriptions
 
 
+def load_texts(path):
+    with open(path, 'r') as json_file:
+        data = json.load(json_file)
+        return data
+
+
 def load_energy(path):
     rmse = np.loadtxt(path)
     return rmse
+
+
+def load_stats(path):
+    with open(path, 'r') as json_file:
+        data = json.load(json_file)
+        return data

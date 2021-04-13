@@ -4,7 +4,6 @@ from scipy import fftpack
 from math import ceil
 import os
 import params
-import re
 
 # 15 ms not overlapping frame -> corresponding to 1000 // 15
 NORMALIZATION_COEFFICIENT = 67
@@ -123,15 +122,6 @@ def plot_wav_with_detection(sampling_rate, wav, vad_segments, joined_vad, cross_
     # ax.tick_params(bottom=False, left=False)
     # ax.plot(time_audio, wav[:, 1], color='k')
     # generate_graph(output_folder, 'speech_Client', fig)
-
-
-def plot_speech_time_comparison(speech_time, path):
-    """Plots pie charts to show speech comparison"""
-    fig, ax = plt.subplots(1)
-    ax.set_title('Poměr řeči', fontsize=16)
-    ax.pie(speech_time, labels=['Terapeut', 'Klient'], autopct='%1.2f%%',
-           startangle=90)
-    generate_graph(path, fig)
 
 
 def create_time_histogram(data, titles, output_folder, hist_name, bins):

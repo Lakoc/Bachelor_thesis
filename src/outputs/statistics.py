@@ -3,9 +3,9 @@ import numpy as np
 
 def detect_cross_talks(vad):
     """Detects cross talks in vad segments"""
-    # TODO: FIX
     cross_talks = np.logical_and(vad[:, 0], vad[:, 1])
-    cross_talks_bounds = np.where(np.diff(cross_talks))
+    cross_talks = np.append(np.append([0], cross_talks), [0])
+    cross_talks_bounds = np.where(np.diff(cross_talks))[0].reshape(-1, 2)
     pre_cross_talk = cross_talks_bounds[:, 0] - 1
     cross_talk_origin = (vad[pre_cross_talk, 1] == 0).astype('i1')[:, np.newaxis]
 
@@ -17,9 +17,11 @@ def detect_cross_talks(vad):
 def detect_interruptions(vad):
     """Detects interruptions (speaker 1 is speaking from 0-10, speaker 2 from 3-6) in vad segments"""
     cross_talks = np.logical_and(vad[:, 0], vad[:, 1])
-    cross_talks_bounds = np.where(np.diff(cross_talks))[0].reshape(-1, 2) + [1, 1]
-    pre_cross_talk = vad[cross_talks_bounds[:, 0] - 1]
-    post_cross_talk = vad[cross_talks_bounds[:, 1]]
+    cross_talks = np.append(np.append([0], cross_talks), [0])
+    cross_talks_bounds = np.where(np.diff(cross_talks))[0].reshape(-1, 2)
+    vad_appended = np.append(vad, [[0,0]], axis=0)
+    pre_cross_talk = vad_appended[cross_talks_bounds[:, 0] - 1]
+    post_cross_talk = vad_appended[cross_talks_bounds[:, 1]]
 
     interruptions = np.all(post_cross_talk == pre_cross_talk, axis=1)
     interruptions_arg = np.argwhere(interruptions)
@@ -105,7 +107,7 @@ def calculate_speech_len(vad):
             start = segment1[0]
             to = segment1[1]
             hesitation = []
-            for j in range(index + 1, speech_bounds[k].shape[0] - index):
+            for j in range(1, speech_bounds[k].shape[0] - index):
                 segment2 = speech_bounds[k][index + j]
 
                 end = segment2[1]
@@ -118,7 +120,7 @@ def calculate_speech_len(vad):
                     segments[k][f'{start}-{to}'] = hesitation
                     segments_len_joined[k].append(to - start)
                     segment_bounds_joined[k].append([start, to])
-                    index = j
+                    index += j
                     break
             else:
                 index += 1

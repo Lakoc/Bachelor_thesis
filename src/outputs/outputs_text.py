@@ -4,7 +4,6 @@ import numpy as np
 from scipy import fftpack, ndimage
 from sklearn.mixture import GaussianMixture
 from helpers.propagation import forward_backward, segments_filter
-from scipy.special import logsumexp
 import params
 
 

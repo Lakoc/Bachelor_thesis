@@ -3,7 +3,7 @@ from os import listdir
 from os.path import isfile, join
 
 from progress.bar import Bar
-from helpers.load_files import load_transcription, load_vad_from_rttm, load_energy
+from helpers.load_files import load_transcription, load_vad_from_rttm, load_energy, load_texts, load_stats
 from helpers.create_html_output import create_output
 from outputs.statistics import get_stats
 from helpers.dir_exist import create_if_not_exist
@@ -19,6 +19,8 @@ if __name__ == '__main__':
                         help='template for html file')
     parser.add_argument('--stats', type=str, required=True,
                         help='path of file containing overall stats')
+    parser.add_argument('--text', type=str, required=True,
+                        help='path of file containing texts')
 
     args = parser.parse_args()
 
@@ -32,6 +34,8 @@ if __name__ == '__main__':
             energy = load_energy(f'{join(args.src, file_name)}.energy')
             vad = load_vad_from_rttm(f'{join(args.src, file_name)}.rttm', energy.shape[0])
             transcription = load_transcription(f'{join(args.src, file_name)}.txt')
+            texts = load_texts(args.text)
             stats = get_stats(vad, transcription, energy)
-            create_output(stats, args.template, args.dest, file_name)
+            stats_overall = load_stats(args.stats)
+            create_output(stats, stats_overall, texts, args.template, args.dest, file_name)
             bar.next()

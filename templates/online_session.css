@@ -1,0 +1,31 @@
+h1 {
+    text-align: center;
+}
+
+.row_picture {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.image_caption {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%
+}
+
+.image_caption img {
+    width: 70%;
+
+}
+
+.param_text {
+    text-align: center;
+}
+
+.attachments {
+    display: flex;
+    flex-direction: column;
+}

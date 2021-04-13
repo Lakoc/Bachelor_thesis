@@ -20,10 +20,10 @@ med_filter = 0.2
 
 
 # maximum system sensitivity
-min_silence_likelihood = 0.8
+min_silence_likelihood = 0.95
 transition_matrix = [[0.9, 0.05, 0.05], [0.05, 0.9, 0.05], [0.05, 0.05, 0.9]]
-filter_non_active = 0.2
-filter_active = 0.2
+filter_non_active = 0.1
+filter_active = 0.1
 
 # vad hmm
 vad_min_speech_dur = 1

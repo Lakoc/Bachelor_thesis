@@ -1,0 +1,14 @@
+{
+  "speech_ratio": {
+    "current": {
+      "therapist_low": "Klient je v průběhu rozhovoru výrazně aktivnější.",
+      "standard": "Poměř mluvy terapeuta aklienta je vyvážený.",
+      "therapist_high": "Terapeut je v rozhovoru výrazně aktivnější."
+    },
+    "overall": {
+      "therapist_low": "Poměr doby mluvy terapeuta k době mluvy klienta je výrazně nižší v porovnání s ostaními sezeními. Jedná se o specifický druh sezení? Je to Váš záměr?",
+      "standard": "Poměř mluvy řečníků odpovídá dlouhodobým stastikám.",
+      "therapist_high": "Poměr doby mluvy terapeuta k době mluvy klienta je výrazně vyšší v porovnání s ostaními sezeními. Jedná se o specifický druh sezení? Je to Váš záměr?"
+    }
+  }
+}
