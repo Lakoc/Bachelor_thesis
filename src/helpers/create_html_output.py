@@ -6,13 +6,13 @@ from helpers.dir_exist import create_if_not_exist
 from shutil import copyfile
 
 
-def return_text_by_bounds(options, num, left, right):
+def return_text_by_bounds(options, num, overall):
     keys = list(options.keys())
-    key = keys[2]
-    if num < left:
+    key = keys[1]
+    if num < overall[0] - overall[1]:
         key = keys[0]
-    elif left <= num <= right:
-        key = keys[1]
+    elif num > overall[0] + overall[1]:
+        key = keys[2]
     return options[key]
 
 
@@ -38,11 +38,11 @@ def add_texts(html, stats, stats_overall, texts, file_name):
     title.string.replace_with(title.text.replace('###', file_name))
 
     html.find(id='speech_ratio_current').string = return_text_by_bounds(texts['speech_ratio']['current'],
-                                                                        stats['speech_ratio'][0][0], 0.3, 0.7)
+                                                                        stats['speech_ratio'][0][0], [0.5, 0.2])
 
     html.find(id='speech_ratio_overall').string = return_text_by_bounds(texts['speech_ratio']['overall'],
-                                                                        stats['speech_ratio'][0][0] - stats_overall[
-                                                                            'speech_ratio'], -0.2, 0.2)
+                                                                        stats['speech_ratio'][0][0], stats_overall[
+                                                                            'speech_ratio'])
 
 
 def add_attachments(html, file_name):

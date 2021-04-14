@@ -17,5 +17,9 @@ def plot_speech_time_comparison_others(speech_time, speech_time_mean, path):
     """Plots pie charts to show speech comparison"""
     center = speech_time_mean[0]
     var_center = speech_time_mean[1]
-    angle = min(max((var_center - center + speech_time) * 180, 0), 180)
-    gauge(labels=['Nízký', 'Normalní', 'Vysoký'], colors=['C0', 'C2', 'C1'], angle=180 - angle, fname=path)
+    angle = (center - speech_time) / var_center * 5 / 9
+
+    angle = min(max(angle, -1), 1)
+    angle += 1
+    angle *= 90
+    gauge(labels=['Nízký', 'Normalní', 'Vysoký'], colors=['C0', 'C2', 'C1'], angle=angle, fname=path)
