@@ -2,23 +2,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import fftpack
 from math import ceil
-import os
 import params
 
 # 15 ms not overlapping frame -> corresponding to 1000 // 15
+from helpers.plot_helpers import generate_graph
+
 NORMALIZATION_COEFFICIENT = 67
-
-
-def check_params():
-    """Check params from external file"""
-    if params.output_folder and not os.path.exists(params.output_folder):
-        os.makedirs(params.output_folder)
-
-
-def generate_graph(path, fig):
-    """Handler for graph generations"""
-    fig.tight_layout()
-    plt.savefig(path)
 
 
 def count_percentage_with_values(values):

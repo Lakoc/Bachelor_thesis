@@ -1,8 +1,7 @@
+import numpy as np
 from matplotlib import pyplot as plt
 
-from helpers.gauge import gauge
-
-from outputs.outputs import generate_graph
+from helpers.plot_helpers import gauge, generate_graph
 
 
 def plot_speech_time_comparison(speech_time, path):
@@ -22,4 +21,15 @@ def plot_speech_time_comparison_others(speech_time, speech_time_mean, path):
     angle = min(max(angle, -1), 1)
     angle += 1
     angle *= 90
-    gauge(labels=['Nízký', 'Normalní', 'Vysoký'], colors=['C0', 'C2', 'C1'], angle=angle, fname=path)
+    gauge(['Nízký', 'Normální', 'Vysoký'], ['C0', 'C2', 'C1'], angle, path)
+
+
+def plot_volume_changes(energy_over_segments, size, path):
+    fig, ax = plt.subplots(figsize=(16, 4))
+    time = np.linspace(0, size, energy_over_segments.shape[0])
+    ax.plot(time, energy_over_segments / np.max(energy_over_segments))
+    ax.set_ylabel('Relativní hlasitost')
+    ax.set_xlabel('Čas [s]')
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+    generate_graph(path, fig)

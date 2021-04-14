@@ -1,4 +1,7 @@
 import numpy as np
+from scipy import signal
+
+import params
 
 
 def detect_cross_talks(vad):
@@ -19,7 +22,7 @@ def detect_interruptions(vad):
     cross_talks = np.logical_and(vad[:, 0], vad[:, 1])
     cross_talks = np.append(np.append([0], cross_talks), [0])
     cross_talks_bounds = np.where(np.diff(cross_talks))[0].reshape(-1, 2)
-    vad_appended = np.append(vad, [[0,0]], axis=0)
+    vad_appended = np.append(vad, [[0, 0]], axis=0)
     pre_cross_talk = vad_appended[cross_talks_bounds[:, 0] - 1]
     post_cross_talk = vad_appended[cross_talks_bounds[:, 1]]
 
@@ -52,6 +55,19 @@ def detect_loudness(energy, vad, percentile=95, min_len=20):
             loudness_bounds_filtered[1].append((np.min(s), np.max(s)))
 
     return loudness_bounds_filtered
+
+
+def get_volume_changes(energy, vad, size):
+    log_energy = np.log(energy)
+    energy_active_segments1 = np.where(vad[:, 0], log_energy[:, 0], 0)
+    energy_active_segments2 = np.where(vad[:, 1], log_energy[:, 1], 0)
+
+    vad1 = signal.resample(np.where(vad[:, 0], log_energy[:, 0], np.min(energy_active_segments1)), size)
+    vad1[vad1 < 0] = 0
+    vad2 = signal.resample(np.where(vad[:, 1], log_energy[:, 1], np.min(energy_active_segments2)), size)
+    vad2[vad2 < 0] = 0
+
+    return vad1, vad2
 
 
 def calculate_speech_ratio(vad):
@@ -162,17 +178,52 @@ def calculate_reaction_times(bounds):
     return responses
 
 
+def get_texts(transcriptions):
+    texts = ['', '']
+    for index, _ in enumerate(transcriptions):
+        for transcription in transcriptions[f'{index}']['segments']:
+            text = transcriptions[f'{index}']['segments'][transcription]['text']
+            if text is not None:
+                texts[index] += f' {text}'
+    return tuple(texts)
+
+
+def get_loud_transcriptions(loudness, transcriptions):
+    segments = ([], [])
+    for index, speaker in enumerate(loudness):
+        for segment in speaker:
+            start = segment[0]
+            end = segment[1]
+
+            for transcription in transcriptions[f'{index}']['segments']:
+                t_start, t_end = transcription.split('-')
+                t_start, t_end = int(t_start), int(t_end)
+                if t_start > end:
+                    break
+                elif t_start <= start and t_end >= end:
+                    text = transcriptions[f'{index}']['segments'][transcription]['text']
+                    if text is not None:
+                        if len(segments[index]) == 0 or segments[index][-1][0] != t_start:
+                            segments[index].append([t_start, t_end, text])
+                        break
+    return segments
+
+
 def get_stats(vad, transcription, energy):
     """Calculate all available statistics"""
     cross_talks = detect_cross_talks(vad)
     interruptions = detect_interruptions(vad)
     loudness = detect_loudness(energy, vad)
+    volume_changes = get_volume_changes(energy, vad, 300)
+    loud_transcription = get_loud_transcriptions(loudness, transcription)
     speed = calculate_speech_speed(transcription)
+    texts = get_texts(transcription)
     speech_len, speech_len_joined, hesitations, segment_bounds_joined = calculate_speech_len(vad)
     reaction_time = calculate_reaction_times(segment_bounds_joined)
 
     speech_ratio = calculate_speech_ratio(vad)
     return {'cross_talks': cross_talks, 'interruptions': interruptions, 'loudness': loudness, 'speed': speed,
             'speech_len': speech_len, 'speech_len_joined': speech_len_joined, 'hesitations': hesitations,
-            'reaction_time': reaction_time,
-            'speech_ratio': speech_ratio}
+            'reaction_time': reaction_time, 'volume_changes': volume_changes,
+            'speech_ratio': speech_ratio, 'texts': texts,
+            'signal': {'len': vad.shape[0] * params.window_stride}}

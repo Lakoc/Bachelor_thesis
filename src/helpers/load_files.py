@@ -1,6 +1,9 @@
 import re
 import numpy as np
 import json
+
+from bs4 import BeautifulSoup
+
 import params
 
 rttm_regex = re.compile(r'SPEAKER \S* \d ([\d.]*) ([\d.]*) <NA> <NA> (\d).*')
@@ -64,3 +67,9 @@ def load_stats(path):
     with open(path, 'r') as json_file:
         data = json.load(json_file)
         return data
+
+
+def load_template(template_path):
+    with open(template_path, 'r') as file:
+        soup = BeautifulSoup(file, "html.parser")
+    return soup

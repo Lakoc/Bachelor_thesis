@@ -9,6 +9,15 @@ h1 {
     align-items: center;
 }
 
+table {
+    width: 100%;
+}
+
+td {
+    text-align: center;
+    vertical-align: middle;
+}
+
 .image_caption {
     display: flex;
     flex-direction: column;
