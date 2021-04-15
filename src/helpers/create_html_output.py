@@ -1,5 +1,9 @@
+import numpy as np
+
 import outputs.plots as plots
 from os.path import join
+
+import params
 from helpers.dir_exist import create_if_not_exist
 from shutil import copyfile
 from helpers.plot_helpers import word_cloud
@@ -38,12 +42,12 @@ def add_plots(html, stats, stats_overall, path, file_name):
                         'speech_ratio_overall', file_name)
 
     create_plot_and_set(plots.plot_volume_changes,
-                        (stats['volume_changes'][0], stats['signal']['len'],
+                        (stats['volume_changes'][0], stats['interruptions'][0], stats['signal']['len'],
                          f'{join(path, f"plots/{file_name}_therapist_volume")}.png'), html,
                         'therapist_volume', file_name)
 
     create_plot_and_set(plots.plot_volume_changes,
-                        (stats['volume_changes'][1], stats['signal']['len'],
+                        (stats['volume_changes'][1], stats['interruptions'][1], stats['signal']['len'],
                          f'{join(path, f"plots/{file_name}_client_volume")}.png'), html,
                         'client_volume', file_name)
 
@@ -57,6 +61,66 @@ def add_plots(html, stats, stats_overall, path, file_name):
                          f'{join(path, f"plots/{file_name}_client_cloud")}.png'), html,
                         'client_cloud', file_name)
 
+    create_plot_and_set(plots.plot_cross_talk_histogram,
+                        (stats['interruptions'][0], stats['interruptions'][1], 10,
+                         f'{join(path, f"plots/{file_name}_therapist_interruptions")}.png'), html,
+                        'therapist_interruptions', file_name)
+
+    create_plot_and_set(plots.plot_cross_talk_histogram,
+                        (stats['interruptions'][1], stats['interruptions'][0], 10,
+                         f'{join(path, f"plots/{file_name}_client_interruptions")}.png'), html,
+                        'client_interruptions', file_name)
+
+    create_plot_and_set(plots.plot_reaction_time_comparison,
+                        (stats['reactions'][0], stats_overall['reactions']['therapist'],
+                         f'{join(path, f"plots/{file_name}_reaction_time_therapist")}.png'), html,
+                        'reaction_time_therapist', file_name)
+
+    create_plot_and_set(plots.plot_reaction_time_comparison,
+                        (stats['reactions'][1], stats_overall['reactions']['client'],
+                         f'{join(path, f"plots/{file_name}_reaction_time_client")}.png'), html,
+                        'reaction_time_client', file_name)
+
+
+def add_volume_table(html, stats):
+    """Add table of most energetic segments with theirs annotations"""
+    t_body = html.find(id='volume_text_table').find("tbody")
+    loud1_sorted = sorted(stats['loudness'][0], key=lambda l: stats['loudness'][0][l]['ratio'])
+    loud2_sorted = sorted(stats['loudness'][1], key=lambda l: stats['loudness'][1][l]['ratio'])
+    loud1_sorted = loud1_sorted[0: min(len(loud1_sorted), 10)]
+    loud2_sorted = loud2_sorted[0: min(len(loud2_sorted), 10)]
+
+    loudness = {key: stats['loudness'][0][key] for key in loud1_sorted}, {key: stats['loudness'][1][key] for key in
+                                                                          loud2_sorted}
+    for num, speaker in enumerate(loudness):
+        for segment in speaker:
+            text = speaker[segment]['text']
+            ratio = speaker[segment]['ratio']
+            volume = speaker[segment]['energy']
+            if text is not None and ratio > 0:
+                new_row = html.new_tag("tr")
+                time_start_tag = html.new_tag('td')
+                time_start_tag.string = f'{int(segment[0] * params.window_stride / 60)} m {int(segment[0] * params.window_stride % 60)} s'
+                new_row.append(time_start_tag)
+
+                time_dur_tag = html.new_tag('td')
+                time_dur_tag.string = f'{(segment[1] - segment[0]) * params.window_stride:.2f}'
+                new_row.append(time_dur_tag)
+
+                speaker_tag = html.new_tag('td')
+                speaker_tag.string = 'Terapeut' if num == 0 else 'Klient'
+                new_row.append(speaker_tag)
+
+                volume_tag = html.new_tag('td')
+                volume_tag.string = f'{volume:.2f}'
+                new_row.append(volume_tag)
+
+                text_tag = html.new_tag('td')
+                text_tag.string = text
+                new_row.append(text_tag)
+
+                t_body.append(new_row)
+
 
 def add_texts(html, stats, stats_overall, texts, file_name):
     """Add texts from json to template html file"""
@@ -69,6 +133,21 @@ def add_texts(html, stats, stats_overall, texts, file_name):
     html.find(id='speech_ratio_overall').string = return_text_by_bounds(texts['speech_ratio']['overall'],
                                                                         stats['speech_ratio'][0][0], stats_overall[
                                                                             'speech_ratio'])
+    reaction_time = np.mean(stats["reactions"][0][:, 1] - stats["reactions"][0][:, 0]) * params.window_stride
+
+    html.find(
+        id='reaction_time_therapist').string = f'Průměrná reakční doba terapeuta v průběhu sezení je ' \
+                                               f'{reaction_time:.2f} s. Průmerná hodnota mezi sezeními se pohybuje ' \
+                                               f'kolem {stats_overall["reactions"]["therapist"][0]:.2f} ' \
+                                               f'(+-{stats_overall["reactions"]["therapist"][1]:.2f}) s'
+
+    reaction_time = np.mean(stats["reactions"][1][:, 1] - stats["reactions"][1][:, 0]) * params.window_stride
+
+    html.find(
+        id='reaction_time_client').string = f'Průměrná reakční doba klienta v průběhu sezení je ' \
+                                            f'{reaction_time:.2f} s. Průmerná hodnota mezi sezeními se pohybuje ' \
+                                            f'kolem {stats_overall["reactions"]["client"][0]:.2f} ' \
+                                            f'(+-{stats_overall["reactions"]["client"][1]:.2f}) s'
 
 
 def add_attachments(html, file_name):
@@ -96,6 +175,7 @@ def create_output(stats, stats_overall, texts, template, path, file_name):
     add_plots(html, stats, stats_overall, path, file_name)
     add_texts(html, stats, stats_overall, texts, file_name)
     add_attachments(html, file_name)
+    add_volume_table(html, stats)
 
     with open(f'{join(path, file_name)}.html', 'w') as output:
         output.write(str(html))

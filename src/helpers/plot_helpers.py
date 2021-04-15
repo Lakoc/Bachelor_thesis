@@ -44,6 +44,15 @@ def gauge(labels, colors, angle, path):
     generate_graph(path, fig)
 
 
+def value_to_angle(value, center, variance):
+    """Return angle for gauge plot"""
+    angle = (center - value) / variance * 5 / 9
+    angle = min(max(angle, -1), 1)
+    angle += 1
+    angle *= 90
+    return angle
+
+
 def word_cloud(text, path):
     """Generate a word cloud image"""
     out = WordCloud(background_color="white").generate(text)

@@ -38,22 +38,18 @@
 
     <p>Následující tabulka poukazuje na energeticky nejvýznamější segmenty řeči mluvčích. Je pravděpodobné, že v těchto
         momentech chtěl mluvčí zdůraznit určitý aspekt. Mohlo taktéž dojít k rozrušení mluvčího.</p>
-    <table>
+    <table id="volume_text_table">
+        <thead>
         <tr>
-            <th>Čas [s]</th>
-            <th>Hlasitost oproti střední hlasitosti aktivních segmentů</th>
+            <th>Start</th>
+            <th>Délka [s]</th>
+            <th>Mlvučí</th>
+            <th>Násobek průměrné hlasitosti</th>
             <th>Přepis</th>
         </tr>
-        <tr>
-            <td>0.26 - 3.52</td>
-            <td>120%</td>
-            <td>Mám opravdu zlost.</td>
-        </tr>
-        <tr>
-            <td>65.26 - 69.52</td>
-            <td>160%</td>
-            <td>To si určitě nepřeji.</td>
-        </tr>
+        </thead>
+        <tbody>
+        </tbody>
     </table>
 </div>
 
@@ -73,21 +69,43 @@
 </div>
 
 <div class="param">
-    <h2>Skákání do řeči</h2>
-    <img width="300" height="200" id="figure-cross_talk" src="placeholder.png" alt="Cross_talk">
-    <img width="300" height="200" id="figure-cross_talk_others" src="placeholder.png" alt="Cross_talk_others">
-
-    <p>Terapeut nadměrně vyrušuje klienta.</p>
-    <p>Jedná se o záměr?</p>
-
+    <h2>Skoky do řeči</h2>
+    <!--    <div class="row_picture">-->
+    <!--        <div class="image_caption">-->
+    <!--            <img id="figure-therapist_cross_talks" src="placeholder.png" alt="Therapist_cross_talks">-->
+    <!--            <p class="param_text" id="therapist_cross_talks">Terapeut</p>-->
+    <!--        </div>-->
+    <!--        <div class="image_caption">-->
+    <!--            <img id="figure-client_cross_talks" src="placeholder.png" alt="Client_cross_talks">-->
+    <!--            <p class="param_text" id="client_cross_talks">Klient</p>-->
+    <!--        </div>-->
+    <!--    </div>-->
+    <div class="row_picture">
+        <div class="image_caption">
+            <img id="figure-therapist_interruptions" src="placeholder.png" alt="Therapist_interruptions">
+            <p class="param_text" id="therapist_interruptions">Terapeut</p>
+        </div>
+        <div class="image_caption">
+            <img id="figure-client_interruptions" src="placeholder.png" alt="Client_interruptions">
+            <p class="param_text" id="client_interruptions">Klient</p>
+        </div>
+    </div>
 </div>
 
 <div class="param">
     <h2>Reakční doba</h2>
-    <img width="300" height="200" id="figure-reaction" src="placeholder.png" alt="Reaction">
-    <p>Klientovi trvá odpověď podstatně déle než je standardní. Standardní hodnota se pohybuje mezi 0.2 s - 3 s.</p>
-
+    <div class="row_picture">
+        <div class="image_caption">
+            <img id="figure-reaction_time_therapist" src="placeholder.png" alt="Therapist_reactions">
+            <p class="param_text" id="reaction_time_therapist">Terapeut</p>
+        </div>
+        <div class="image_caption">
+            <img id="figure-reaction_time_client" src="placeholder.png" alt="reactions">
+            <p class="param_text" id="reaction_time_client">Klient</p>
+        </div>
+    </div>
 </div>
+
 <h2>Délka spojitých úseků mluvy</h2>
 <h2>Rychlost řeči</h2>
 

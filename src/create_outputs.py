@@ -3,6 +3,8 @@ from os import listdir
 from os.path import isfile, join
 
 from progress.bar import Bar
+
+import params
 from helpers.load_files import load_transcription, load_vad_from_rttm, load_energy, load_texts, load_stats
 from helpers.create_html_output import create_output
 from outputs.statistics import get_stats
@@ -35,7 +37,8 @@ if __name__ == '__main__':
             vad = load_vad_from_rttm(f'{join(args.src, file_name)}.rttm', energy.shape[0])
             transcription = load_transcription(f'{join(args.src, file_name)}.txt')
             texts = load_texts(args.text)
-            stats = get_stats(vad, transcription, energy)
+            stats = get_stats(vad, transcription, energy, min_segment_len=int(
+                0.1 / params.window_stride))  # remove detected cross-talks and loudness shorter than 0.1s
             stats_overall = load_stats(args.stats)
             create_output(stats, stats_overall, texts, args.template, args.dest, file_name)
             bar.next()

@@ -3,8 +3,6 @@ import librosa
 import params
 from scipy import fftpack, ndimage
 from helpers.decorators import deprecated, timeit
-from external import features
-import matplotlib.pyplot as plt
 
 
 def calculate_energy_over_segments(segments):
@@ -26,6 +24,14 @@ def normalize_energy(energy):
     normalized_energy = np.copy(energy)
     normalized_energy -= normalized_energy.mean()
     normalized_energy /= normalized_energy.std()
+    return normalized_energy
+
+
+def normalize_energy_to_1(energy):
+    """Normalize energy over segments to interval <-1;1>"""
+    normalized_energy = np.copy(energy)
+    normalized_energy -= normalized_energy.mean()
+    normalized_energy /= np.max(normalized_energy)
     return normalized_energy
 
 
@@ -55,7 +61,6 @@ def calculate_mfcc(segments, sampling_rate, mel_filters):
 
     # Create zeros bank
     mel_bank = np.zeros((mel_filters, int(np.floor(params.frequency_resolution / 2 + 1))))
-
 
     """For each filter get left, center, right sampled frequency -
     The first filter bank will start at the first point, reach its peak at the second point, 
