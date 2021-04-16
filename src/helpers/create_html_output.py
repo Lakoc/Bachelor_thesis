@@ -81,6 +81,34 @@ def add_plots(html, stats, stats_overall, path, file_name):
                          f'{join(path, f"plots/{file_name}_reaction_time_client")}.png'), html,
                         'reaction_time_client', file_name)
 
+    create_plot_and_set(plots.plot_speech_bounds_len,
+                        (stats['speech_joined'][0], 15,
+                         f'{join(path, f"plots/{file_name}_bounds_len_therapist")}.png'), html,
+                        'bounds_len_therapist', file_name)
+
+    create_plot_and_set(plots.plot_speech_bounds_len,
+                        (stats['speech_joined'][1], 15,
+                         f'{join(path, f"plots/{file_name}_bounds_len_client")}.png'), html,
+                        'bounds_len_client', file_name)
+
+    create_plot_and_set(plots.plot_speed,
+                        (stats['speed'][0], f'{join(path, f"plots/{file_name}_speed_therapist")}.png'), html,
+                        'speed_therapist', file_name)
+
+    create_plot_and_set(plots.plot_speed,
+                        (stats['speed'][1], f'{join(path, f"plots/{file_name}_speed_client")}.png'), html,
+                        'speed_client', file_name)
+
+    create_plot_and_set(plots.plot_hesitations,
+                        (stats['hesitations'][0], stats['signal']['len'], stats_overall['hesitations']['therapist'],
+                         f'{join(path, f"plots/{file_name}_hesitations_therapist")}.png'), html,
+                        'hesitations_therapist', file_name)
+
+    create_plot_and_set(plots.plot_hesitations,
+                        (stats['hesitations'][1], stats['signal']['len'], stats_overall['hesitations']['client'],
+                         f'{join(path, f"plots/{file_name}_hesitations_client")}.png'), html,
+                        'hesitations_client', file_name)
+
 
 def add_volume_table(html, stats):
     """Add table of most energetic segments with theirs annotations"""
@@ -148,6 +176,20 @@ def add_texts(html, stats, stats_overall, texts, file_name):
                                             f'{reaction_time:.2f} s. Průmerná hodnota mezi sezeními se pohybuje ' \
                                             f'kolem {stats_overall["reactions"]["client"][0]:.2f} ' \
                                             f'(+-{stats_overall["reactions"]["client"][1]:.2f}) s'
+
+    html.find(
+        id='hesitations_therapist').string = f'Průměrný počet váhaní za minutu je ' \
+                                             f'{stats_overall["hesitations"]["therapist"][0]:.2f}. Terapeut v ' \
+                                             f'průběhu aktuálního sezení váhá průměrně ' \
+                                             f'{stats["hesitations"][0].shape[0] / stats["signal"]["len"] * 60:.2f} ' \
+                                             f'krát za minutu.'
+
+    html.find(
+        id='hesitations_client').string = f'Průměrný počet váhaní za minutu je ' \
+                                          f'{stats_overall["hesitations"]["client"][0]:.2f}. Klient v ' \
+                                          f'průběhu aktuálního sezení váhá průměrně ' \
+                                          f'{stats["hesitations"][1].shape[0] / stats["signal"]["len"] * 60:.2f} ' \
+                                          f'krát za minutu.'
 
 
 def add_attachments(html, file_name):

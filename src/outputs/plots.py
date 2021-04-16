@@ -63,11 +63,11 @@ def plot_cross_talk_histogram(cross_talks, cross_talks_overall, bins_count, path
     labels = [f'{bins[i]:.1f} - {bins[i + 1]:.1f}' for i in range(len(bins) - 1)]
 
     current_counts, _ = np.histogram(cross_talks_len_current, bins=bins)
-    current_counts = current_counts / np.sum(current_counts)
+    current_counts = (current_counts / np.sum(current_counts)) * 100
     ax.plot(labels, current_counts, label='Aktuální sezení')
 
     overall_counts, _ = np.histogram(cross_talks_len_overall, bins=bins)
-    overall_counts = overall_counts / np.sum(overall_counts)
+    overall_counts = (overall_counts / np.sum(overall_counts)) * 100
     ax.plot(labels, overall_counts, label='Průměr mezi sezeními')
 
     ax.grid(axis='y', color='black', linewidth=.5, alpha=.5)
@@ -76,7 +76,7 @@ def plot_cross_talk_histogram(cross_talks, cross_talks_overall, bins_count, path
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     ax.tick_params(left=False, bottom=False)
-    ax.set_ylabel("Pravděpodbnost")
+    ax.set_ylabel("Výskyt [%]")
     ax.legend()
     ax.set_xlabel("Délka [s]")
     generate_graph(path, fig)
@@ -89,3 +89,62 @@ def plot_reaction_time_comparison(reactions, reaction_time_mean, path):
     angle = value_to_angle(reaction_time, reaction_time_mean[0], reaction_time_mean[1])
 
     gauge(['Nízká', 'Normální', 'Vysoká'], ['C0', 'C2', 'C1'], angle, path)
+
+
+def plot_speech_bounds_len(speech_bounds, bins_count, path):
+    """Plots speech lengths"""
+    fig, ax = plt.subplots()
+    speech_bounds_len = (speech_bounds[:, 1] - speech_bounds[:, 0]).astype(np.float)
+    speech_bounds_len *= params.window_stride
+
+    bins = np.linspace(0, np.max(speech_bounds_len), bins_count)
+    labels = [f'{bins[i]:.1f} - {bins[i + 1]:.1f}' for i in range(len(bins) - 1)]
+
+    current_counts, _ = np.histogram(speech_bounds_len, bins=bins)
+    current_counts = (current_counts / np.sum(current_counts)) * 100
+    ax.bar(labels, current_counts, label='Aktuální sezení')
+
+    ax.grid(axis='y', color='black', linewidth=.5, alpha=.5)
+    plt.xticks(rotation=45)
+    ax.set_axisbelow(True)
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    ax.tick_params(left=False, bottom=False)
+    ax.set_ylabel("Výskyt [%]")
+    ax.legend()
+    ax.set_xlabel("Délka [s]")
+    generate_graph(path, fig)
+
+
+def plot_speed(speed, path):
+    """Plots speech speed"""
+    speed = [speed[segment]['words_per_segment'] for segment in speed if speed[segment]['words_per_segment']]
+    speed = np.array(speed)
+    speed = (speed / params.window_stride) * 60
+    speed_overall = np.empty(speed.shape[0])
+    speed_overall[:] = 124
+    speed_mean = np.empty(speed.shape[0])
+    speed_mean[:] = np.mean(speed)
+    fig, ax = plt.subplots()
+    ax.plot(speed, label='Rychlost řeči')
+    ax.plot(speed_overall, label='Průměrná rychlost řeči mezi nahrávkami')
+    ax.plot(speed_mean, label='Průměrná rychlost mluvčího')
+    ax.grid(axis='y', color='black', linewidth=.5, alpha=.5)
+    ax.set_axisbelow(True)
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    ax.tick_params(left=False, bottom=False)
+    ax.legend()
+    ax.set_ylabel("Délka [slov/minuta]")
+    # ax.set_xlabel("Čas")
+    ax.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+    generate_graph(path, fig)
+
+
+def plot_hesitations(hesitations, signal_len, hesitations_mean, path):
+    """Plot hesitations count comparison"""
+    hesitations = hesitations.shape[0] / signal_len *60
+
+    angle = value_to_angle(hesitations, hesitations_mean[0], hesitations_mean[1])
+
+    gauge(['Nízký', 'Normální', 'Vysoký'], ['C0', 'C2', 'C1'], angle, path)

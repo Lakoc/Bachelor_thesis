@@ -75,16 +75,16 @@ def calculate_speech_ratio(vad):
 def calculate_speech_speed(transcriptions):
     """Calculate on transcribed segments speed of speech"""
     for speaker in transcriptions:
-        for key in speaker:
+        for key in transcriptions[speaker]:
             duration = key[1] - key[0]
-            text = speaker[key]['text']
+            text = transcriptions[speaker][key]['text']
 
             if text is None:
-                speaker[key]['words_per_segment'] = None
+                transcriptions[speaker][key]['words_per_segment'] = None
             else:
                 words_per_segment = len(text.split(' ')) / duration
-                speaker[key]['words_per_segment'] = words_per_segment
-    return transcriptions
+                transcriptions[speaker][key]['words_per_segment'] = words_per_segment
+    return transcriptions['0'], transcriptions['1']
 
 
 def calculate_speech_len(vad):
@@ -230,8 +230,8 @@ def get_stats(vad, transcription, energy, min_segment_len):
     interruptions = detect_interruptions(vad)
     loudness = detect_loudness(energy, vad, percentile=80, min_len=min_segment_len)
     volume_changes = process_volume_changes(energy, vad)
-    loud_transcription_with_speed = calculate_speech_speed(
-        find_loud_transcriptions(loudness, energy, vad, transcription))
+    loud_transcription_with_speed = find_loud_transcriptions(loudness, energy, vad, transcription)
+    speed = calculate_speech_speed(transcription)
     texts = get_texts(transcription)
     speech_bounds, segment_bounds_joined, hesitations = calculate_speech_len(vad)
     reactions = calculate_reaction_times(segment_bounds_joined)
@@ -240,5 +240,5 @@ def get_stats(vad, transcription, energy, min_segment_len):
     return {'cross_talks': cross_talks, 'interruptions': interruptions, 'loudness': loud_transcription_with_speed,
             'speech': speech_bounds, 'speech_joined': segment_bounds_joined, 'hesitations': hesitations,
             'reactions': reactions, 'volume_changes': volume_changes,
-            'speech_ratio': speech_ratio, 'texts': texts,
+            'speech_ratio': speech_ratio, 'texts': texts, 'speed': speed,
             'signal': {'len': vad.shape[0] * params.window_stride}}
