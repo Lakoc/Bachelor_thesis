@@ -8,6 +8,12 @@ def gauge(labels, colors, min_val, max_val, value, tickers_format, val_format, p
     """Create gauge graph for showing difference between overall and current data"""
     fig, ax = plt.subplots()
 
+    if min_val < 0:
+        max_val += min_val
+        if max_val < 0:
+            raise ValueError(f'Gauge intervals are not in range: max_val < 0({max_val})')
+        min_val = max(0, min_val)
+
     # Set sector bounding
     mid_points = [20, 90, 160]
     ang_range = np.array([[0, 40], [40, 140], [140, 180]])
@@ -30,8 +36,11 @@ def gauge(labels, colors, min_val, max_val, value, tickers_format, val_format, p
     # Add tickers
     tickers_range = np.linspace(0, 180, 10, endpoint=True)
     tickers_val = np.flip(np.linspace(min_val, max_val, 10, endpoint=True))
-    for ticker_angle, val in zip(tickers_range, tickers_val):
-        ax.text(0.420 * np.cos(np.radians(ticker_angle)), 0.420 * np.sin(np.radians(ticker_angle)), tickers_format(val),
+    tickers_val_arr = [tickers_format(val) for val in tickers_val]
+    tickers_val_arr[0] = f'< {tickers_val_arr[0]}'
+    tickers_val_arr[-1] = f'> {tickers_val_arr[-1]}'
+    for ticker_angle, val in zip(tickers_range, tickers_val_arr):
+        ax.text(0.420 * np.cos(np.radians(ticker_angle)), 0.420 * np.sin(np.radians(ticker_angle)), val,
                 horizontalalignment='center', fontweight='bold',
                 verticalalignment='center', fontsize=11,
                 rotation=np.degrees(np.radians(ticker_angle) * np.pi / np.pi - np.radians(90)))
@@ -44,6 +53,7 @@ def gauge(labels, colors, min_val, max_val, value, tickers_format, val_format, p
 
     # Add arrow pointing on current value
     angle = value_to_angle(value, min_val, max_val)
+
     ax.arrow(0, 0, 0.225 * np.cos(np.radians(angle)), 0.225 * np.sin(np.radians(angle)), width=0.025, head_width=0.075,
              head_length=0.1, fc='k', ec='k')
     ax.add_patch(Circle((0, 0), radius=0.02, facecolor='k'))
@@ -63,6 +73,7 @@ def value_to_angle(value, min_val, max_val):
     """Return angle for gauge plot"""
     angle = (value - min_val) / (max_val - min_val)
     angle *= 180
+    angle = max(min(angle, 180), 0)
     return 180 - angle
 
 

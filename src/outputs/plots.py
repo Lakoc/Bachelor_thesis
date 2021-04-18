@@ -11,7 +11,9 @@ def plot_speech_time_comparison(speech_time, path):
     """Plots pie charts to show speech comparison"""
     fig, ax = plt.subplots(1)
     ax.pie(speech_time, labels=['Terapeut', 'Klient'], autopct='%1.2f%%',
-           startangle=90)
+           startangle=90, textprops={'fontsize': 14, 'fontweight': 'bold'}, colors=['C0', 'C1'],
+           wedgeprops={'alpha': 0.5})
+
     generate_graph(path, fig)
 
 
@@ -71,11 +73,9 @@ def plot_cross_talk_histogram(cross_talks, cross_talks_overall, bins_count, path
     labels = [f'{bins[i]:.1f} - {bins[i + 1]:.1f}' for i in range(len(bins) - 1)]
 
     current_counts, _ = np.histogram(cross_talks_len_current, bins=bins)
-    current_counts = (current_counts / np.sum(current_counts)) * 100
     ax.plot(labels, current_counts, label='Aktuální sezení')
 
     overall_counts, _ = np.histogram(cross_talks_len_overall, bins=bins)
-    overall_counts = (overall_counts / np.sum(overall_counts)) * 100
     ax.plot(labels, overall_counts, label='Průměr mezi sezeními')
 
     ax.grid(axis='y', color='black', linewidth=.5, alpha=.5)
@@ -84,7 +84,7 @@ def plot_cross_talk_histogram(cross_talks, cross_talks_overall, bins_count, path
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     ax.tick_params(left=False, bottom=False)
-    ax.set_ylabel("Výskyt [%]")
+    ax.set_ylabel("Výskyt")
     ax.legend()
     ax.set_xlabel("Délka [s]")
     generate_graph(path, fig)
@@ -94,26 +94,32 @@ def plot_reaction_time_comparison(reactions, reaction_time_mean, path):
     """Plot reaction time comparison"""
     reaction_time = np.mean(reactions[:, 1] - reactions[:, 0]) * params.window_stride
 
-    angle = value_to_angle(reaction_time, reaction_time_mean[0], reaction_time_mean[1])
+    gauge(['Nízká', 'Normální', 'Vysoká'], ['C0', 'C2', 'C1'], value=reaction_time,
+          min_val=reaction_time_mean[0] - 5 * reaction_time_mean[1],
+          max_val=reaction_time_mean[0] + 5 * reaction_time_mean[1], tickers_format=lambda l: f'{l:.2f}',
+          val_format=lambda l: f'{l:.3f}', path=path)
 
-    gauge(['Nízká', 'Normální', 'Vysoká'], ['C0', 'C2', 'C1'], angle=angle, min_val=0, max_val=1, path=path)
 
-
-def plot_speech_bounds_len(speech_bounds, bins_count, path):
+def plot_speech_bounds_len(speech_bounds, path):
     """Plots speech lengths"""
     fig, ax = plt.subplots()
     speech_bounds_len = (speech_bounds[:, 1] - speech_bounds[:, 0]).astype(np.float)
     speech_bounds_len *= params.window_stride
 
-    bins = np.linspace(0, np.max(speech_bounds_len), bins_count)
-    labels = [f'{bins[i]:.1f} - {bins[i + 1]:.1f}' for i in range(len(bins) - 1)]
+    bins = np.array([0, 2, 5, 10, 15, 20, 30, np.iinfo(np.int16).max])
+    labels = [f'{bins[i]:} - {bins[i + 1]:}' for i in range(len(bins) - 2)]
+    labels.append('> 30')
 
+    ind = np.arange(len(labels))
+
+    width = 0.3
     current_counts, _ = np.histogram(speech_bounds_len, bins=bins)
     current_counts = (current_counts / np.sum(current_counts)) * 100
-    ax.bar(labels, current_counts, label='Aktuální sezení')
+    ax.bar(ind, current_counts, width, label='Aktuální sezení')
+    ax.bar(ind + width + 0.05, current_counts, width, label='Průměr')
+    plt.xticks(ind + width / 2 + 0.025, labels, rotation=45)
 
     ax.grid(axis='y', color='black', linewidth=.5, alpha=.5)
-    plt.xticks(rotation=45)
     ax.set_axisbelow(True)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
@@ -124,19 +130,25 @@ def plot_speech_bounds_len(speech_bounds, bins_count, path):
     generate_graph(path, fig)
 
 
-def plot_speed(speed, path):
+def plot_speed(speed, intervals, size, path):
     """Plots speech speed"""
-    speed = [speed[segment]['words_per_segment'] for segment in speed if speed[segment]['words_per_segment']]
-    speed = np.array(speed)
-    speed = (speed / params.window_stride) * 60
-    speed_overall = np.empty(speed.shape[0])
+    speed = np.array([speed[segment]['words_per_segment'] for segment in speed if speed[segment]['words_per_segment']])
+
+    speed_percentiles = np.empty(intervals)
+    interval = int(speed.shape[0] / intervals)
+    for i in range(0, intervals):
+        speed_percentiles[i] = np.mean(speed[interval * i:interval * (i + 1)])
+
+    time = np.linspace(0, size / 60, intervals + 1)
+    speed_percentiles = (speed_percentiles / params.window_stride) * 60
+    speed_overall = np.empty(speed_percentiles.shape[0])
     speed_overall[:] = 124
-    speed_mean = np.empty(speed.shape[0])
-    speed_mean[:] = np.mean(speed)
+    speed_mean = np.empty(speed_percentiles.shape[0])
+    speed_mean[:] = np.mean(speed_percentiles)
     fig, ax = plt.subplots()
-    ax.plot(speed, label='Rychlost řeči')
-    ax.plot(speed_overall, label='Průměrná rychlost řeči mezi nahrávkami')
-    ax.plot(speed_mean, label='Průměrná rychlost mluvčího')
+
+    ax.plot(speed_percentiles, label='Rychlost řeči')
+    ax.plot(speed_overall, alpha=.4, label='Průměrná rychlost řeči mezi nahrávkami')
     ax.grid(axis='y', color='black', linewidth=.5, alpha=.5)
     ax.set_axisbelow(True)
     ax.spines["top"].set_visible(False)
@@ -144,7 +156,6 @@ def plot_speed(speed, path):
     ax.tick_params(left=False, bottom=False)
     ax.legend()
     ax.set_ylabel("Délka [slov/minuta]")
-    # ax.set_xlabel("Čas")
     ax.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
     generate_graph(path, fig)
 
@@ -153,6 +164,6 @@ def plot_hesitations(hesitations, signal_len, hesitations_mean, path):
     """Plot hesitations count comparison"""
     hesitations = hesitations.shape[0] / signal_len * 60
 
-    angle = value_to_angle(hesitations, hesitations_mean[0], hesitations_mean[1])
-
-    gauge(['Nízký', 'Normální', 'Vysoký'], ['C0', 'C2', 'C1'], angle=angle, min_val=0, max_val=1, path=path)
+    gauge(['Nízký', 'Normální', 'Vysoký'], ['C0', 'C2', 'C1'], value=hesitations,
+          min_val=hesitations_mean[0] - 5 * hesitations_mean[1], max_val=hesitations_mean[0] + 5 * hesitations_mean[1],
+          path=path, tickers_format=lambda l: f'{l:.1f}', val_format=lambda l: f'{l:.2f}')

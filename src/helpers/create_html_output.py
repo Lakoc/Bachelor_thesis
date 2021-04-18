@@ -82,21 +82,21 @@ def add_plots(html, stats, stats_overall, path, file_name):
                         'reaction_time_client', file_name)
 
     create_plot_and_set(plots.plot_speech_bounds_len,
-                        (stats['speech_joined'][0], 15,
+                        (stats['speech_joined'][0],
                          f'{join(path, f"plots/{file_name}_bounds_len_therapist")}.png'), html,
                         'bounds_len_therapist', file_name)
 
     create_plot_and_set(plots.plot_speech_bounds_len,
-                        (stats['speech_joined'][1], 15,
+                        (stats['speech_joined'][1],
                          f'{join(path, f"plots/{file_name}_bounds_len_client")}.png'), html,
                         'bounds_len_client', file_name)
 
     create_plot_and_set(plots.plot_speed,
-                        (stats['speed'][0], f'{join(path, f"plots/{file_name}_speed_therapist")}.png'), html,
+                        (stats['speed'][0], 8, stats['signal']['len'], f'{join(path, f"plots/{file_name}_speed_therapist")}.png'), html,
                         'speed_therapist', file_name)
 
     create_plot_and_set(plots.plot_speed,
-                        (stats['speed'][1], f'{join(path, f"plots/{file_name}_speed_client")}.png'), html,
+                        (stats['speed'][1], 8,stats['signal']['len'], f'{join(path, f"plots/{file_name}_speed_client")}.png'), html,
                         'speed_client', file_name)
 
     create_plot_and_set(plots.plot_hesitations,
