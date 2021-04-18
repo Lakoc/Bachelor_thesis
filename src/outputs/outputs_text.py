@@ -268,13 +268,18 @@ def mel_bank(segments):
 def VAD_sample(signal, Fs):
     fig, ax = plt.subplots(figsize=(7, 4))
     sig = signal[40000:100000, 0]
-    window = np.zeros(len(sig))
+    window = np.empty(len(sig))
+    window[:] = np.nan
     window[13000:37500] = 1
+    window[13000] = 0
+    window[37500] = 0
     window[45000:58000] = 1
+    window[45000] = 0
+    window[58000] = 0
     linear = np.linspace(0, 600000 / Fs, 60000)
-    ax.plot(linear, sig / np.max(signal) * 10, label='Signál')
+    ax.plot(linear, sig / np.max(sig) , label='Signál')
     ax.plot(linear, window, label='Řečová aktivita', color='black', linewidth=3.0)
-    ax.set_ylabel('Velikost')
+    ax.set_ylabel('Normalizovaná velikost')
     ax.set_xlabel('Čas [s]')
     ax.spines['right'].set_visible(False)
     ax.spines['top'].set_visible(False)
@@ -287,18 +292,26 @@ def VAD_sample(signal, Fs):
 def VAD_sample_smooth(signal, Fs):
     fig, ax = plt.subplots(figsize=(7, 4))
     sig = signal[40000:500000, 0]
-    window = np.zeros(len(sig))
+    window = np.empty(len(sig))
+    window[:] = np.nan
     window[13000:125000] = 1
+    window[125000] = 0
+    window[13000] = 0
     window[160000:195000] = 1
+    window[160000] = 0
+    window[195000] = 0
     window[243000:390000] = 1
+    window[390000] = 0
+    window[243000] = 0
     window[440000:] = 1
+    window[440000] = 0
     window[-1] = 0
 
     linear = np.linspace(0, (500000 - 40000) / Fs, (500000 - 40000))
 
-    ax.plot(linear, sig / np.max(signal) * 10, label='Signál')
+    ax.plot(linear, sig / np.max(sig), label='Signál')
     ax.plot(linear, window, label='Vyhlazená detekce řečové aktivity', color='black', linewidth=3.0)
-    ax.set_ylabel('Velikost')
+    ax.set_ylabel('Normalizovaná velikost')
     ax.set_xlabel('Čas [s]')
     ax.spines['right'].set_visible(False)
     ax.spines['top'].set_visible(False)
@@ -313,15 +326,20 @@ def VAD_threshold(signal, Fs):
     linear = np.linspace(0, (100000 - 40000) / Fs, (100000 - 40000))
 
     sig = signal[40000:100000, 0]
-    window = np.zeros(len(sig))
+    window = np.empty(len(sig))
+    window[:] = np.nan
     window[13200:36300] = 1
+    window[13200] = 0
+    window[36300] = 0
     window[45500:58000] = 1
+    window[45500] = 0
+    window[58000] = 0
     threshold = np.zeros(len(sig))
     threshold += 0.05
-    ax.plot(linear, sig / np.max(signal) * 10, label='Signál')
+    ax.plot(linear, sig / np.max(sig), label='Signál')
     ax.plot(linear, window, label='Řečová aktivita', color='black', linewidth=3.0)
     ax.plot(linear, threshold, label='Práh', color='C1')
-    ax.set_ylabel('Velikost')
+    ax.set_ylabel('Normalizovaná velikost')
     ax.set_xlabel('Čas [s]')
     ax.spines['right'].set_visible(False)
     ax.spines['top'].set_visible(False)
@@ -377,22 +395,36 @@ def VAD_adaptive_threshold(energy_segments):
         vad[index] = segment > threshold
 
     # apply median filter to remove unwanted
-    vad = ndimage.median_filter(vad, int(round(med_filter / window_stride) * 4))
+    vad = ndimage.median_filter(vad, int(round(med_filter / window_stride) * 4)).astype(np.float)
 
     time = np.linspace(0, 10, 1000)
     fig, axs = plt.subplots(nrows=2, figsize=(7, 4), sharex=True)
-    axs[0].plot(time, e_min_arr[:, 0], label='Minimální energie')
-    axs[0].plot(time, e_max_arr[:, 0], label='Maximální energie')
+    axs[0].plot(time, e_min_arr[:, 0] / np.max(e_max_arr[:, 0]), label='Minimální energie')
+    axs[0].plot(time, e_max_arr[:, 0]/ np.max(e_max_arr[:, 0]), label='Maximální energie')
 
-    axs[0].set_ylabel('Velikost')
+    axs[0].set_ylabel('Normalizovaná velikost')
     axs[0].spines['right'].set_visible(False)
     axs[0].spines['top'].set_visible(False)
     axs[0].legend()
 
-    axs[1].plot(time, energy_segments[:, 0], label='Energie')
-    axs[1].plot(time, threshold_arr[:, 0], label='Práh')
-    axs[1].plot(time, vad[:, 0] * np.max(energy_segments[:, 0]), label='Řečová aktivita', color='black', linewidth=3.0)
-    axs[1].set_ylabel('Velikost')
+    vad[:, 0][vad[:, 0] == 0] = np.nan
+    vad[181,0] =0
+    vad[212,0] =0
+    vad[332,0] =0
+    vad[467,0] =0
+    vad[533,0] =0
+    vad[609,0] =0
+    vad[636,0] =0
+    vad[713,0] =0
+    vad[759,0] =0
+    vad[837,0] =0
+    vad[931,0] =0
+    vad[999,0] =0
+
+    axs[1].plot(time, energy_segments[:, 0] / np.max(energy_segments[:,0]), label='Energie')
+    axs[1].plot(time, threshold_arr[:, 0] / np.max(energy_segments[:,0]), label='Práh')
+    axs[1].plot(time, vad[:, 0] , label='Řečová aktivita', color='black', linewidth=3.0)
+    axs[1].set_ylabel('Normalizovaná velikost')
     axs[1].set_xlabel('Čas [s]')
     axs[1].spines['right'].set_visible(False)
     axs[1].spines['top'].set_visible(False)
@@ -428,7 +460,7 @@ def VAD_gmm(energy, signal, Fs):
     vad1 = likelihood_propagated1[:, 0] < params.min_silence_likelihood
 
     # Smooth activity segments and create arr containing both speakers
-    vad1 = segments_filter(segments_filter(vad1, params.filter_size_non, 1), params.filter_size_active, 0)
+    vad1 = segments_filter(segments_filter(vad1, params.filter_non_active, 1), params.filter_active, 0)
 
     fig, axs = plt.subplots(nrows=3, sharex=True, figsize=(10, 6))
     height = np.max(signal[0:Fs * 20:, 0])
@@ -460,18 +492,25 @@ def VAD_gmm(energy, signal, Fs):
     axs[2].set_xlabel('Čas [s]')
     plt.savefig('../thesis_text/Anal-za-audio-hovoru-mezi-dv-ma-astn-ky/obrazky-figures/vad_gmm.pdf')
 
+
 def diarization(signal, Fs):
     fig, ax = plt.subplots(figsize=(7, 4))
     sig = signal[40000:100000, 0]
     time = np.linspace(0, 60000 / Fs, 60000)
-    window1 = np.zeros(len(sig))
-    window2 = np.zeros(len(sig))
+    window1 = np.empty(len(sig))
+    window1[:] = np.nan
+    window2 = np.empty(len(sig))
+    window2[:] = np.nan
     window1[13000:37500] = 1
+    window1[13000] = 0
+    window1[37500] = 0
     window2[45000:58000] = 1
-    ax.plot(time, sig / np.max(signal) * 10, label='Signál')
+    window2[45000] = 0
+    window2[58000] = 0
+    ax.plot(time, sig / np.max(sig), label='Signál')
     ax.plot(time, window1, label='Řečová aktivita terapeuta', linewidth=3.0)
     ax.plot(time, window2, label='Řečová aktivita klienta', linewidth=3.0)
-    ax.set_ylabel('Velikost')
+    ax.set_ylabel('Normalizovaná velikost')
     ax.set_xlabel('Čas [s]')
     ax.spines['right'].set_visible(False)
     ax.spines['top'].set_visible(False)
@@ -480,21 +519,66 @@ def diarization(signal, Fs):
     plt.savefig('../thesis_text/Anal-za-audio-hovoru-mezi-dv-ma-astn-ky/obrazky-figures/diarization.pdf')
     # plt.show()
 
+
 def cross_talk(signal, Fs):
-
     fig, axs = plt.subplots(nrows=2, figsize=(7, 4), sharey=True, sharex=True)
-    sig1 = signal[0:100000, 0]
-    sig2 = signal[0:100000, 1]
-    time = np.linspace(0, 100000 / Fs, 100000)
+    sig1 = signal[0:Fs * 35, 0]
+    sig2 = signal[0:Fs * 35, 1]
+    time = np.linspace(0, 35, Fs * 35)
+    vad1 = np.empty(Fs * 35)
+    vad2 = np.empty(Fs * 35)
 
-    axs[0].plot(time, sig1 , label='Kanál 1', color='C0')
-    axs[0].set_ylabel('Velikost')
+    val1 = np.max(sig1)
+    sig1 = sig1 / val1
+    val1 = np.max(sig1)
+
+    vad1[:] = np.nan
+    vad1[0] = 0
+    vad1[1:int(0.232 * Fs)] = val1
+    vad1[int(0.232 * Fs)] = 0
+
+    vad1[int(33.589 * Fs)] = 0
+    vad1[int(33.589 * Fs) + 1:int(34.011 * Fs)] = val1
+    vad1[int(34.011 * Fs)] = 0
+
+    axs[0].plot(time, sig1, label='Kanál 1', color='C0')
+    axs[0].plot(time, vad1, label='Řečová aktivita', color='black', linewidth=0.8)
+    axs[0].set_ylabel('Normalizovaná velikost')
     axs[0].spines['right'].set_visible(False)
     axs[0].spines['top'].set_visible(False)
     axs[0].legend()
 
+    val2 = np.max(sig2)
+    sig2 = sig2 / val2
+    val2 = np.max(sig2)
+    vad2[:] = np.nan
+    vad2[int(3.319 * Fs)] = 0
+    vad2[int(3.319 * Fs) + 1:int(8.485 * Fs)] = val2
+    vad2[int(8.485 * Fs)] = 0
+
+    vad2[int(9.203 * Fs)] = 0
+    vad2[int(9.203 * Fs) + 1: int(10.258 * Fs)] = val2
+    vad2[int(10.258 * Fs)] = 0
+
+    vad2[int(12.701 * Fs)] = 0
+    vad2[int(12.701 * Fs) + 1: int(15.163 * Fs)] = val2
+    vad2[int(15.163 * Fs)] = 0
+
+    vad2[int(17.595 * Fs)] = 0
+    vad2[int(17.595 * Fs) + 1: int(19.361 * Fs)] = val2
+    vad2[int(19.361 * Fs)] = 0
+
+    vad2[int(30.378 * Fs)] = 0
+    vad2[int(30.378 * Fs) + 1: int(32.761 * Fs)] = val2
+    vad2[int(32.761 * Fs)] = 0
+
+    vad2[int(19.976 * Fs)] = 0
+    vad2[int(19.976 * Fs) + 1: int(25.883 * Fs)] = val2
+    vad2[int(25.883 * Fs)] = 0
+
     axs[1].plot(time, sig2, label='Kanál 2', color='C1')
-    axs[1].set_ylabel('Velikost')
+    axs[1].plot(time, vad2, label='Řečová aktivita', color='black', linewidth=0.8)
+    axs[1].set_ylabel('Normalizovaná Velikost')
     axs[1].set_xlabel('Čas [s]')
     axs[1].spines['right'].set_visible(False)
     axs[1].spines['top'].set_visible(False)

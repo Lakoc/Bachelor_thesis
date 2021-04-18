@@ -4,7 +4,7 @@ from matplotlib.patches import Wedge, Circle
 from wordcloud import WordCloud
 
 
-def gauge(labels, colors, angle, path):
+def gauge(labels, colors, min_val, max_val, value, tickers_format, val_format, path):
     """Create gauge graph for showing difference between overall and current data"""
     fig, ax = plt.subplots()
 
@@ -17,7 +17,6 @@ def gauge(labels, colors, angle, path):
     # Create sectors
     patches = []
     for ang, c in zip(ang_range, colors):
-        patches.append(Wedge((0., 0.), .4, *ang, facecolor='w', lw=2))
         patches.append(Wedge((0., 0.), .4, *ang, width=0.10, facecolor=c, lw=2, alpha=0.5))
 
     [ax.add_patch(p) for p in patches]
@@ -25,10 +24,26 @@ def gauge(labels, colors, angle, path):
     # Add texts for sectors
     for mid, lab in zip(mid_points, labels):
         ax.text(0.35 * np.cos(np.radians(mid)), 0.35 * np.sin(np.radians(mid)), lab, horizontalalignment='center',
-                verticalalignment='center', fontsize=14, fontweight='bold',
+                verticalalignment='center', fontsize=16, fontweight='bold',
                 rotation=np.degrees(np.radians(mid) * np.pi / np.pi - np.radians(90)))
 
+    # Add tickers
+    tickers_range = np.linspace(0, 180, 10, endpoint=True)
+    tickers_val = np.flip(np.linspace(min_val, max_val, 10, endpoint=True))
+    for ticker_angle, val in zip(tickers_range, tickers_val):
+        ax.text(0.420 * np.cos(np.radians(ticker_angle)), 0.420 * np.sin(np.radians(ticker_angle)), tickers_format(val),
+                horizontalalignment='center', fontweight='bold',
+                verticalalignment='center', fontsize=11,
+                rotation=np.degrees(np.radians(ticker_angle) * np.pi / np.pi - np.radians(90)))
+        ax.plot([0.395 * np.cos(np.radians(ticker_angle)), 0.405 * np.cos(np.radians(ticker_angle))],
+                [0.395 * np.sin(np.radians(ticker_angle)), 0.405 * np.sin(np.radians(ticker_angle))], color='black',
+                linewidth=.4)
+
+    # Add value
+    ax.text(-.014 * (len(val_format(value)) / 2), -0.08, val_format(value), fontsize=16, fontweight='bold')
+
     # Add arrow pointing on current value
+    angle = value_to_angle(value, min_val, max_val)
     ax.arrow(0, 0, 0.225 * np.cos(np.radians(angle)), 0.225 * np.sin(np.radians(angle)), width=0.025, head_width=0.075,
              head_length=0.1, fc='k', ec='k')
     ax.add_patch(Circle((0, 0), radius=0.02, facecolor='k'))
@@ -44,13 +59,11 @@ def gauge(labels, colors, angle, path):
     generate_graph(path, fig)
 
 
-def value_to_angle(value, center, variance):
+def value_to_angle(value, min_val, max_val):
     """Return angle for gauge plot"""
-    angle = (center - value) / variance * 5 / 9
-    angle = min(max(angle, -1), 1)
-    angle += 1
-    angle *= 90
-    return angle
+    angle = (value - min_val) / (max_val - min_val)
+    angle *= 180
+    return 180 - angle
 
 
 def word_cloud(text, path):

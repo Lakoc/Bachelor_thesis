@@ -17,8 +17,16 @@ def plot_speech_time_comparison(speech_time, path):
 
 def plot_speech_time_comparison_others(speech_time, speech_time_mean, path):
     """Plots pie charts to show speech comparison"""
-    angle = value_to_angle(speech_time, speech_time_mean[0], speech_time_mean[1])
-    gauge(['Nízký', 'Normální', 'Vysoký'], ['C0', 'C2', 'C1'], angle, path)
+
+    def tickers_format(value):
+        return f'{value * 100:.1f}%'
+
+    def val_format(value):
+        return f'{value * 100:.3f}%'
+
+    gauge(labels=['Nízký', 'Normální', 'Vysoký'], colors=['C0', 'C2', 'C1'],
+          min_val=speech_time_mean[0] - 5 * speech_time_mean[1], max_val=speech_time_mean[0] + 5 * speech_time_mean[1],
+          value=speech_time, tickers_format=tickers_format, val_format=val_format, path=path)
 
 
 def plot_volume_changes(energy_over_segments, interruptions, size, path):
@@ -88,7 +96,7 @@ def plot_reaction_time_comparison(reactions, reaction_time_mean, path):
 
     angle = value_to_angle(reaction_time, reaction_time_mean[0], reaction_time_mean[1])
 
-    gauge(['Nízká', 'Normální', 'Vysoká'], ['C0', 'C2', 'C1'], angle, path)
+    gauge(['Nízká', 'Normální', 'Vysoká'], ['C0', 'C2', 'C1'], angle=angle, min_val=0, max_val=1, path=path)
 
 
 def plot_speech_bounds_len(speech_bounds, bins_count, path):
@@ -143,8 +151,8 @@ def plot_speed(speed, path):
 
 def plot_hesitations(hesitations, signal_len, hesitations_mean, path):
     """Plot hesitations count comparison"""
-    hesitations = hesitations.shape[0] / signal_len *60
+    hesitations = hesitations.shape[0] / signal_len * 60
 
     angle = value_to_angle(hesitations, hesitations_mean[0], hesitations_mean[1])
 
-    gauge(['Nízký', 'Normální', 'Vysoký'], ['C0', 'C2', 'C1'], angle, path)
+    gauge(['Nízký', 'Normální', 'Vysoký'], ['C0', 'C2', 'C1'], angle=angle, min_val=0, max_val=1, path=path)
