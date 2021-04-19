@@ -1,7 +1,6 @@
 from argparse import ArgumentParser
 from os import listdir
 from os.path import isfile, join
-from progress.bar import Bar
 from helpers.speech2word import process_file
 from helpers.dir_exist import create_if_not_exist
 

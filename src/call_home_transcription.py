@@ -52,7 +52,7 @@ for file in files:
                     speaker = 1 if match[3] == 'A' else 2
                     text = match[4]
                     f1.write(
-                        f'SPEAKER {file} {speaker} {start_time_new:.3f} {end_time - start_time:.3f} <NA> <NA> {speaker} <NA> <NA>\n')
+                        f'SPEAKER {file} {speaker} {start_time_new:.3f} {end_time - start_time_old:.3f} <NA> <NA> {speaker} <NA> <NA>\n')
                     f2.write(f'Channel {speaker} {start_time_new:.2f}, {end_time_new:.2f}: {text}\n')
 
 """Remove unnecessary files"""

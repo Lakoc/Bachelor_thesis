@@ -120,26 +120,10 @@ def energy_gmm_based_vad_propagation(energy):
 
 
     # Fit and predict posterior probabilities for each channel
-    while True:
-        gmm1.fit(energy[:, 0][:, np.newaxis])
-
-        if np.argmin(gmm1.means_) == 0:
-            break
-        else:
-            print(gmm1.means_)
-            # gmm1 = deepcopy(gmm)
-
+    gmm1.fit(energy[:, 0][:, np.newaxis])
     likelihoods1 = gmm1.predict_proba(energy[:, 0][:, np.newaxis])
 
-    while True:
-        gmm2.fit(energy[:, 1][:, np.newaxis])
-
-        if np.argmin(gmm2.means_) == 0:
-            break
-        else:
-            print(gmm2.means_)
-            # gmm2 = deepcopy(gmm)
-
+    gmm2.fit(energy[:, 1][:, np.newaxis])
     likelihoods2 = gmm2.predict_proba(energy[:, 1][:, np.newaxis])
 
     # Init propagation matrix for sil likelihood smoothing
