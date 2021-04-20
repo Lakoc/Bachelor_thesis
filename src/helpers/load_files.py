@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 import params
 
 rttm_regex = re.compile(r'SPEAKER \S* \d ([\d.]*) ([\d.]*) <NA> <NA> (\d).*')
-transcription_regex = re.compile(r'Channel (\d) \(([\d.]*), ([\d.]*)\): (.*)')
+transcription_regex = re.compile(r'Channel (\d) ([\d.]*), ([\d.]*): (.*)')
 
 
 def extract_rttm_line(line):
@@ -19,8 +19,8 @@ def extract_rttm_line(line):
 def extract_transcription_line(line):
     match = transcription_regex.search(line)
     start = int(float(match[2]) / params.window_stride)
-    duration = int(float(match[3]) / params.window_stride)
-    return start, start +duration, int(match[1]), None if match[4] == '<UNKNOWN>' else match[4]
+    end = int(float(match[3]) / params.window_stride)
+    return start, end, int(match[1]), None if match[4] == '<UNKNOWN>' else match[4]
 
 
 def load_vad_from_rttm(path, size):
@@ -44,9 +44,9 @@ def load_transcription(path):
         for line in lines:
             arr_extracted.append(extract_transcription_line(line))
 
-        transcriptions = {'0': {}, '1':{}}
+        transcriptions = ({}, {})
         for speech_tuple in arr_extracted:
-            transcriptions[f'{speech_tuple[2] - 1}'][(speech_tuple[0], speech_tuple[1])] = {
+            transcriptions[speech_tuple[2] - 1][(speech_tuple[0], speech_tuple[1])] = {
                 'text': speech_tuple[3]}
 
         return transcriptions

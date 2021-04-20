@@ -49,10 +49,8 @@ from argparse import ArgumentParser
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='Module for processing diarization over wav files in provided directory.')
-    parser.add_argument('--src', type=str, required=True,
-                        help='source path of wav files')
-    parser.add_argument('--dest', type=str, required=True,
-                        help='destination path for rttm files')
+    parser.add_argument('src', type=str, help='source path of wav files')
+    parser.add_argument('dest', type=str, help='destination path for rttm files')
 
     args = parser.parse_args()
 
@@ -60,6 +58,9 @@ if __name__ == '__main__':
 
     print(f'Listing files in {args.src}')
     files = [f for f in listdir(args.src) if isfile(join(args.src, f)) and f.endswith(f'.wav')]
+
+    if len(files) < 1:
+        raise FileNotFoundError(f'No wav files found in {args.src}')
 
     with Bar(f'Processing files in {args.src}', max=len(files)) as bar:
         for file in files:

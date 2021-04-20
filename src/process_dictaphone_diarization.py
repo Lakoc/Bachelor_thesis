@@ -1,5 +1,5 @@
-from os import listdir, makedirs
-from os.path import isfile, join, exists
+from os import listdir
+from os.path import isfile, join
 from audio_processing import vad as vad_module
 from outputs import outputs
 import params
@@ -14,10 +14,8 @@ from helpers.dir_exist import create_if_not_exist
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='Module for processing diarization over wav files in provided directory.')
-    parser.add_argument('--src', type=str, required=True,
-                        help='source path of wav files')
-    parser.add_argument('--dest', type=str, required=True,
-                        help='destination path for rttm files')
+    parser.add_argument('src', type=str, help='source path of wav files')
+    parser.add_argument('dest', type=str, help='destination path for rttm files')
 
     args = parser.parse_args()
 
@@ -25,6 +23,9 @@ if __name__ == '__main__':
 
     print(f'Listing files in {args.source}')
     files = [f for f in listdir(args.source) if isfile(join(args.source, f)) and f.endswith(f'.wav')]
+
+    if len(files) < 1:
+        raise FileNotFoundError(f'No wav files found in {args.source}')
 
     with Bar(f'Processing files in {args.source}', max=len(files)) as bar:
         for file in files:

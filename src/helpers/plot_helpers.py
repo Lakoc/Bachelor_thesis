@@ -4,7 +4,7 @@ from matplotlib.patches import Wedge, Circle
 from wordcloud import WordCloud
 
 
-def gauge(labels, colors, min_val, max_val, value, tickers_format, val_format, path):
+def gauge(labels, colors, min_val, max_val, value, tickers_format, val_format):
     """Create gauge graph for showing difference between overall and current data"""
     fig, ax = plt.subplots()
 
@@ -65,8 +65,7 @@ def gauge(labels, colors, min_val, max_val, value, tickers_format, val_format, p
     ax.axes.set_yticks([])
     ax.axis('equal')
 
-    # Crate graph
-    generate_graph(path, fig)
+    return fig, ax
 
 
 def value_to_angle(value, min_val, max_val):

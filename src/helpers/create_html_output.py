@@ -1,14 +1,13 @@
 import numpy as np
 
-import outputs.plots as plots
+from outputs import plots
 from os.path import join
-
+import pickle
 import params
-from helpers.dir_exist import create_if_not_exist
-from shutil import copyfile
 from helpers.plot_helpers import word_cloud
 
 from helpers.load_files import load_template
+from helpers.dir_exist import create_if_not_exist
 
 
 def return_text_by_bounds(options, num, overall):
@@ -25,129 +24,158 @@ def return_text_by_bounds(options, num, overall):
 def create_plot_and_set(fun, args, html, element_id, file_name):
     """Plot to file and set that path to html as source"""
     fun(*args)
-    html.find(id=f'figure-{element_id}')['src'] = f'plots/{file_name}_{element_id}.png'
+    html.find(id=f'figure-{element_id}')['src'] = f'plots/{file_name}/{element_id}.png'
 
 
 def add_plots(html, stats, stats_overall, path, file_name):
     """Create plot and set path in html file"""
-    create_if_not_exist(join(path, 'plots'))
+    create_if_not_exist(join(path, f'plots/{file_name}'), verbose=False)
 
-    create_plot_and_set(plots.plot_speech_time_comparison,
-                        (stats['speech_ratio'][0], f'{join(path, f"plots/{file_name}_speech_ratio")}.png'), html,
+    create_plot_and_set(plots.speech_time_comparison,
+                        (stats['speech_ratio'][0], f'{join(path, f"plots/{file_name}/speech_ratio")}.png'),
+                        html,
                         'speech_ratio', file_name)
 
-    create_plot_and_set(plots.plot_speech_time_comparison_others,
-                        (stats['speech_ratio'][0][0], stats_overall['speech_ratio'],
-                         f'{join(path, f"plots/{file_name}_speech_ratio_overall")}.png'), html,
+    create_plot_and_set(plots.silence_ratio,
+                        (
+                            stats['speech_ratio'][1][0],
+                            f'{join(path, f"plots/{file_name}/silence_ratio_therapist")}.png'),
+                        html,
+                        'silence_ratio_therapist', file_name)
+
+    create_plot_and_set(plots.silence_ratio,
+                        (stats['speech_ratio'][1][1], f'{join(path, f"plots/{file_name}/silence_ratio_client")}.png'),
+                        html,
+                        'silence_ratio_client', file_name)
+
+    create_plot_and_set(plots.speech_time_comparison_others,
+                        (stats['speech_ratio'][0][0], stats_overall['speech_ratio']['therapist'],
+                         f'{join(path, f"plots/{file_name}/speech_ratio_overall")}.png'), html,
                         'speech_ratio_overall', file_name)
 
-    create_plot_and_set(plots.plot_volume_changes,
+    create_plot_and_set(plots.volume_changes,
                         (stats['volume_changes'][0], stats['interruptions'][0], stats['signal']['len'],
-                         f'{join(path, f"plots/{file_name}_therapist_volume")}.png'), html,
+                         f'{join(path, f"plots/{file_name}/therapist_volume")}.png'), html,
                         'therapist_volume', file_name)
 
-    create_plot_and_set(plots.plot_volume_changes,
+    create_plot_and_set(plots.volume_changes,
                         (stats['volume_changes'][1], stats['interruptions'][1], stats['signal']['len'],
-                         f'{join(path, f"plots/{file_name}_client_volume")}.png'), html,
+                         f'{join(path, f"plots/{file_name}/client_volume")}.png'), html,
                         'client_volume', file_name)
 
     create_plot_and_set(word_cloud,
                         (stats['texts'][0],
-                         f'{join(path, f"plots/{file_name}_therapist_cloud")}.png'), html,
+                         f'{join(path, f"plots/{file_name}/therapist_cloud")}.png'), html,
                         'therapist_cloud', file_name)
 
     create_plot_and_set(word_cloud,
                         (stats['texts'][1],
-                         f'{join(path, f"plots/{file_name}_client_cloud")}.png'), html,
+                         f'{join(path, f"plots/{file_name}/client_cloud")}.png'), html,
                         'client_cloud', file_name)
 
-    create_plot_and_set(plots.plot_cross_talk_histogram,
-                        (stats['interruptions'][0], stats['interruptions'][1], 10,
-                         f'{join(path, f"plots/{file_name}_therapist_interruptions")}.png'), html,
+    create_plot_and_set(plots.interruptions_histogram,
+                        (stats['interruptions_len'][0], stats_overall['interruptions_len']['therapist'],
+                         f'{join(path, f"plots/{file_name}/therapist_interruptions")}.png'), html,
                         'therapist_interruptions', file_name)
 
-    create_plot_and_set(plots.plot_cross_talk_histogram,
-                        (stats['interruptions'][1], stats['interruptions'][0], 10,
-                         f'{join(path, f"plots/{file_name}_client_interruptions")}.png'), html,
+    create_plot_and_set(plots.interruptions_histogram,
+                        (stats['interruptions_len'][1], stats_overall['interruptions_len']['client'],
+                         f'{join(path, f"plots/{file_name}/client_interruptions")}.png'), html,
                         'client_interruptions', file_name)
 
-    create_plot_and_set(plots.plot_reaction_time_comparison,
+    create_plot_and_set(plots.reaction_time_comparison,
                         (stats['reactions'][0], stats_overall['reactions']['therapist'],
-                         f'{join(path, f"plots/{file_name}_reaction_time_therapist")}.png'), html,
+                         f'{join(path, f"plots/{file_name}/reaction_time_therapist")}.png'), html,
                         'reaction_time_therapist', file_name)
 
-    create_plot_and_set(plots.plot_reaction_time_comparison,
+    create_plot_and_set(plots.reaction_time_comparison,
                         (stats['reactions'][1], stats_overall['reactions']['client'],
-                         f'{join(path, f"plots/{file_name}_reaction_time_client")}.png'), html,
+                         f'{join(path, f"plots/{file_name}/reaction_time_client")}.png'), html,
                         'reaction_time_client', file_name)
 
-    create_plot_and_set(plots.plot_speech_bounds_len,
-                        (stats['speech_joined'][0],
-                         f'{join(path, f"plots/{file_name}_bounds_len_therapist")}.png'), html,
+    create_plot_and_set(plots.speech_bounds_lengths,
+                        (stats['speech_len'][0], stats_overall['speech_len']['therapist'],
+                         f'{join(path, f"plots/{file_name}/bounds_len_therapist")}.png'), html,
                         'bounds_len_therapist', file_name)
 
-    create_plot_and_set(plots.plot_speech_bounds_len,
-                        (stats['speech_joined'][1],
-                         f'{join(path, f"plots/{file_name}_bounds_len_client")}.png'), html,
+    create_plot_and_set(plots.speech_bounds_lengths,
+                        (stats['speech_len'][1], stats_overall['speech_len']['client'],
+                         f'{join(path, f"plots/{file_name}/bounds_len_client")}.png'), html,
                         'bounds_len_client', file_name)
 
-    create_plot_and_set(plots.plot_speed,
-                        (stats['speed'][0], 8, stats['signal']['len'], f'{join(path, f"plots/{file_name}_speed_therapist")}.png'), html,
+    create_plot_and_set(plots.speed_changes,
+                        (stats['transcription'][0], 16, stats['signal']['len'],
+                         f'{join(path, f"plots/{file_name}/speed_therapist")}.png'), html,
                         'speed_therapist', file_name)
 
-    create_plot_and_set(plots.plot_speed,
-                        (stats['speed'][1], 8,stats['signal']['len'], f'{join(path, f"plots/{file_name}_speed_client")}.png'), html,
+    create_plot_and_set(plots.speed_changes,
+                        (stats['transcription'][1], 16, stats['signal']['len'],
+                         f'{join(path, f"plots/{file_name}/speed_client")}.png'), html,
                         'speed_client', file_name)
 
-    create_plot_and_set(plots.plot_hesitations,
+    create_plot_and_set(plots.hesitations_difference,
                         (stats['hesitations'][0], stats['signal']['len'], stats_overall['hesitations']['therapist'],
-                         f'{join(path, f"plots/{file_name}_hesitations_therapist")}.png'), html,
+                         f'{join(path, f"plots/{file_name}/hesitations_therapist")}.png'), html,
                         'hesitations_therapist', file_name)
 
-    create_plot_and_set(plots.plot_hesitations,
+    create_plot_and_set(plots.hesitations_difference,
                         (stats['hesitations'][1], stats['signal']['len'], stats_overall['hesitations']['client'],
-                         f'{join(path, f"plots/{file_name}_hesitations_client")}.png'), html,
+                         f'{join(path, f"plots/{file_name}/hesitations_client")}.png'), html,
                         'hesitations_client', file_name)
+
+    create_plot_and_set(plots.fills_difference,
+                        (stats['fills'][0], stats['signal']['len'], stats_overall['fills']['therapist'],
+                         f'{join(path, f"plots/{file_name}/therapist_fills")}.png'), html,
+                        'therapist_fills', file_name)
+
+    create_plot_and_set(plots.fills_difference,
+                        (stats['fills'][1], stats['signal']['len'], stats_overall['fills']['client'],
+                         f'{join(path, f"plots/{file_name}/client_fills")}.png'), html,
+                        'client_fills', file_name)
+
+    create_plot_and_set(plots.client_mood,
+                        (stats['client_mood'],
+                         f'{join(path, f"plots/{file_name}/client_mood")}.png'), html,
+                        'client_mood', file_name)
 
 
 def add_volume_table(html, stats):
     """Add table of most energetic segments with theirs annotations"""
     t_body = html.find(id='volume_text_table').find("tbody")
-    loud1_sorted = sorted(stats['loudness'][0], key=lambda l: stats['loudness'][0][l]['ratio'])
-    loud2_sorted = sorted(stats['loudness'][1], key=lambda l: stats['loudness'][1][l]['ratio'])
-    loud1_sorted = loud1_sorted[0: min(len(loud1_sorted), 10)]
-    loud2_sorted = loud2_sorted[0: min(len(loud2_sorted), 10)]
 
-    loudness = {key: stats['loudness'][0][key] for key in loud1_sorted}, {key: stats['loudness'][1][key] for key in
-                                                                          loud2_sorted}
-    for num, speaker in enumerate(loudness):
-        for segment in speaker:
-            text = speaker[segment]['text']
-            ratio = speaker[segment]['ratio']
-            volume = speaker[segment]['energy']
-            if text is not None and ratio > 0:
-                new_row = html.new_tag("tr")
-                time_start_tag = html.new_tag('td')
-                time_start_tag.string = f'{int(segment[0] * params.window_stride / 60)} m {int(segment[0] * params.window_stride % 60)} s'
-                new_row.append(time_start_tag)
+    loudness = {**dict(((*key, 0), value) for (key, value) in stats['transcription'][0].items() if value['text']),
+                **dict(((*key, 1), value) for (key, value) in stats['transcription'][1].items() if value['text'])}
+    loud_sorted = sorted(loudness, key=lambda l: loudness[l]['energy'], reverse=True)
+    loud_sorted = loud_sorted[0: min(len(loud_sorted), 20)]
 
-                time_dur_tag = html.new_tag('td')
-                time_dur_tag.string = f'{(segment[1] - segment[0]) * params.window_stride:.2f}'
-                new_row.append(time_dur_tag)
+    for segment in loud_sorted:
+        text = loudness[segment]['text']
+        volume = loudness[segment]['energy']
+        speaker = segment[2]
+        if text is not None:
+            new_row = html.new_tag("tr")
+            time_start_tag = html.new_tag('td')
+            time_start_tag.string = f'{int(segment[0] * params.window_stride / 60)} m ' \
+                                    f'{int(segment[0] * params.window_stride % 60)} s'
+            new_row.append(time_start_tag)
 
-                speaker_tag = html.new_tag('td')
-                speaker_tag.string = 'Terapeut' if num == 0 else 'Klient'
-                new_row.append(speaker_tag)
+            time_dur_tag = html.new_tag('td')
+            time_dur_tag.string = f'{(segment[1] - segment[0]) * params.window_stride:.2f}'
+            new_row.append(time_dur_tag)
 
-                volume_tag = html.new_tag('td')
-                volume_tag.string = f'{volume:.2f}'
-                new_row.append(volume_tag)
+            speaker_tag = html.new_tag('td')
+            speaker_tag.string = 'Terapeut' if speaker == 0 else 'Klient'
+            new_row.append(speaker_tag)
 
-                text_tag = html.new_tag('td')
-                text_tag.string = text
-                new_row.append(text_tag)
+            volume_tag = html.new_tag('td')
+            volume_tag.string = f'{volume:.2f}'
+            new_row.append(volume_tag)
 
-                t_body.append(new_row)
+            text_tag = html.new_tag('td')
+            text_tag.string = text
+            new_row.append(text_tag)
+
+            t_body.append(new_row)
 
 
 def add_texts(html, stats, stats_overall, texts, file_name):
@@ -160,7 +188,7 @@ def add_texts(html, stats, stats_overall, texts, file_name):
 
     html.find(id='speech_ratio_overall').string = return_text_by_bounds(texts['speech_ratio']['overall'],
                                                                         stats['speech_ratio'][0][0], stats_overall[
-                                                                            'speech_ratio'])
+                                                                            'speech_ratio']['therapist'])
     reaction_time = np.mean(stats["reactions"][0][:, 1] - stats["reactions"][0][:, 0]) * params.window_stride
 
     html.find(
@@ -207,17 +235,18 @@ def add_attachments(html, file_name):
     vad['download'] = f'{file_name}.rttm'
 
 
-def create_output(stats, stats_overall, texts, template, path, file_name):
+def create_output(stats, stats_overall, texts, template, path, file_name, stats_only):
     """Create single paged html document with overall statistics of session from provided template"""
-    html = load_template(template)
-    copyfile(f'{template.split(".html")[0]}.css', f'{path}/style.css')
 
-    html.find(rel="stylesheet")['href'] = 'style.css'
+    with open(join(path, f'stats/{file_name}.pkl'), 'wb') as file:
+        pickle.dump(stats, file, pickle.HIGHEST_PROTOCOL)
 
-    add_plots(html, stats, stats_overall, path, file_name)
-    add_texts(html, stats, stats_overall, texts, file_name)
-    add_attachments(html, file_name)
-    add_volume_table(html, stats)
-
-    with open(f'{join(path, file_name)}.html', 'w') as output:
-        output.write(str(html))
+    if not stats_only:
+        html = load_template(template)
+        html.find(rel="stylesheet")['href'] = 'style.css'
+        add_texts(html, stats, stats_overall, texts, file_name)
+        add_attachments(html, file_name)
+        add_volume_table(html, stats)
+        add_plots(html, stats, stats_overall, path, file_name)
+        with open(f'{join(path, file_name)}.html', 'w') as output:
+            output.write(str(html))

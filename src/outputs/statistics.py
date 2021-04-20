@@ -1,6 +1,8 @@
 import numpy as np
 from audio_processing.feature_extraction import normalize_energy_to_1
 import params
+import re
+import text2emotion as te
 
 
 def detect_cross_talks(vad, min_len):
@@ -74,7 +76,7 @@ def calculate_speech_ratio(vad):
 
 def calculate_speech_speed(transcriptions):
     """Calculate on transcribed segments speed of speech"""
-    for speaker in transcriptions:
+    for speaker in range(len(transcriptions)):
         for key in transcriptions[speaker]:
             duration = key[1] - key[0]
             text = transcriptions[speaker][key]['text']
@@ -82,12 +84,13 @@ def calculate_speech_speed(transcriptions):
             if text is None:
                 transcriptions[speaker][key]['words_per_segment'] = None
             else:
-                words_per_segment = len(text.split(' ')) / duration
+                text = re.sub(r'%[a-zA-Z]*|{[a-zA-Z ]*}|\[[a-zA-Z ]*]|<[a-zA-Z]*|[^a-zA-Z\s]', "", text).strip()
+                words_per_segment = len(text.split()) / duration
                 transcriptions[speaker][key]['words_per_segment'] = words_per_segment
-    return transcriptions['0'], transcriptions['1']
+                transcriptions[speaker][key]['text'] = text
 
 
-def calculate_speech_len(vad):
+def detect_segment_bounds(vad):
     """Calculate speech lengths of vad segments, join following segments that was not interrupted by second channel,
     and find hesitation in monolog"""
     vad_appended1 = np.append(np.append([1 - vad[0, 0]], vad[:, 0], axis=0), [1 - vad[-1, 0]], axis=0)
@@ -144,6 +147,18 @@ def calculate_speech_len(vad):
         np.array(segments_hesitation[0]), np.array(segments_hesitation[1]))
 
 
+def calculate_segments_len_distribution(bounds):
+    """Calculate joined segments lengths distribution"""
+    speech_bounds_len = (bounds[:, 1] - bounds[:, 0]).astype(np.float)
+    speech_bounds_len *= params.window_stride
+
+    bins = np.array([0, 2, 5, 10, 15, 20, 30, np.iinfo(np.int16).max])
+
+    current_counts, _ = np.histogram(speech_bounds_len, bins=bins)
+    current_counts = (current_counts / np.sum(current_counts)) * 100
+    return current_counts
+
+
 def calculate_reaction_times(bounds):
     """Find silence segments when one speaker waits for second speaker response"""
     responses = ([], [])
@@ -183,62 +198,76 @@ def calculate_reaction_times(bounds):
 def get_texts(transcriptions):
     """Append texts to long string for word clouding"""
     texts = ['', '']
-    for index, _ in enumerate(transcriptions):
-        for transcription in transcriptions[f'{index}']:
-            text = transcriptions[f'{index}'][transcription]['text']
+    for speaker in range(len(transcriptions)):
+        for transcription in transcriptions[speaker]:
+            text = transcriptions[speaker][transcription]['text']
             if text is not None:
-                texts[index] += f' {text}'
-    return tuple(texts)
+                texts[speaker] += f' {text}'
+    non_speech_activity = len(re.findall(r'%[a-zA-z]*', texts[0])), len(re.findall(r'%[a-zA-z]*', texts[1]))
+    return texts, non_speech_activity
 
 
-def find_loud_transcriptions(loudness, energy, vad, transcriptions):
+def calculate_loudness(energy, vad, transcriptions, percentile=90):
     """Add to transcriptions its "loudness" detected by finding the most energetically important segments"""
-    segments = ({}, {})
     energy_mean = [np.mean(energy[:, 0][vad[:, 0]]), np.mean(energy[:, 1][vad[:, 1]])]
-    for index, speaker in enumerate(loudness):
-        # iterate over loud segments
-        for segment in speaker:
-            start = segment[0]
-            end = segment[1]
+    # energy_active_segments1 = np.where(vad[:, 0], energy[:, 0], 0)
+    # energy_active_segments2 = np.where(vad[:, 1], energy[:, 1], 0)
+    #
+    # loudness1 = np.squeeze(np.argwhere(energy_active_segments1 > np.percentile(energy_active_segments1, percentile)))
+    # loudness2 = np.squeeze(np.argwhere(energy_active_segments2 > np.percentile(energy_active_segments2, percentile)))
+    #
+    # sequences1 = np.split(loudness1, np.array(np.where(np.diff(loudness1) > 1)[0]) + 1)
+    # sequences2 = np.split(loudness2, np.array(np.where(np.diff(loudness2) > 1)[0]) + 1)
+    # energy_hard = np.zeros(energy.shape)
+    #
+    # for sequence in sequences1:
+    #     energy_hard[sequence[0]: sequence[-1], 0] = 1
+    #
+    # for sequence in sequences2:
+    #     energy_hard[sequence[0]: sequence[-1], 1] = 1
 
-            # find belonging transcription
-            for transcription in transcriptions[f'{index}']:
-                t_start, t_end = transcription
-
-                # we have not found any transcription for loud segment
-                if t_start > end:
-                    break
-
-                elif t_start <= start and t_end >= end:
-                    # add segment len to transcription ratio
-                    text = transcriptions[f'{index}'][transcription]['text']
-                    if text is not None:
-                        if (t_start, t_end) in segments[index]:
-                            pre_ratio = segments[index][(t_start, t_end)]['ratio']
-                        else:
-                            pre_ratio = 0
-                        segments[index][(t_start, t_end)] = {'text': text,
-                                                             'ratio': pre_ratio + end - start,
-                                                             'energy': np.sum(energy[t_start: t_end, index]) / (
-                                                                     energy_mean[index] * (t_end - t_start))}
-    return segments
+    for speaker in range(len(transcriptions)):
+        for transcription in transcriptions[speaker]:
+            t_start, t_end = transcription
+            transcriptions[speaker][transcription]['energy'] = np.mean(
+                energy[t_start: t_end, speaker] / energy_mean[speaker])
 
 
-def get_stats(vad, transcription, energy, min_segment_len):
+def calculate_client_mood(transcriptions):
+    emotions = np.zeros((len(transcriptions), 5))
+    for index, transcription in enumerate(transcriptions):
+        text = transcriptions[transcription]['text']
+        emotions[index] = list(te.get_emotion(text).values())
+
+    return emotions
+
+
+def interruption_len_hist(interruptions):
+    """Return counts of interruptions"""
+    interruptions_len = (interruptions[:, 1] - interruptions[:, 0]).astype(np.float)
+    interruptions_len *= params.window_stride
+    bins = np.array([0, 0.2, 0.5, 0.8, 1, np.iinfo(np.int16).max])
+    counts, _ = np.histogram(interruptions_len, bins=bins)
+    return counts
+
+
+def get_stats(vad, transcription, energy):
     """Calculate all available statistics"""
-    cross_talks = detect_cross_talks(vad, min_segment_len)
+    texts, fills = get_texts(transcription)
     interruptions = detect_interruptions(vad)
-    loudness = detect_loudness(energy, vad, percentile=80, min_len=min_segment_len)
+    interruptions_len = interruption_len_hist(interruptions[0]), interruption_len_hist(interruptions[1])
     volume_changes = process_volume_changes(energy, vad)
-    loud_transcription_with_speed = find_loud_transcriptions(loudness, energy, vad, transcription)
-    speed = calculate_speech_speed(transcription)
-    texts = get_texts(transcription)
-    speech_bounds, segment_bounds_joined, hesitations = calculate_speech_len(vad)
+    calculate_loudness(energy, vad, transcription)
+    calculate_speech_speed(transcription)
+    speech_bounds, segment_bounds_joined, hesitations = detect_segment_bounds(vad)
+    speech_len = calculate_segments_len_distribution(segment_bounds_joined[0]), calculate_segments_len_distribution(
+        segment_bounds_joined[1])
     reactions = calculate_reaction_times(segment_bounds_joined)
+    client_mood = calculate_client_mood(transcription[0])
 
     speech_ratio = calculate_speech_ratio(vad)
-    return {'cross_talks': cross_talks, 'interruptions': interruptions, 'loudness': loud_transcription_with_speed,
+    return {'interruptions': interruptions, 'interruptions_len': interruptions_len, 'transcription': transcription,
             'speech': speech_bounds, 'speech_joined': segment_bounds_joined, 'hesitations': hesitations,
-            'reactions': reactions, 'volume_changes': volume_changes,
-            'speech_ratio': speech_ratio, 'texts': texts, 'speed': speed,
+            'reactions': reactions, 'volume_changes': volume_changes, 'client_mood': client_mood,
+            'speech_len': speech_len, 'speech_ratio': speech_ratio, 'texts': texts, 'fills': fills,
             'signal': {'len': vad.shape[0] * params.window_stride}}
