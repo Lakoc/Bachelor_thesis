@@ -24,8 +24,7 @@ energy = calculate_energy_over_segments(segmented_tracks)
 normalized_energy = normalize_energy(energy)
 root_mean_squared_energy = calculate_rmse(segmented_tracks)
 
-outputs_text.VAD_adaptive_threshold(root_mean_squared_energy)
-exit(0)
+
 filter_banks, mfcc, power_spectrum = calculate_mfcc(segmented_tracks, sampling_rate, params.cepstral_coef_count)
 delta_mfcc = calculate_delta(mfcc)
 mfcc_dd = append_delta(mfcc, delta_mfcc, calculate_delta(delta_mfcc))
@@ -36,7 +35,6 @@ mfcc_dd = append_delta(mfcc, delta_mfcc, calculate_delta(delta_mfcc))
 # vad = energy_gmm_based_vad(root_mean_squared_energy)
 vad = energy_gmm_based_vad_propagation(root_mean_squared_energy)
 # outputs_text.VAD_gmm(root_mean_squared_energy, signal, sampling_rate)
-# exit(0)
 """Diarization"""
 # diarization = energy_based_diarization_no_interruptions(root_mean_squared_energy, vad)
 # diarization = gmm_mfcc_diarization_no_interruptions_1channel(mfcc, vad, root_mean_squared_energy)
@@ -44,6 +42,7 @@ diarization = gmm_mfcc_diarization_no_interruptions_2channels_single_iteration(m
 # diarization = gmm_mfcc_diarization_no_interruptions_1channel_k_means(mfcc[:, :, 0], vad, root_mean_squared_energy[:, 0])
 # diarization = gmm_mfcc_diarization_no_interruptions_2channels_2iterations(mfcc_dd, vad, root_mean_squared_energy)
 
+exit(0)
 """Outputs"""
 outputs.diarization_to_file(*diarization_with_timing(diarization))
 # outputs.plot_energy_with_wav(segmented_tracks[:, :, 0], energy_over_segments[:, 0])

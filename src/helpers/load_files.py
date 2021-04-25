@@ -1,7 +1,7 @@
 import re
 import numpy as np
 import json
-
+import pickle
 from bs4 import BeautifulSoup
 
 import params
@@ -55,7 +55,7 @@ def load_transcription(path):
 def load_texts(path):
     with open(path, 'r') as json_file:
         data = json.load(json_file)
-        return data
+    return data
 
 
 def load_energy(path):
@@ -64,9 +64,15 @@ def load_energy(path):
 
 
 def load_stats(path):
+    with open(path, 'rb') as file:
+        stats = pickle.load(file)
+    return stats
+
+
+def load_stats_overall(path):
     with open(path, 'r') as json_file:
         data = json.load(json_file)
-        return data
+    return data
 
 
 def load_template(template_path):

@@ -1,7 +1,19 @@
-streda 9
+patek 9
 
 TODO:
-0. Mimoslovni aktivity
-3. Skoky do reci
-1. Emotions https://towardsdatascience.com/text2emotion-python-package-to-detect-emotions-from-textual-data-b2e7b7ce1153
-2. Design
+1. SHAPE of WAV
+2. WER Error
+
+
+
+1. Design
+2. Zoomovani hlasitosti
+3. Cas [min]
+4. Hlasitost polovinu nad polovinu pod, oznacit njevic kladne useky
+5. Sortovani tabulek (staticky podle startu)
+6. Obrazky na full screen
+7. List mimoslovnich slozek
+8. Skoky do reci bary
+9. Rychlost blok na ose x
+10. minutut
+11.Vahani v monologu co to je - od kdy a jak dlouhe jsou, rozsah

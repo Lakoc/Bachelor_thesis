@@ -198,7 +198,7 @@ def fills_difference(fills, signal_len, fills_mean, path):
 def client_mood(mood, path):
     fig, ax = plt.subplots(figsize=(16, 4))
     labels = ['Hněv', 'Strach', 'Štěstí', 'Smutek', 'Překvapení']
-    smoothing_kernel = np.ones(11) / 11
+    smoothing_kernel = np.ones(10) / 10
     for column, label in zip(mood.T, labels):
         column = np.convolve(column, smoothing_kernel, mode='same')
         ax.plot(column, label=label)

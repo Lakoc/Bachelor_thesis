@@ -2,7 +2,6 @@ import numpy as np
 
 from outputs import plots
 from os.path import join
-import pickle
 import params
 from helpers.plot_helpers import word_cloud
 
@@ -235,18 +234,14 @@ def add_attachments(html, file_name):
     vad['download'] = f'{file_name}.rttm'
 
 
-def create_output(stats, stats_overall, texts, template, path, file_name, stats_only):
+def create_output(stats, stats_overall, texts, template, path, file_name):
     """Create single paged html document with overall statistics of session from provided template"""
 
-    with open(join(path, f'stats/{file_name}.pkl'), 'wb') as file:
-        pickle.dump(stats, file, pickle.HIGHEST_PROTOCOL)
-
-    if not stats_only:
-        html = load_template(template)
-        html.find(rel="stylesheet")['href'] = 'style.css'
-        add_texts(html, stats, stats_overall, texts, file_name)
-        add_attachments(html, file_name)
-        add_volume_table(html, stats)
-        add_plots(html, stats, stats_overall, path, file_name)
-        with open(f'{join(path, file_name)}.html', 'w') as output:
-            output.write(str(html))
+    html = load_template(template)
+    html.find(rel="stylesheet")['href'] = 'style.css'
+    add_texts(html, stats, stats_overall, texts, file_name)
+    add_attachments(html, file_name)
+    add_volume_table(html, stats)
+    add_plots(html, stats, stats_overall, path, file_name)
+    with open(f'{join(path, file_name)}.html', 'w') as output:
+        output.write(str(html))

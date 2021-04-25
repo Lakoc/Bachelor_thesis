@@ -7,7 +7,7 @@ class MyGmm(GaussianMixture):
     """Inherit from sklearn class add functionality for means update"""
 
     def update_centers(self, data, shift):
-        """Update means by shift in direction estimated by new data"""
+        """Actualize means by shift in direction estimated by new data"""
 
         # E-step
         weighted_log_gamma = self._estimate_weighted_log_prob(data)

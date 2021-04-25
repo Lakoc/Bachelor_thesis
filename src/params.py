@@ -30,6 +30,7 @@ vad_min_speech_dur = 1
 vad_loop_probability = 0.9
 
 # diarization
+gmm_components = 32
 energy_diff_filter = 50
 gmm_max_iterations = 100
 gmm_error_rate = 1e-3
