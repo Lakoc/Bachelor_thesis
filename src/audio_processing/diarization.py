@@ -6,7 +6,6 @@ from helpers.decorators import timeit
 from helpers.gmm import MyGmm
 from helpers.diarization_helpers import extract_features_for_diarization, likelihood_propagation_matrix, \
     single_gmm_update
-from debug.debug_outputs import plot_6_7k
 from sklearn.cluster import KMeans
 
 
@@ -22,7 +21,6 @@ def energy_based_diarization_no_interruptions(energy, vad):
     """Simple energy based diarization, if voice activity was detected, choose higher energy as speaker"""
     higher_energy = np.argmax(energy, axis=1)
     vad_summed = np.sum(vad, axis=1)
-    plot_6_7k(energy, vad_summed)
     diarized = np.where(vad_summed > 0, higher_energy + 1, 0)
     diarized = ndimage.median_filter(diarized, params.mean_filter_diar)
     return diarized
@@ -91,7 +89,6 @@ def gmm_mfcc_diarization_no_interruptions_1channel_k_means(mfcc, vad, energy):
     return diarization
 
 
-@timeit
 def gmm_mfcc_diarization_no_interruptions_2channels_single_iteration(mfcc, vad, energy):
     """Train Gaussian mixture models with mfcc features over speech segments"""
     active_segments, active_segments_index, features1, features2, energy_difference = extract_features_for_diarization(

@@ -5,8 +5,8 @@ from audio_processing.feature_extraction import calculate_energy_over_segments, 
     calculate_delta, append_delta
 from audio_processing.vad import energy_gmm_based_vad_propagation
 from audio_processing.diarization import gmm_mfcc_diarization_no_interruptions_2channels_single_iteration
-from tests.transcription_test import calculate_success_rate
 import outputs.outputs_text
+from system_tests.transcription_test import calculate_success_rate
 
 
 """Load wav file"""
@@ -19,6 +19,8 @@ signal = process_pre_emphasis(wav_file, params.pre_emphasis_coefficient)
 segmented_tracks = process_hamming(signal, sampling_rate, params.window_size,
                                    params.window_overlap)
 
+outputs_text.GMM_update()
+exit(0)
 """Feature extraction"""
 energy = calculate_energy_over_segments(segmented_tracks)
 normalized_energy = normalize_energy(energy)
@@ -40,9 +42,7 @@ vad = energy_gmm_based_vad_propagation(root_mean_squared_energy)
 # diarization = gmm_mfcc_diarization_no_interruptions_1channel(mfcc, vad, root_mean_squared_energy)
 diarization = gmm_mfcc_diarization_no_interruptions_2channels_single_iteration(mfcc_dd, vad, root_mean_squared_energy)
 # diarization = gmm_mfcc_diarization_no_interruptions_1channel_k_means(mfcc[:, :, 0], vad, root_mean_squared_energy[:, 0])
-# diarization = gmm_mfcc_diarization_no_interruptions_2channels_2iterations(mfcc_dd, vad, root_mean_squared_energy)
 
-exit(0)
 """Outputs"""
 outputs.diarization_to_file(*diarization_with_timing(diarization))
 # outputs.plot_energy_with_wav(segmented_tracks[:, :, 0], energy_over_segments[:, 0])

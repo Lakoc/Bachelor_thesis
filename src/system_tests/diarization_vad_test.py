@@ -1,4 +1,6 @@
 import re
+
+import matplotlib.pyplot as plt
 import numpy as np
 from os.path import join
 
@@ -11,7 +13,7 @@ def extract(line):
     return start, start + int(float(x[2]) * 100), int(x[3])
 
 
-def calculate_success_rate(ref_path, filename, output_path, collar_size, verbose):
+def diar_dictaphone(ref_path, filename, output_path, collar_size, verbose):
     with open(join(output_path, filename), 'r') as hypothesis_file:
         with open(join(ref_path, filename), 'r') as reference_file:
 
@@ -59,20 +61,19 @@ def calculate_success_rate(ref_path, filename, output_path, collar_size, verbose
 
             if verbose:
                 print(
-                    f'Miss rate: {miss_percentage:.3f} (Marked as non-active, although speech was present)')
+                    f'Miss rate: {miss_percentage * 100:.3f}% (Marked as non-active, although speech was present)')
                 print(
-                    f'False alarm: {false_alarm_percentage:.3f} (Marked as active, although speech was '
+                    f'False alarm: {false_alarm_percentage * 100:.3f}% (Marked as active, although speech was '
                     f'not present)')
                 print(
-                    f'Confusion: {confusion_percentage:.3f} (System provided speaker tag and the '
+                    f'Confusion: {confusion_percentage * 100:.3f}% (System provided speaker tag and the '
                     f'reference speech was present, but does not match)')
-                print(f'Diarization error rate:{der:.3f}')
-                print(f'Diarization accuracy:{1 - der:.3f}')
+                print(f'Diarization error rate:{der * 100:.3f}%')
 
-            return miss_percentage, false_alarm_percentage, confusion_percentage, der
+            return miss_percentage, false_alarm_percentage, confusion_percentage, 1 - der
 
 
-def calculate_success_rate_no_overlap(ref_path, filename, output_path, collar_size, verbose):
+def diar_online(ref_path, filename, output_path, collar_size, verbose):
     with open(join(output_path, filename), 'r') as hypothesis_file:
         with open(join(ref_path, filename), 'r') as reference_file:
 
@@ -113,7 +114,6 @@ def calculate_success_rate_no_overlap(ref_path, filename, output_path, collar_si
             miss = np.sum(miss1) + np.sum(miss2)
             miss_percentage = miss / (2 * reference_arr.shape[0])
 
-            print(np.sum(false_alarm1), np.sum(false_alarm2))
             false_alarm = np.sum(false_alarm1) + np.sum(false_alarm2)
             false_alarm_percentage = false_alarm / (2 * reference_arr.shape[0])
 

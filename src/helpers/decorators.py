@@ -9,11 +9,13 @@ def deprecated(func):
     when the function is used."""
     @functools.wraps(func)
     def new_func(*args, **kwargs):
-        warnings.simplefilter('always', DeprecationWarning)  # turn off filter
-        warnings.warn("Call to deprecated function {}.".format(func.__name__),
+        # Turn off warnings filter
+        warnings.simplefilter('always', DeprecationWarning)
+        warnings.warn(f'Call to deprecated function {func.__name__}.',
                       category=DeprecationWarning,
                       stacklevel=2)
-        warnings.simplefilter('default', DeprecationWarning)  # reset filter
+        # Reset warning filter
+        warnings.simplefilter('default', DeprecationWarning)
         return func(*args, **kwargs)
 
     return new_func
@@ -26,8 +28,7 @@ def timeit(func):
         start_time = time.time()
         ret_val = func(*args, **kwargs)
         elapsed_time = time.time() - start_time
-        print('function [{}] finished in {} ms'.format(
-            func.__name__, int(elapsed_time * 1000)))
+        print(f'function [{func.__name__}] finished in {int(elapsed_time * 1000)} ms')
         return ret_val
 
     return new_func

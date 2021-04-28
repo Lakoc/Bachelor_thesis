@@ -1,13 +1,13 @@
 import numpy as np
 from progress.bar import Bar
-from tests.transcription_test_overlap import calculate_success_rate_no_overlap, calculate_success_rate
+from system_tests.diarization_vad_test import diar_dictaphone, diar_online
 from os import listdir
 from os.path import isfile, join
 from argparse import ArgumentParser
 
 if __name__ == '__main__':
 
-    parser = ArgumentParser(description='Module for processing diarization over wav files in provided directory.')
+    parser = ArgumentParser(description='Module for checking Diarization error rate.')
     parser.add_argument('hyp', type=str,
                         help='path of hypothesis rttm files')
     parser.add_argument('ref', type=str,
@@ -24,28 +24,30 @@ if __name__ == '__main__':
 
     error_rate = np.zeros(4)
 
-    print(f'Listing files in {args.ref}')
-    files = [f for f in listdir(args.ref) if isfile(join(args.ref, f)) and f.endswith(f'.rttm')]
+    print(f'Listing files in {args.hyp}')
+    files = [f for f in listdir(args.hyp) if isfile(join(args.hyp, f)) and f.endswith(f'.rttm')]
 
     if len(files) < 1:
         raise FileNotFoundError(f'No rttm files found in {args.hyp}')
 
-    with Bar(f'Calculating success_rate', max=len(files)) as bar:
+    with Bar(f'Calculating diarization error rate', max=len(files)) as bar:
         for file in files:
             file_name = f'{file.split(".")[0].split("/")[-1]}.rttm'
-            print(f'File {file}\n')
+            if args.verbose:
+                print(f'File {file}\n')
             if args.mode == 2:
-                error_rate += calculate_success_rate_no_overlap(args.hyp, file_name, args.ref, args.collar,
-                                                                args.verbose)
+                error_rate += diar_dictaphone(args.ref, file_name, args.hyp, args.collar // 10,
+                                              args.verbose)
             else:
-                error_rate += calculate_success_rate(args.hyp, file_name, args.ref, args.collar, args.verbose)
-            print('\n')
+                error_rate += diar_online(args.ref, file_name, args.hyp, args.collar // 10, args.verbose)
+            if args.verbose:
+                print('\n')
             bar.next()
 
         error_rate /= len(files)
         print(f"""\nOverall error rates\n
         Miss rate: {error_rate[0] * 100:.3f}%
         False alarm rate: {error_rate[1] * 100:.3f}%
-        {f'Diarization error rate: {error_rate[2] * 100:.3f}%' if args.mode == 1 else ''}
+        {f'Confusion error rate: {error_rate[2] * 100:.3f}%' if args.mode == 2 else ''}
         System accuracy: {error_rate[3] * 100:.3f}%
         """)

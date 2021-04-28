@@ -26,6 +26,9 @@ if __name__ == '__main__':
     print(f'Listing files in {args.src}')
     files = [f for f in listdir(args.src) if isfile(join(args.src, f)) and f.endswith(f'.wav')]
 
+    if len(files) < 1:
+        print('No files with extension .wav found')
+
     for file in files:
         file_name = file.split('.wav')[0]
         process_file(args.src, args.dest, file_name, args.language)

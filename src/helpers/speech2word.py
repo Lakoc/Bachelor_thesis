@@ -101,13 +101,13 @@ def process_file(src, dst, file, language):
                             out = '<UNKNOWN>'
                         else:
                             try:
-                                out = r.recognize_sphinx(audio)
+                                # out = r.recognize_sphinx(audio)
                                 """Google API for testing purposes"""
-                                # out = r.recognize_google(audio, language=language)
+                                out = r.recognize_google(audio, language=language)
                             except sr.UnknownValueError:
                                 out = '<UNKNOWN>'
 
                         f2.write(
-                            f'Channel {channel} ({start:.2f}, {duration:.2f}): {out}\n')
+                            f'Channel {channel} {start:.2f}, {duration:.2f}: {out}\n')
                         bar.next()
     clean(tmp_dir)

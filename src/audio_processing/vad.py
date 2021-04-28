@@ -50,7 +50,7 @@ def energy_vad_threshold_with_adaptive_threshold(energy_segments):
     # Lambda min in case of too fast scaling
     lam_min = np.array([0.95, 0.95])
     for index, segment in enumerate(energy_segments):
-        # Actualize e_min and e_max
+        # Update value of e_min and e_max
         e_min = e_min * j
         j = np.where(segment < e_min, 1, j)
         j *= 1.0001
@@ -62,7 +62,7 @@ def energy_vad_threshold_with_adaptive_threshold(energy_segments):
         e_max = np.maximum(e_max, segment)
         e_max_ref = np.maximum(e_max_ref, segment)
 
-        # Actualize lambda and calculate threshold
+        # Update lambda and calculate threshold
         lam = np.maximum(lam_min, (e_max_ref - e_min) / e_max_ref)
         threshold = (1 - lam) * e_max + lam * e_min
 
@@ -108,16 +108,17 @@ def energy_gmm_based_vad(normalized_energy):
     return vad
 
 
-def energy_gmm_based_vad_propagation(energy):
+def energy_gmm_based_vad_propagation(energy, signal):
     """Estimate vad using gaussian mixture model"""
     # Initialization of model
-    weights = np.array([1/3, 1/3, 1/3])
+    weights = np.array([1 / 3, 1 / 3, 1 / 3])
 
     gmm1 = GaussianMixture(n_components=3, max_iter=300, tol=1e-5, weights_init=weights, covariance_type='spherical',
-                          means_init=np.array([np.min(energy[:,0]), (np.max(energy[:,0]) + np.min(energy[:,0])) / 2, np.max(energy[:,0])])[:, np.newaxis])
+                           means_init=np.array([np.min(energy[:, 0]), (np.max(energy[:, 0]) + np.min(energy[:, 0])) / 2,
+                                                np.max(energy[:, 0])])[:, np.newaxis])
     gmm2 = deepcopy(gmm1)
-    gmm2.means_init = np.array([np.min(energy[:,1]), (np.max(energy[:,1]) + np.min(energy[:,1])) / 2, np.max(energy[:,1])])[:, np.newaxis]
-
+    gmm2.means_init = np.array(
+        [np.min(energy[:, 1]), (np.max(energy[:, 1]) + np.min(energy[:, 1])) / 2, np.max(energy[:, 1])])[:, np.newaxis]
 
     # Fit and predict posterior probabilities for each channel
     gmm1.fit(energy[:, 0][:, np.newaxis])
@@ -147,7 +148,6 @@ def energy_gmm_based_vad_propagation(energy):
     vad2 = segments_filter(segments_filter(vad2, params.filter_active, 1), params.filter_non_active, 0)
     vad = np.append(vad1[:, np.newaxis], vad2[:, np.newaxis], axis=1)
 
-    #
     # fig, axs = plt.subplots(nrows=3,  figsize=(10, 6))
     # height = np.max(signal[:, 0])
     # threshold = np.full(likelihood_propagated1.shape[0], params.min_silence_likelihood)
@@ -161,7 +161,7 @@ def energy_gmm_based_vad_propagation(energy):
     # axs[0].legend()
     # axs[0].set_ylabel('Pravděpodobnost')
     #
-    # axs[1].plot(likelihood_propagated2[:, 2], label='Pravděpodobnost ticha')
+    # axs[1].plot(likelihood_propagated2[:, 0], label='Pravděpodobnost ticha')
     # axs[1].plot( threshold, label='Práh')
     # axs[1].spines['right'].set_visible(False)
     # axs[1].spines['top'].set_visible(False)
@@ -191,7 +191,7 @@ def energy_gmm_based_vad_propagation(energy):
     # axs[0].legend()
     # axs[0].set_ylabel('Pravděpodobnost')
     #
-    # axs[1].plot(likelihood_propagated1[:, 2], label='Pravděpodobnost ticha')
+    # axs[1].plot(likelihood_propagated1[:, 0], label='Pravděpodobnost ticha')
     # axs[1].plot(threshold, label='Práh')
     # axs[1].spines['right'].set_visible(False)
     # axs[1].spines['top'].set_visible(False)

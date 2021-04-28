@@ -21,13 +21,13 @@ if __name__ == '__main__':
 
     create_if_not_exist(args.dest)
 
-    print(f'Listing files in {args.source}')
-    files = [f for f in listdir(args.source) if isfile(join(args.source, f)) and f.endswith(f'.wav')]
+    print(f'Listing files in {args.src}')
+    files = [f for f in listdir(args.src) if isfile(join(args.src, f)) and f.endswith(f'.wav')]
 
     if len(files) < 1:
-        raise FileNotFoundError(f'No wav files found in {args.source}')
+        raise FileNotFoundError(f'No wav files found in {args.src}')
 
-    with Bar(f'Processing files in {args.source}', max=len(files)) as bar:
+    with Bar(f'Processing files in {args.src}', max=len(files)) as bar:
         for file in files:
             file_name = file.split('.wav')[0]
             wav_file, sampling_rate = read_wav_file(join(args.src, file))
@@ -37,8 +37,8 @@ if __name__ == '__main__':
             root_mean_squared_energy = calculate_rmse(segmented_tracks)
             np.savetxt(f'{join(args.dest, file_name)}.energy', root_mean_squared_energy)
             _, mfcc, _ = calculate_mfcc(segmented_tracks, sampling_rate, params.cepstral_coef_count)
-            vad = vad_module.energy_gmm_based_vad_propagation(root_mean_squared_energy)
+            vad = vad_module.energy_gmm_based_vad_propagation(root_mean_squared_energy, signal)
             diarization = gmm_mfcc_diarization_no_interruptions_2channels_single_iteration(mfcc, vad,
                                                                                            root_mean_squared_energy)
-            outputs.diarization_to_rttm_file(join(args.dst, file_name), *diarization_with_timing(diarization))
+            outputs.diarization_to_rttm_file(join(args.dest, file_name), *diarization_with_timing(diarization))
             bar.next()

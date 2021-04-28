@@ -71,6 +71,6 @@ if __name__ == '__main__':
                                                params.window_overlap)
             root_mean_squared_energy = calculate_rmse(segmented_tracks)
             np.savetxt(f'{join(args.dest, file_name)}.energy', root_mean_squared_energy)
-            vad = vad_module.energy_gmm_based_vad_propagation(root_mean_squared_energy)
+            vad = vad_module.energy_gmm_based_vad_propagation(root_mean_squared_energy, signal)
             outputs.online_session_to_rttm(join(args.dest, file_name), vad)
             bar.next()

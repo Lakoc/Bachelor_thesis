@@ -5,6 +5,7 @@ from scipy import fftpack, ndimage
 from sklearn.mixture import GaussianMixture
 from helpers.propagation import forward_backward, segments_filter
 import params
+from helpers import gmm
 
 
 def preemphasis(signal, pre_signal, Fs):
@@ -277,7 +278,7 @@ def VAD_sample(signal, Fs):
     window[45000] = 0
     window[58000] = 0
     linear = np.linspace(0, 600000 / Fs, 60000)
-    ax.plot(linear, sig / np.max(sig) , label='Signál')
+    ax.plot(linear, sig / np.max(sig), label='Signál')
     ax.plot(linear, window, label='Řečová aktivita', color='black', linewidth=3.0)
     ax.set_ylabel('Normalizovaná velikost')
     ax.set_xlabel('Čas [s]')
@@ -287,6 +288,38 @@ def VAD_sample(signal, Fs):
     fig.tight_layout()
     plt.savefig('../thesis_text/Anal-za-audio-hovoru-mezi-dv-ma-astn-ky/obrazky-figures/signal_vad.pdf')
     # plt.show()
+
+
+def VAD_collar(signal, Fs):
+    fig, ax = plt.subplots(figsize=(7, 4))
+    sig = signal[40000:100000, 0]
+    window = np.empty(len(sig))
+    window[:] = np.nan
+    window[13000:37500] = 1
+    window[13000] = 0
+    window[37500] = 0
+    window[45000:58000] = 1
+    window[45000] = 0
+    window[58000] = 0
+    linear = np.linspace(0, 600000 / Fs, 60000)
+
+    collar = np.zeros(len(sig))
+    collar[13000 - int(Fs * 0.125):13000 + int(Fs * 0.125)] = 1
+    collar[37500 - int(Fs * 0.125):37500 + int(Fs * 0.125)] = 1
+    collar[45000 - int(Fs * 0.125):45000 + int(Fs * 0.125)] = 1
+    collar[58000 - int(Fs * 0.125):58000 + int(Fs * 0.125)] = 1
+
+    ax.plot(linear, sig / np.max(sig), label='Signál')
+    ax.plot(linear, window, label='Řečová aktivita', color='black', linewidth=3.0)
+    ax.fill_between(linear, np.zeros(60000), collar, color='C1', label='Límec')
+    ax.set_ylabel('Normalizovaná velikost')
+    ax.set_xlabel('Čas [s]')
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+    ax.legend()
+    fig.tight_layout()
+    plt.savefig('../thesis_text/Anal-za-audio-hovoru-mezi-dv-ma-astn-ky/obrazky-figures/collar.pdf')
+    plt.show()
 
 
 def VAD_sample_smooth(signal, Fs):
@@ -371,7 +404,7 @@ def VAD_adaptive_threshold(energy_segments):
     # Lambda min in case of too fast scaling
     lam_min = np.array([0.95, 0.95])
     for index, segment in enumerate(energy_segments):
-        # Actualize e_min and e_max
+        # Update e_min and e_max
         e_min = e_min * j
         j = np.where(segment < e_min, 1, j)
         j *= 1.0001
@@ -383,7 +416,7 @@ def VAD_adaptive_threshold(energy_segments):
         e_max = np.maximum(e_max, segment)
         e_max_ref = np.maximum(e_max_ref, segment)
 
-        # Actualize lambda and calculate threshold
+        # Update lambda and calculate threshold
         lam = np.maximum(lam_min, (e_max_ref - e_min) / e_max_ref)
         threshold = (1 - lam) * e_max + lam * e_min
 
@@ -400,7 +433,7 @@ def VAD_adaptive_threshold(energy_segments):
     time = np.linspace(0, 10, 1000)
     fig, axs = plt.subplots(nrows=2, figsize=(7, 4), sharex=True)
     axs[0].plot(time, e_min_arr[:, 0] / np.max(e_max_arr[:, 0]), label='Minimální energie')
-    axs[0].plot(time, e_max_arr[:, 0]/ np.max(e_max_arr[:, 0]), label='Maximální energie')
+    axs[0].plot(time, e_max_arr[:, 0] / np.max(e_max_arr[:, 0]), label='Maximální energie')
 
     axs[0].set_ylabel('Normalizovaná velikost')
     axs[0].spines['right'].set_visible(False)
@@ -408,22 +441,22 @@ def VAD_adaptive_threshold(energy_segments):
     axs[0].legend()
 
     vad[:, 0][vad[:, 0] == 0] = np.nan
-    vad[181,0] =0
-    vad[212,0] =0
-    vad[332,0] =0
-    vad[467,0] =0
-    vad[533,0] =0
-    vad[609,0] =0
-    vad[636,0] =0
-    vad[713,0] =0
-    vad[759,0] =0
-    vad[837,0] =0
-    vad[931,0] =0
-    vad[999,0] =0
+    vad[181, 0] = 0
+    vad[212, 0] = 0
+    vad[332, 0] = 0
+    vad[467, 0] = 0
+    vad[533, 0] = 0
+    vad[609, 0] = 0
+    vad[636, 0] = 0
+    vad[713, 0] = 0
+    vad[759, 0] = 0
+    vad[837, 0] = 0
+    vad[931, 0] = 0
+    vad[999, 0] = 0
 
-    axs[1].plot(time, energy_segments[:, 0] / np.max(energy_segments[:,0]), label='Energie')
-    axs[1].plot(time, threshold_arr[:, 0] / np.max(energy_segments[:,0]), label='Práh')
-    axs[1].plot(time, vad[:, 0] , label='Řečová aktivita', color='black', linewidth=3.0)
+    axs[1].plot(time, energy_segments[:, 0] / np.max(energy_segments[:, 0]), label='Energie')
+    axs[1].plot(time, threshold_arr[:, 0] / np.max(energy_segments[:, 0]), label='Práh')
+    axs[1].plot(time, vad[:, 0], label='Řečová aktivita', color='black', linewidth=3.0)
     axs[1].set_ylabel('Normalizovaná velikost')
     axs[1].set_xlabel('Čas [s]')
     axs[1].spines['right'].set_visible(False)
@@ -586,3 +619,53 @@ def cross_talk(signal, Fs):
     fig.tight_layout()
     plt.savefig('../thesis_text/Anal-za-audio-hovoru-mezi-dv-ma-astn-ky/obrazky-figures/cross_talk.pdf')
     # plt.show()
+
+
+def GMM_update():
+    fig, ax = plt.subplots(figsize=(7,4))
+    gmm_new = gmm.MyGmm(n_components=2)
+
+    # Create train data
+    mean = [0, 0]
+    cov = [[1, 0], [0, 1]]
+    x1, y1 = np.random.multivariate_normal(mean, cov, 100).T
+    features1 = np.append(x1.reshape(-1, 1), y1.reshape(-1, 1), axis=1)
+
+    mean = [30, 0]
+    cov = [[1, 0], [0, 1]]
+    x2, y2 = np.random.multivariate_normal(mean, cov, 100).T
+    features2 = np.append(x2.reshape(-1, 1), y2.reshape(-1, 1), axis=1)
+
+    features = np.append(features1, features2, axis=0)
+
+    # Fit gmm
+    gmm_new.fit(features)
+
+    x3, y3 = np.random.multivariate_normal(gmm_new.means_[0], gmm_new.covariances_[0], 100).T
+    x4, y4 = np.random.multivariate_normal(gmm_new.means_[1], gmm_new.covariances_[1], 100).T
+    ax.scatter(x3, y3, label='1. komponenta GMM', color='#4169E1')
+    ax.scatter(x4, y4, label='2. komponenta GMM',  color='#FF8C00')
+
+    # Data to update means
+    mean = [10, 10]
+    cov = [[1, 0], [0, 1]]
+    x5, y5 = np.random.multivariate_normal(mean, cov, 100).T
+    data_to_fit = np.append(x5.reshape(-1, 1), y5.reshape(-1, 1), axis=1)
+
+    ax.scatter(x5, y5, label='Nová data', color='C2')
+
+    gmm_new.update_centers(data_to_fit, 0.5)
+
+    # Plot updated gmms
+    x3, y3 = np.random.multivariate_normal(gmm_new.means_[0], gmm_new.covariances_[0], 100).T
+    x4, y4 = np.random.multivariate_normal(gmm_new.means_[1], gmm_new.covariances_[1], 100).T
+    ax.scatter(x3, y3, label='1. komponenta GMM po aktualizaci', color='#1E90FF')
+    ax.scatter(x4, y4, label='2. komponenta GMM po aktualizaci', color='#FFD700')
+
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+    ax.legend()
+    ax.axis('equal')
+    ax.set_xlabel('Hodnota na ose X')
+    ax.set_ylabel('Hodnota na ose Y')
+    plt.savefig('../thesis_text/Anal-za-audio-hovoru-mezi-dv-ma-astn-ky/obrazky-figures/gmm_update.pdf')
