@@ -1,6 +1,9 @@
+# input file path
+file_path = 'data_to_delete/transcribed/same_room/session1/stereo.wav'
+transcription_path = 'data_to_delete/transcribed/same_room/session1/transcription.trs'
+
 # preprocessing
 pre_emphasis_coefficient = 0.97
-
 window_size = 0.02  # 20ms
 window_overlap = 0.01  # 10ms
 window_stride = window_size - window_overlap  # 10ms
@@ -12,19 +15,27 @@ lifter = 22
 delta_neighbours = 2
 
 # energy vad
+# -thresholding
 energy_threshold_interval = 0.1  # 100ms
-med_filter = 0.2
+energy_threshold = 0.006
 
+# -adaptive
+growth_coefficient = 1.1
+descent_coefficient = 0.9
 
-# maximum system sensitivity
-min_silence_likelihood = 0.2
-transition_matrix = [[0.9, 0.05, 0.05], [0.05, 0.9, 0.05], [0.05, 0.05, 0.9]]
-filter_non_active = 0.1
-filter_active = 0.1
+# -filtration
+vad_med_filter = 0.3  # 100ms
+vad_filter_non_active = 0.25  # 100ms
+vad_filter_active = 0.1  # 100ms
 
-# vad hmm
-vad_min_speech_dur = 1
+# --forward-backward settings
+vad_min_speech_dur = 1  # 1 segment
 vad_loop_probability = 0.9
+vad_transition_matrix = [[0.9, 0.05, 0.05], [0.05, 0.9, 0.05], [0.05, 0.05, 0.9]]
+
+# -gmm
+vad_component_to_threshold = 2  # silence =0, speech 2
+vad_min_likelihood = 0.2
 
 # diarization
 gmm_components = 32

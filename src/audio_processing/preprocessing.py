@@ -24,7 +24,6 @@ def process_hamming(signal, sampling_rate, window_size, window_overlap):
     window_stride = window_size - window_overlap
 
     signal_len = len(signal)
-
     # size_of_signal = ((number_of_frames - 1) * (window_size - window_overlap)) + window_size
     number_of_frames = int(np.ceil((signal_len - window_size) / window_stride + 1))
     signal_len_new = (number_of_frames - 1) * window_stride + window_size
@@ -42,5 +41,6 @@ def process_hamming(signal, sampling_rate, window_size, window_overlap):
     windows = signal_padded[indices.astype(np.int32, copy=False)]
 
     # apply hamming window function on segments
-    windows = windows.transpose(0, 2, 1) * np.hamming(window_size)
+    windows = windows.transpose(0, 2, 1)
+    windows *= np.hamming(window_size)
     return windows.transpose(0, 2, 1)

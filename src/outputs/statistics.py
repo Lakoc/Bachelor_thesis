@@ -57,6 +57,7 @@ def detect_loudness(energy, vad, percentile=90, min_len=20):
 
 def process_volume_changes(energy, vad):
     """Get normalized energy of voice active segments"""
+    # TODO: Fix
     log_energy1 = normalize_energy_to_1(energy[:, 0])
     log_energy2 = normalize_energy_to_1(energy[:, 1])
     energy_active_segments1 = np.where(vad[:, 0], log_energy1, 0)

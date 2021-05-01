@@ -7,7 +7,7 @@ from audio_processing import vad as vad_module
 from outputs import outputs
 import params
 from audio_processing.preprocessing import process_hamming, read_wav_file, process_pre_emphasis
-from audio_processing.feature_extraction import calculate_rmse
+from audio_processing.feature_extraction import calculate_rmse, normalize_energy_to_0_1
 from progress.bar import Bar
 from argparse import ArgumentParser
 
@@ -69,8 +69,13 @@ if __name__ == '__main__':
             signal = process_pre_emphasis(wav_file, params.pre_emphasis_coefficient)
             segmented_tracks = process_hamming(signal, sampling_rate, params.window_size,
                                                params.window_overlap)
+            # del signal
             root_mean_squared_energy = calculate_rmse(segmented_tracks)
+            del segmented_tracks
             np.savetxt(f'{join(args.dest, file_name)}.energy', root_mean_squared_energy)
-            vad = vad_module.energy_gmm_based_vad_propagation(root_mean_squared_energy, signal)
+            vad = vad_module.energy_vad_threshold_with_adaptive_threshold(
+                normalize_energy_to_0_1(root_mean_squared_energy))
+            # vad = vad_module.apply_median_filter(vad)
+            # vad = vad_module.apply_silence_speech_removal(vad)
             outputs.online_session_to_rttm(join(args.dest, file_name), vad)
             bar.next()

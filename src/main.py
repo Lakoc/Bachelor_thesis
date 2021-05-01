@@ -6,7 +6,7 @@ from audio_processing.feature_extraction import calculate_energy_over_segments, 
 from audio_processing.vad import energy_gmm_based_vad_propagation
 from audio_processing.diarization import gmm_mfcc_diarization_no_interruptions_2channels_single_iteration
 import outputs.outputs_text
-from system_tests.transcription_test import calculate_success_rate
+# from system_tests.transcription_test import calculate_success_rate
 
 
 """Load wav file"""
@@ -19,14 +19,14 @@ signal = process_pre_emphasis(wav_file, params.pre_emphasis_coefficient)
 segmented_tracks = process_hamming(signal, sampling_rate, params.window_size,
                                    params.window_overlap)
 
-outputs_text.GMM_update()
-exit(0)
+
 """Feature extraction"""
 energy = calculate_energy_over_segments(segmented_tracks)
 normalized_energy = normalize_energy(energy)
 root_mean_squared_energy = calculate_rmse(segmented_tracks)
 
-
+outputs_text.VAD_sample_smooth( signal, sampling_rate)
+exit(0)
 filter_banks, mfcc, power_spectrum = calculate_mfcc(segmented_tracks, sampling_rate, params.cepstral_coef_count)
 delta_mfcc = calculate_delta(mfcc)
 mfcc_dd = append_delta(mfcc, delta_mfcc, calculate_delta(delta_mfcc))

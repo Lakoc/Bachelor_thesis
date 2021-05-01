@@ -6,6 +6,9 @@ from sklearn.mixture import GaussianMixture
 from helpers.propagation import forward_backward, segments_filter
 import params
 from helpers import gmm
+from audio_processing.preprocessing import process_hamming
+from audio_processing.feature_extraction import calculate_rmse, normalize_energy_to_0_1
+from audio_processing.vad import energy_vad_threshold
 
 
 def preemphasis(signal, pre_signal, Fs):
@@ -324,26 +327,35 @@ def VAD_collar(signal, Fs):
 
 def VAD_sample_smooth(signal, Fs):
     fig, ax = plt.subplots(figsize=(7, 4))
-    sig = signal[40000:500000, 0]
+    sig = signal[40000:500000, :]
+    segmented_tracks = process_hamming(sig, Fs, params.window_size,
+                                       params.window_overlap)
+    energy = normalize_energy_to_0_1(calculate_rmse(segmented_tracks))
+    vad = energy_vad_threshold(energy, threshold=0.03).astype(float)
+
     window = np.empty(len(sig))
     window[:] = np.nan
     window[13000:125000] = 1
     window[125000] = 0
     window[13000] = 0
-    window[160000:195000] = 1
-    window[160000] = 0
-    window[195000] = 0
-    window[243000:390000] = 1
-    window[390000] = 0
+    window[162000:194000] = 1
+    window[162000] = 0
+    window[194000] = 0
+    window[243000:390500] = 1
+    window[390500] = 0
     window[243000] = 0
-    window[440000:] = 1
-    window[440000] = 0
+    window[445000:] = 1
+    window[445000] = 0
     window[-1] = 0
 
     linear = np.linspace(0, (500000 - 40000) / Fs, (500000 - 40000))
+    linear_vad = np.linspace(0, (500000 - 40000) / Fs, vad.shape[0])
 
-    ax.plot(linear, sig / np.max(sig), label='Signál')
+    sig = sig[:, 0]
+    ax.plot(linear, sig / np.max(sig), label='Signál', color='C0')
     ax.plot(linear, window, label='Vyhlazená detekce řečové aktivity', color='black', linewidth=3.0)
+    ax.fill_between(linear_vad, np.zeros(vad.shape[0]), vad[:, 0], label='Původní detekce řečové aktivity',
+                    color='gray', alpha=0.7)
     ax.set_ylabel('Normalizovaná velikost')
     ax.set_xlabel('Čas [s]')
     ax.spines['right'].set_visible(False)
@@ -355,23 +367,27 @@ def VAD_sample_smooth(signal, Fs):
 
 
 def VAD_threshold(signal, Fs):
-    fig, ax = plt.subplots(figsize=(7, 4))
+    fig, ax = plt.subplots(figsize=(8, 4))
     linear = np.linspace(0, (100000 - 40000) / Fs, (100000 - 40000))
 
-    sig = signal[40000:100000, 0]
-    window = np.empty(len(sig))
-    window[:] = np.nan
-    window[13200:36300] = 1
-    window[13200] = 0
-    window[36300] = 0
-    window[45500:58000] = 1
-    window[45500] = 0
-    window[58000] = 0
-    threshold = np.zeros(len(sig))
-    threshold += 0.05
-    ax.plot(linear, sig / np.max(sig), label='Signál')
-    ax.plot(linear, window, label='Řečová aktivita', color='black', linewidth=3.0)
-    ax.plot(linear, threshold, label='Práh', color='C1')
+    sig = signal[40000:100000, :]
+    segmented_tracks = process_hamming(sig, Fs, params.window_size,
+                                       params.window_overlap)
+    energy = normalize_energy_to_0_1(calculate_rmse(segmented_tracks))
+    vad = energy_vad_threshold(energy, threshold=0.05).astype(float)
+    vad[vad == 0] = np.nan
+    vad[83] = 0
+    vad[222] = 0
+    vad[283] = 0
+    vad[360] = 0
+    linear_vad = np.linspace(0, (100000 - 40000) / Fs, vad.shape[0])
+
+    threshold = np.zeros(energy.shape[0])
+    threshold[:] = 0.05
+    ax.plot(linear, sig[:, 0] / np.max(sig[:, 0]), label='Signál')
+    ax.plot(linear_vad, vad[:, 0], label='Řečová aktivita', color='black', linewidth=2.0)
+    ax.plot(linear_vad, energy[:, 0], label='Energie v rozsahu <0;1>')
+    ax.plot(linear_vad, threshold, label='Práh')
     ax.set_ylabel('Normalizovaná velikost')
     ax.set_xlabel('Čas [s]')
     ax.spines['right'].set_visible(False)
@@ -435,7 +451,7 @@ def VAD_adaptive_threshold(energy_segments):
     axs[0].plot(time, e_min_arr[:, 0] / np.max(e_max_arr[:, 0]), label='Minimální energie')
     axs[0].plot(time, e_max_arr[:, 0] / np.max(e_max_arr[:, 0]), label='Maximální energie')
 
-    axs[0].set_ylabel('Normalizovaná velikost')
+    axs[0].set_ylabel('Velikost')
     axs[0].spines['right'].set_visible(False)
     axs[0].spines['top'].set_visible(False)
     axs[0].legend()
@@ -457,7 +473,7 @@ def VAD_adaptive_threshold(energy_segments):
     axs[1].plot(time, energy_segments[:, 0] / np.max(energy_segments[:, 0]), label='Energie')
     axs[1].plot(time, threshold_arr[:, 0] / np.max(energy_segments[:, 0]), label='Práh')
     axs[1].plot(time, vad[:, 0], label='Řečová aktivita', color='black', linewidth=3.0)
-    axs[1].set_ylabel('Normalizovaná velikost')
+    axs[1].set_ylabel('Velikost')
     axs[1].set_xlabel('Čas [s]')
     axs[1].spines['right'].set_visible(False)
     axs[1].spines['top'].set_visible(False)
@@ -493,7 +509,7 @@ def VAD_gmm(energy, signal, Fs):
     vad1 = likelihood_propagated1[:, 0] < params.min_silence_likelihood
 
     # Smooth activity segments and create arr containing both speakers
-    vad1 = segments_filter(segments_filter(vad1, params.filter_non_active, 1), params.filter_active, 0)
+    vad1 = segments_filter(segments_filter(vad1, params.vad_filter_non_active, 1), params.vad_filter_active, 0)
 
     fig, axs = plt.subplots(nrows=3, sharex=True, figsize=(10, 6))
     height = np.max(signal[0:Fs * 20:, 0])
@@ -523,6 +539,7 @@ def VAD_gmm(energy, signal, Fs):
     axs[2].set_ylabel('Velikost')
     axs[2].legend()
     axs[2].set_xlabel('Čas [s]')
+    fig.tight_layout()
     plt.savefig('../thesis_text/Anal-za-audio-hovoru-mezi-dv-ma-astn-ky/obrazky-figures/vad_gmm.pdf')
 
 
@@ -622,7 +639,7 @@ def cross_talk(signal, Fs):
 
 
 def GMM_update():
-    fig, ax = plt.subplots(figsize=(7,4))
+    fig, ax = plt.subplots(figsize=(7, 4))
     gmm_new = gmm.MyGmm(n_components=2)
 
     # Create train data
@@ -644,7 +661,7 @@ def GMM_update():
     x3, y3 = np.random.multivariate_normal(gmm_new.means_[0], gmm_new.covariances_[0], 100).T
     x4, y4 = np.random.multivariate_normal(gmm_new.means_[1], gmm_new.covariances_[1], 100).T
     ax.scatter(x3, y3, label='1. komponenta GMM', color='#4169E1')
-    ax.scatter(x4, y4, label='2. komponenta GMM',  color='#FF8C00')
+    ax.scatter(x4, y4, label='2. komponenta GMM', color='#FF8C00')
 
     # Data to update means
     mean = [10, 10]

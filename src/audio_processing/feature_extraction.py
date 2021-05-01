@@ -21,16 +21,16 @@ def calculate_rmse(segments):
 def normalize_energy(energy):
     """Normalize energy over segments"""
     normalized_energy = np.copy(energy)
-    normalized_energy -= normalized_energy.mean()
-    normalized_energy /= normalized_energy.std()
+    normalized_energy -= normalized_energy.mean(axis=0)
+    normalized_energy /= normalized_energy.std(axis=0)
     return normalized_energy
 
 
-def normalize_energy_to_1(energy):
-    """Normalize energy over segments to interval <-1;1>"""
+def normalize_energy_to_0_1(energy):
+    """Normalize energy over segments to interval <0;1>"""
     normalized_energy = np.copy(energy)
-    normalized_energy -= normalized_energy.mean()
-    normalized_energy /= np.max(normalized_energy)
+    normalized_energy -= np.min(normalized_energy,axis=0)
+    normalized_energy /= np.max(normalized_energy, axis=0)
     return normalized_energy
 
 
@@ -154,4 +154,3 @@ def calculate_sign_changes(segmented_tracks):
             # check for sign by comparing sign bit of two neighbor numbers
             sign_changes[track_index][segment_index] = np.sum(np.diff(np.signbit(segment)))
     return sign_changes
-
