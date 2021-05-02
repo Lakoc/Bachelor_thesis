@@ -87,7 +87,6 @@ def diar_online(ref_path, filename, output_path, collar_size, verbose):
 
             for line in reference:
                 reference_extracted.append(extract(line))
-
             max_val = max(hypothesis_extracted[-1][1], reference_extracted[-1][1])
 
             reference_arr = np.zeros((max_val, 2))

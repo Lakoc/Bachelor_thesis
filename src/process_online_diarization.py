@@ -7,45 +7,9 @@ from audio_processing import vad as vad_module
 from outputs import outputs
 import params
 from audio_processing.preprocessing import process_hamming, read_wav_file, process_pre_emphasis
-from audio_processing.feature_extraction import calculate_rmse, normalize_energy_to_0_1
+from audio_processing.feature_extraction import calculate_rmse, normalize_energy_to_0_1, normalize_energy
 from progress.bar import Bar
 from argparse import ArgumentParser
-
-# with open(join(path, f'{name.split(".")[0]}.rttm'), 'r') as reference_file:
-#     reference = reference_file.readlines()
-#     reference_extracted = []
-#
-#     regex = re.compile(r'SPEAKER \S* \d ([\d.]*) ([\d.]*) <NA> <NA> (\d).*')
-#
-#     def extract(line):
-#         x = regex.search(line)
-#         start = int(float(x[1]) * 1000)
-#         return start, start + int(float(x[2]) * 1000), int(x[3])
-#
-#     for line in reference:
-#         reference_extracted.append(extract(line))
-#
-#     max_val = reference_extracted[-1][1]
-#
-#     reference_arr = np.zeros(max_val)
-#
-#     for speech_tuple in reference_extracted:
-#         from_t, to_t, value = speech_tuple
-#         if value == 2:
-#             reference_arr[from_t: to_t] = value
-#
-#     fig, axs = plt.subplots(nrows=2)
-#     height = np.max(wav_file[:, 1])
-#
-#     time1 = np.linspace(0, wav_file.shape[0], vad.shape[0])
-#     axs[0].plot(time1, vad[:, 1])
-#     axs[0].plot(wav_file[:, 1] / height)
-#
-#     time2 = np.linspace(0, wav_file.shape[0], reference_arr.shape[0])
-#     axs[1].plot(time2, reference_arr)
-#     axs[1].plot(wav_file[:, 1] / height)
-#     plt.show()
-
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='Module for processing diarization over wav files in provided directory.')
@@ -69,13 +33,24 @@ if __name__ == '__main__':
             signal = process_pre_emphasis(wav_file, params.pre_emphasis_coefficient)
             segmented_tracks = process_hamming(signal, sampling_rate, params.window_size,
                                                params.window_overlap)
-            # del signal
+            del signal
             root_mean_squared_energy = calculate_rmse(segmented_tracks)
             del segmented_tracks
             np.savetxt(f'{join(args.dest, file_name)}.energy', root_mean_squared_energy)
-            vad = vad_module.energy_vad_threshold_with_adaptive_threshold(
-                normalize_energy_to_0_1(root_mean_squared_energy))
-            # vad = vad_module.apply_median_filter(vad)
-            # vad = vad_module.apply_silence_speech_removal(vad)
+
+            """Thresholding"""
+            # vad = vad_module.energy_vad_threshold(normalize_energy_to_0_1(
+            #     root_mean_squared_energy), threshold=params.energy_threshold)
+            """Adaptive threshold"""
+            # vad = vad_module.energy_vad_threshold_with_adaptive_threshold(normalize_energy_to_0_1(
+            #     root_mean_squared_energy))
+            """Gmm based VAD"""
+            vad = vad_module.energy_gmm_based(
+                normalize_energy_to_0_1(root_mean_squared_energy), propagation=True)
+
+            """Smoothing the vad output"""
+            vad = vad_module.apply_median_filter(vad)
+            vad = vad_module.apply_silence_speech_removal(vad)
+
             outputs.online_session_to_rttm(join(args.dest, file_name), vad)
             bar.next()

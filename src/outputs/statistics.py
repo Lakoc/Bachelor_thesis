@@ -1,5 +1,5 @@
 import numpy as np
-from audio_processing.feature_extraction import normalize_energy_to_1
+from audio_processing.feature_extraction import normalize_energy_to_
 import params
 import re
 import text2emotion as te
@@ -204,7 +204,7 @@ def get_texts(transcriptions):
             text = transcriptions[speaker][transcription]['text']
             if text is not None:
                 texts[speaker] += f' {text}'
-    non_speech_activity = len(re.findall(r'%[a-zA-z]*', texts[0])), len(re.findall(r'%[a-zA-z]*', texts[1]))
+    non_speech_activity = len(re.findall(r'[%_][a-zA-z]*', texts[0])), len(re.findall(r'[%_][a-zA-z]*', texts[1]))
     return texts, non_speech_activity
 
 

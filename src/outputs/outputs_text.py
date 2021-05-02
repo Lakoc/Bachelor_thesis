@@ -399,54 +399,49 @@ def VAD_threshold(signal, Fs):
 
 
 def VAD_adaptive_threshold(energy_segments):
-    energy_segments = energy_segments[0:1000, :]
+    energy_segments = energy_segments[0:800, :]
     med_filter = 0.1  # 250 ms
     window_stride = 0.01  # 10ms
 
-    # Initial energies
-    e_min = np.array([np.finfo(float).max, np.finfo(float).max])
-    e_max = np.array([np.finfo(float).min, np.finfo(float).min])
-    e_max_ref = e_max
-
-    # Scaling factors
-    j = np.array([1, 1], dtype=float)
-    k = np.array([1, 1], dtype=float)
-
-    vad = np.zeros(energy_segments.shape, dtype="i1")
     threshold_arr = np.zeros(energy_segments.shape)
     e_min_arr = np.zeros(energy_segments.shape)
     e_max_arr = np.zeros(energy_segments.shape)
 
-    # Lambda min in case of too fast scaling
-    lam_min = np.array([0.95, 0.95])
+    # Initial energies
+    e_min = np.array([np.finfo(float).max, np.finfo(float).max])
+    e_max = np.array([np.finfo(float).min, np.finfo(float).min])
+
+    # Scaling factors
+    j = np.array([1, 1], dtype=float)
+
+    # Create output array
+    vad = np.zeros(energy_segments.shape, dtype="i1")
+
+    # Lambda init
+    lam = np.array([params.lam, params.lam])
     for index, segment in enumerate(energy_segments):
-        # Update e_min and e_max
+        # Update value of e_min and j
         e_min = e_min * j
         j = np.where(segment < e_min, 1, j)
-        j *= 1.0001
-        e_min = np.minimum(e_min, segment)
+        j *= params.growth_coefficient
 
-        e_max_ref = e_max_ref * k
-        k = np.where(segment > e_max_ref, 1, k)
-        k *= 0.999
+        e_min = np.minimum(e_min, segment)
+        e_min_arr[index] = e_min
         e_max = np.maximum(e_max, segment)
-        e_max_ref = np.maximum(e_max_ref, segment)
+        e_max_arr[index] = e_max
 
         # Update lambda and calculate threshold
-        lam = np.maximum(lam_min, (e_max_ref - e_min) / e_max_ref)
         threshold = (1 - lam) * e_max + lam * e_min
-
         threshold_arr[index] = threshold
-        e_max_arr[index] = e_max_ref
-        e_min_arr[index] = e_min
-
-        # 1 - speech, 0 - non speech
         vad[index] = segment > threshold
 
     # apply median filter to remove unwanted
-    vad = ndimage.median_filter(vad, int(round(med_filter / window_stride) * 4)).astype(np.float)
+    vad = ndimage.median_filter(vad[:, 0], int(round(med_filter / window_stride) * 2)).astype(np.float)
+    vad[vad == 0] = np.nan
 
-    time = np.linspace(0, 10, 1000)
+    vad[45] = vad[118] = vad[136] = vad[210] = vad[220] = vad[253] = vad[330] = vad[472] = vad[530] = vad[617] = vad[
+        635] = vad[724] = vad[755] = vad[-1] = 0
+    time = np.linspace(0, 8, 800)
     fig, axs = plt.subplots(nrows=2, figsize=(7, 4), sharex=True)
     axs[0].plot(time, e_min_arr[:, 0] / np.max(e_max_arr[:, 0]), label='Minimální energie')
     axs[0].plot(time, e_max_arr[:, 0] / np.max(e_max_arr[:, 0]), label='Maximální energie')
@@ -456,23 +451,9 @@ def VAD_adaptive_threshold(energy_segments):
     axs[0].spines['top'].set_visible(False)
     axs[0].legend()
 
-    vad[:, 0][vad[:, 0] == 0] = np.nan
-    vad[181, 0] = 0
-    vad[212, 0] = 0
-    vad[332, 0] = 0
-    vad[467, 0] = 0
-    vad[533, 0] = 0
-    vad[609, 0] = 0
-    vad[636, 0] = 0
-    vad[713, 0] = 0
-    vad[759, 0] = 0
-    vad[837, 0] = 0
-    vad[931, 0] = 0
-    vad[999, 0] = 0
-
     axs[1].plot(time, energy_segments[:, 0] / np.max(energy_segments[:, 0]), label='Energie')
     axs[1].plot(time, threshold_arr[:, 0] / np.max(energy_segments[:, 0]), label='Práh')
-    axs[1].plot(time, vad[:, 0], label='Řečová aktivita', color='black', linewidth=3.0)
+    axs[1].plot(time, vad, label='Řečová aktivita', color='black', linewidth=3.0)
     axs[1].set_ylabel('Velikost')
     axs[1].set_xlabel('Čas [s]')
     axs[1].spines['right'].set_visible(False)

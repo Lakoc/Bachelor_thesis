@@ -20,22 +20,21 @@ energy_threshold_interval = 0.1  # 100ms
 energy_threshold = 0.006
 
 # -adaptive
-growth_coefficient = 1.1
-descent_coefficient = 0.9
+growth_coefficient = 1.0001
+lam = 0.99
 
 # -filtration
 vad_med_filter = 0.3  # 100ms
-vad_filter_non_active = 0.25  # 100ms
+vad_filter_non_active = 0.4  # 100ms
 vad_filter_active = 0.1  # 100ms
 
 # --forward-backward settings
-vad_min_speech_dur = 1  # 1 segment
-vad_loop_probability = 0.9
-vad_transition_matrix = [[0.9, 0.05, 0.05], [0.05, 0.9, 0.05], [0.05, 0.05, 0.9]]
+vad_min_speech_dur = 1
+p_loop = 0.95
 
 # -gmm
-vad_component_to_threshold = 2  # silence =0, speech 2
-vad_min_likelihood = 0.2
+vad_component_to_threshold = 0  # silence 0, noise 1, speech 2
+vad_min_likelihood = 0.95
 
 # diarization
 gmm_components = 32

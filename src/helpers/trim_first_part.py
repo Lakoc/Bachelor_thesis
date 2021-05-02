@@ -55,4 +55,4 @@ for file in files:
                                 f'SPEAKER {file} {speaker} {start_time:.2f} {duration:.2f} <NA> <NA> {speaker} <NA> <NA>\n')
                         elif start_time < part / sampling_rate:
                             fr1.write(
-                                f'SPEAKER {file} {speaker} {start_time:.2f} {part / sampling_rate:.2f} <NA> <NA> {speaker} <NA> <NA>\n')
+                                f'SPEAKER {file} {speaker} {start_time:.2f} {(part / sampling_rate) - start_time:.2f} <NA> <NA> {speaker} <NA> <NA>\n')

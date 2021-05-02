@@ -1,11 +1,13 @@
 from outputs import outputs, outputs_text
 import params
 from audio_processing.preprocessing import process_hamming, read_wav_file, process_pre_emphasis
-from audio_processing.feature_extraction import calculate_energy_over_segments, normalize_energy, calculate_rmse, calculate_mfcc, \
+from audio_processing.feature_extraction import calculate_energy_over_segments, normalize_energy, calculate_rmse, \
+    calculate_mfcc, \
     calculate_delta, append_delta
-from audio_processing.vad import energy_gmm_based_vad_propagation
+# from audio_processing.vad import energy_gmm_based_vad_propagation
 from audio_processing.diarization import gmm_mfcc_diarization_no_interruptions_2channels_single_iteration
 import outputs.outputs_text
+
 # from system_tests.transcription_test import calculate_success_rate
 
 
@@ -19,13 +21,12 @@ signal = process_pre_emphasis(wav_file, params.pre_emphasis_coefficient)
 segmented_tracks = process_hamming(signal, sampling_rate, params.window_size,
                                    params.window_overlap)
 
-
 """Feature extraction"""
 energy = calculate_energy_over_segments(segmented_tracks)
 normalized_energy = normalize_energy(energy)
 root_mean_squared_energy = calculate_rmse(segmented_tracks)
 
-outputs_text.VAD_sample_smooth( signal, sampling_rate)
+outputs_text.VAD_adaptive_threshold(root_mean_squared_energy)
 exit(0)
 filter_banks, mfcc, power_spectrum = calculate_mfcc(segmented_tracks, sampling_rate, params.cepstral_coef_count)
 delta_mfcc = calculate_delta(mfcc)
