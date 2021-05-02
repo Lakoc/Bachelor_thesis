@@ -12,8 +12,8 @@ transcription_regex = re.compile(r'Channel (\d) ([\d.]*), ([\d.]*): (.*)')
 
 def extract_rttm_line(line):
     match = rttm_regex.search(line)
-    start = int(float(match[1]) / params.window_stride)
-    return start, start + int(float(match[2]) / params.window_stride), int(match[3])
+    start = int(round(float(match[1]) / params.window_stride))
+    return start, start + int(round(float(match[2]) / params.window_stride)), int(match[3])
 
 
 def extract_transcription_line(line):

@@ -8,10 +8,16 @@ with open(input_file, 'r') as source:
     with open(output_file, 'w') as destination:
         content = source.read()
         soup = BeautifulSoup(content, "lxml")
+        file_name = input_file.split('.wav')[0].split('/')[-1]
         items = soup.findAll('turn'
                              )
         reference = [(item.get("speaker"), item.get("starttime"), item.get("endtime")) for item in
                      items]
         for line in reference:
-            if line[0] is not None:
-                destination.write(f'SPEAKER ES2005b 1 {float(line[1]):.3f} {float(line[2]) - float(line[1]):.3f} <NA> <NA> {line[0]} <NA> <NA>\n')
+            if line[0] != 'spk2':
+                speaker = int(line[0][-1])
+                if speaker == 3:
+                    speaker = 1
+                else:
+                    speaker = 2
+                destination.write(f'SPEAKER {file_name} {speaker} {float(line[1]):.3f} {float(line[2]) - float(line[1]):.3f} <NA> <NA> {speaker} <NA> <NA>\n')

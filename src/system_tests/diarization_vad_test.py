@@ -1,17 +1,6 @@
-import re
-
-import matplotlib.pyplot as plt
 import numpy as np
 from os.path import join
-
-regex = re.compile(r'SPEAKER \S* \d ([\d.]*) ([\d.]*) <NA> <NA> (\d).*')
-
-
-def extract(line):
-    x = regex.search(line)
-    start = int(float(x[1]) * 100)
-    return start, start + int(float(x[2]) * 100), int(x[3])
-
+from helpers.load_files import extract_rttm_line
 
 def diar_dictaphone(ref_path, filename, output_path, collar_size, verbose):
     with open(join(output_path, filename), 'r') as hypothesis_file:
@@ -23,10 +12,10 @@ def diar_dictaphone(ref_path, filename, output_path, collar_size, verbose):
             hypothesis_extracted = []
             reference_extracted = []
             for line in hypothesis:
-                hypothesis_extracted.append(extract(line))
+                hypothesis_extracted.append(extract_rttm_line(line))
 
             for line in reference:
-                reference_extracted.append(extract(line))
+                reference_extracted.append(extract_rttm_line(line))
 
             max_val = max(hypothesis_extracted[-1][1], reference_extracted[-1][1])
 
@@ -57,7 +46,8 @@ def diar_dictaphone(ref_path, filename, output_path, collar_size, verbose):
             confusion = np.sum(confusion)
             confusion_percentage = confusion / reference_arr.shape[0]
 
-            der = (miss + false_alarm + confusion) / reference_arr.shape[0]
+            # TODO: Confucion back
+            der = (miss + false_alarm) / reference_arr.shape[0]
 
             if verbose:
                 print(
@@ -83,10 +73,10 @@ def diar_online(ref_path, filename, output_path, collar_size, verbose):
             hypothesis_extracted = []
             reference_extracted = []
             for line in hypothesis:
-                hypothesis_extracted.append(extract(line))
+                hypothesis_extracted.append(extract_rttm_line(line))
 
             for line in reference:
-                reference_extracted.append(extract(line))
+                reference_extracted.append(extract_rttm_line(line))
             max_val = max(hypothesis_extracted[-1][1], reference_extracted[-1][1])
 
             reference_arr = np.zeros((max_val, 2))

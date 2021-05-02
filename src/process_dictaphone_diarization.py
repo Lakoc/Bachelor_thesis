@@ -4,13 +4,14 @@ from audio_processing import vad as vad_module
 from outputs import outputs
 import params
 from audio_processing.preprocessing import process_hamming, read_wav_file, process_pre_emphasis
-from audio_processing.feature_extraction import calculate_rmse, calculate_mfcc
-from audio_processing.diarization import gmm_mfcc_diarization_no_interruptions_2channels_single_iteration
+from audio_processing.feature_extraction import calculate_rmse, calculate_mfcc, normalize_energy_to_0_1
+import audio_processing.diarization as diarization_module
 from outputs.outputs import diarization_with_timing
 from progress.bar import Bar
 from argparse import ArgumentParser
 import numpy as np
 from helpers.dir_exist import create_if_not_exist
+from helpers.load_files import load_vad_from_rttm
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='Module for processing diarization over wav files in provided directory.')
@@ -34,11 +35,29 @@ if __name__ == '__main__':
             signal = process_pre_emphasis(wav_file, params.pre_emphasis_coefficient)
             segmented_tracks = process_hamming(signal, sampling_rate, params.window_size,
                                                params.window_overlap)
+            del signal
             root_mean_squared_energy = calculate_rmse(segmented_tracks)
             np.savetxt(f'{join(args.dest, file_name)}.energy', root_mean_squared_energy)
             _, mfcc, _ = calculate_mfcc(segmented_tracks, sampling_rate, params.cepstral_coef_count)
-            vad = vad_module.energy_gmm_based_vad_propagation(root_mean_squared_energy, signal)
-            diarization = gmm_mfcc_diarization_no_interruptions_2channels_single_iteration(mfcc, vad,
-                                                                                           root_mean_squared_energy)
+            del segmented_tracks
+
+            """Thresholding"""
+            # vad = vad_module.energy_vad_threshold(normalize_energy_to_0_1(
+            #     root_mean_squared_energy), threshold=params.energy_threshold)
+            """Adaptive threshold"""
+            # vad = vad_module.energy_vad_threshold_with_adaptive_threshold(normalize_energy_to_0_1(
+            #     root_mean_squared_energy))
+            """Gmm based VAD"""
+
+            # vad = vad_module.energy_gmm_based(
+            #     normalize_energy_to_0_1(root_mean_squared_energy), propagation=True)
+
+            """Smoothing the vad output"""
+            # vad = vad_module.apply_median_filter(vad)
+            # vad = vad_module.apply_silence_speech_removal(vad)
+            vad = load_vad_from_rttm(f'{join(args.src, file_name)}.rttm', root_mean_squared_energy.shape[0])
+
+            diarization = diarization_module.energy_based_diarization_no_interruptions(root_mean_squared_energy, vad)
+
             outputs.diarization_to_rttm_file(join(args.dest, file_name), *diarization_with_timing(diarization))
             bar.next()
