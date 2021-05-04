@@ -5,7 +5,7 @@ from audio_processing.feature_extraction import calculate_energy_over_segments, 
     calculate_mfcc, \
     calculate_delta, append_delta
 # from audio_processing.vad import energy_gmm_based_vad_propagation
-from audio_processing.diarization import gmm_mfcc_diarization_no_interruptions_2channels_single_iteration
+from audio_processing.diarization import gmm_mfcc_diarization_2channels
 import outputs.outputs_text
 
 # from system_tests.transcription_test import calculate_success_rate
@@ -41,7 +41,7 @@ vad = energy_gmm_based_vad_propagation(root_mean_squared_energy)
 """Diarization"""
 # diarization = energy_based_diarization_no_interruptions(root_mean_squared_energy, vad)
 # diarization = gmm_mfcc_diarization_no_interruptions_1channel(mfcc, vad, root_mean_squared_energy)
-diarization = gmm_mfcc_diarization_no_interruptions_2channels_single_iteration(mfcc_dd, vad, root_mean_squared_energy)
+diarization = gmm_mfcc_diarization_2channels(mfcc_dd, vad, root_mean_squared_energy)
 # diarization = gmm_mfcc_diarization_no_interruptions_1channel_k_means(mfcc[:, :, 0], vad, root_mean_squared_energy[:, 0])
 
 """Outputs"""

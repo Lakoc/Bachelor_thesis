@@ -21,42 +21,12 @@ def extract_features_for_diarization(mfcc_dd, vad, energy):
 
     # Difference
     energy_difference = (np.log(channel1_energy) - np.log(channel2_energy)).reshape(-1)
-    energy_difference_filtered = mean_filter(energy_difference, params.energy_diff_filter)
 
     # Append all features together
     features_ch1 = np.append(channel1_energy, channel1_mfcc, axis=1)
     features_ch2 = np.append(channel2_energy, channel2_mfcc, axis=1)
 
-    return active_segments, active_segments_index, features_ch1, features_ch2, energy_difference_filtered
-
-
-def extract_features_for_diarization_with_delta(mfcc, delta, delta_delta, vad, energy):
-    """Extract features from sound for diarization"""
-    # Active segments over channels
-    active_segments = np.logical_or(vad[:, 0], vad[:, 1]).astype("i1")
-    active_segments_index = np.argwhere(active_segments).reshape(-1)
-
-    # Extract speech mfcc features
-    channel1_mfcc = mfcc[:, :, 0]
-    channel1_delta = delta[:, :, 0]
-    channel1_ddelta = delta_delta[:, :, 0]
-    channel2_mfcc = mfcc[:, :, 1]
-    channel2_delta = delta[:, :, 1]
-    channel2_ddelta = delta_delta[:, :, 1]
-
-    # Energy over channels
-    channel1_energy = energy[:, 0].reshape(-1, 1)
-    channel2_energy = energy[:, 1].reshape(-1, 1)
-
-    # Difference
-    energy_difference = (np.log(channel1_energy) - np.log(channel2_energy)).reshape(-1)
-
-    # Append all features together
-    features_ch1 = np.append(channel1_energy, channel1_mfcc, channel1_delta, channel1_ddelta, axis=1)
-    features_ch2 = np.append(channel2_energy, channel2_mfcc, channel2_delta, channel2_ddelta, axis=1)
-    features = np.append(features_ch1, features_ch2, axis=1)
-
-    return active_segments, active_segments_index, features, energy_difference
+    return active_segments, active_segments_index, features_ch1, features_ch2, energy_difference
 
 
 def convolve2d_with_zeros(data, filter_to_convolve):
@@ -97,7 +67,6 @@ def likelihood_propagation_matrix(likelihood):
     return likelihood_smoothed
 
 
-# TODO: FIX this
 def single_gmm_update(gmm1, gmm2, features, data_full, active_segments_index):
     """Update means of gmm by X% in direction of new means"""
 

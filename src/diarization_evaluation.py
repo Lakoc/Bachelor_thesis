@@ -48,8 +48,6 @@ if __name__ == '__main__':
         print(f"""\nOverall error rates\n
         Miss rate: {error_rate[0] * 100:.3f}%
         False alarm rate: {error_rate[1] * 100:.3f}%
+        {f'Confusion error rate: {error_rate[2] * 100:.3f}%' if args.mode == 2 else ''}
         System accuracy: {error_rate[3] * 100:.3f}%
         """)
-
-        #TODO back         {f'Confusion error rate: {error_rate[2] * 100:.3f}%' if args.mode == 2 else ''}
-

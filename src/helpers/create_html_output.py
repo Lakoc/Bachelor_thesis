@@ -146,8 +146,9 @@ def add_volume_table(html, stats):
                 **dict(((*key, 1), value) for (key, value) in stats['transcription'][1].items() if value['text'])}
     loud_sorted = sorted(loudness, key=lambda l: loudness[l]['energy'], reverse=True)
     loud_sorted = loud_sorted[0: min(len(loud_sorted), 20)]
+    loud_sorted_by_time = sorted(loud_sorted, key=lambda l: l[0])
 
-    for segment in loud_sorted:
+    for segment in loud_sorted_by_time:
         text = loudness[segment]['text']
         volume = loudness[segment]['energy']
         speaker = segment[2]
@@ -238,7 +239,7 @@ def create_output(stats, stats_overall, texts, template, path, file_name):
     """Create single paged html document with overall statistics of session from provided template"""
 
     html = load_template(template)
-    html.find(rel="stylesheet")['href'] = 'style.css'
+    html.find_all(rel="stylesheet")[-1]['href'] = 'style.css'
     add_texts(html, stats, stats_overall, texts, file_name)
     add_attachments(html, file_name)
     add_volume_table(html, stats)

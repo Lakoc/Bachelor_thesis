@@ -67,7 +67,7 @@ def volume_changes(energy_over_segments, interruptions, size, path):
     ax.plot(time, interruptions_arr, label='Skoky do řeči druhému mluvčímu')
     ax.plot(time, silence, label='Neaktivní segmenty')
     ax.set_ylabel('Normalizovaná hlasitost')
-    ax.set_xlabel('Čas [m]')
+    ax.set_xlabel('Čas [min]')
     ax.spines['right'].set_visible(False)
     ax.spines['top'].set_visible(False)
     ax.legend()
@@ -165,7 +165,7 @@ def speed_changes(speed, intervals, size, path):
     ax.tick_params(left=False, bottom=False)
     ax.legend()
     ax.set_ylabel("Rychlost [slov/minuta]")
-    ax.set_xlabel("Čas [m]")
+    ax.set_xlabel("Čas [min]")
     # ax.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
 
     generate_graph(path, fig)
@@ -178,7 +178,7 @@ def hesitations_difference(hesitations, signal_len, hesitations_mean, path):
     fig, ax = gauge(['Nízký', 'Normální', 'Vysoký'], ['C0', 'C2', 'C1'], value=hesitations,
                     min_val=hesitations_mean[0] - 5 * hesitations_mean[1],
                     max_val=hesitations_mean[0] + 5 * hesitations_mean[1],
-                    tickers_format=lambda l: f'{l:.1f}', val_format=lambda l: f'{l:.2f} váhání za minutut')
+                    tickers_format=lambda l: f'{l:.1f}', val_format=lambda l: f'{l:.2f} váhání za minutu')
 
     generate_graph(path, fig)
 

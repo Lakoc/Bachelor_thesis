@@ -89,5 +89,5 @@ def word_cloud(text, path):
 def generate_graph(path, fig):
     """Handler for graph generations"""
     fig.tight_layout()
-    plt.savefig(path)
+    plt.savefig(path, transparent=True)
     plt.close(fig)

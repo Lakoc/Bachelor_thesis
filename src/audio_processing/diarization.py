@@ -2,11 +2,11 @@ import numpy as np
 import params
 from scipy import ndimage
 from copy import deepcopy
-from helpers.decorators import timeit
 from helpers.gmm import MyGmm
 from helpers.diarization_helpers import extract_features_for_diarization, likelihood_propagation_matrix, \
     single_gmm_update
 from sklearn.cluster import KMeans
+from helpers.propagation import mean_filter
 
 
 def return_diarization_index(likelihoods, active_segments):
@@ -17,52 +17,26 @@ def return_diarization_index(likelihoods, active_segments):
     likelihoods_diff = likelihoods[:, 0] - likelihoods[:, 1]
     return diarization, likelihoods_diff
 
-def energy_based_diarization_no_interruptions(energy, vad):
+
+def energy_based_diarization(energy, vad):
     """Simple energy based diarization, if voice activity was detected, choose higher energy as speaker"""
     higher_energy = np.argmax(energy, axis=1)
     vad_summed = np.sum(vad, axis=1)
     diarized = np.where(vad_summed > 0, higher_energy + 1, 0)
-    diarized = ndimage.median_filter(diarized, params.mean_filter_diar)
+    diarized_active = diarized[diarized > 0]
+    diarized_active = ndimage.median_filter(diarized_active,
+                                            int(params.diarization_output_mean_filter / params.window_stride))
+    diarized[diarized > 0] = diarized_active
     return diarized
 
 
-@timeit
-def gmm_mfcc_diarization_no_interruptions_1channel(mfcc, vad, energy):
-    """Train Gaussian mixture models with mfcc features over speech segments"""
-
-    active_segments, active_segments_index, features, energy_difference = extract_features_for_diarization(mfcc, vad,
-                                                                                                           energy)
-
-    # Train UBM GMM - speaker independent
-    features = features[:, 0: int(features.shape[1] / 2)]
-    features_active = features[active_segments_index]
-    gmm = MyGmm(n_components=params.gmm_components, verbose=1, covariance_type='diag', max_iter=params.gmm_max_iterations,
-                tol=params.gmm_error_rate).fit(features_active)
-
-    # Create model for each speaker
-    gmm1 = deepcopy(gmm)
-    gmm2 = deepcopy(gmm)
-
-    # Move means in direction of each speaker
-    likelihoods = single_gmm_update(gmm1, gmm2, features, energy_difference, active_segments_index)
-    likelihoods_smoothed = likelihood_propagation_matrix(likelihoods)
-
-    # Test plot
-    # plot_6_7k(likelihoods_smoothed, active_segments)
-
-    diarization, likelihoods_difference = return_diarization_index(likelihoods_smoothed, active_segments)
-
-    return
-
-
-@timeit
-def gmm_mfcc_diarization_no_interruptions_1channel_k_means(mfcc, vad, energy):
+def gmm_mfcc_diarization_1channel_k_means(mfcc, vad, energy):
     """Train Gaussian mixture models with mfcc features over speech segments"""
     active_segments = np.logical_or(vad[:, 0], vad[:, 1]).astype("i1")
     active_segments_index = np.argwhere(active_segments).reshape(-1)
 
     mfcc_active = mfcc[active_segments_index]
-    k_means = KMeans(n_clusters=2, verbose=1, max_iter=params.gmm_max_iterations).fit(mfcc_active)
+    k_means = KMeans(n_clusters=2, max_iter=params.gmm_max_iterations).fit(mfcc_active)
 
     clusters = k_means.predict(mfcc)
     likelihood = np.sum(mfcc - k_means.cluster_centers_[0], axis=1) ** 2
@@ -70,7 +44,8 @@ def gmm_mfcc_diarization_no_interruptions_1channel_k_means(mfcc, vad, energy):
     # Train UBM GMM - speaker independent
     features = np.append(mfcc, energy[:, np.newaxis], axis=1)
     features_active = features[active_segments_index]
-    gmm = MyGmm(n_components=params.gmm_components, verbose=1, covariance_type='diag', max_iter=params.gmm_max_iterations,
+    gmm = MyGmm(n_components=params.gmm_components, verbose=params.gmm_verbose, covariance_type='diag',
+                max_iter=params.gmm_max_iterations,
                 tol=params.gmm_error_rate).fit(features_active)
 
     # Create model for each speaker
@@ -81,15 +56,40 @@ def gmm_mfcc_diarization_no_interruptions_1channel_k_means(mfcc, vad, energy):
     likelihoods = single_gmm_update(gmm1, gmm2, features, likelihood, active_segments_index)
     likelihoods_smoothed = likelihood_propagation_matrix(likelihoods)
 
-    # Test plot
-    # plot_6_7k(likelihoods_smoothed, active_segments)
+    diarization, likelihoods_difference = return_diarization_index(likelihoods_smoothed, active_segments)
+
+    return diarization
+
+
+def gmm_mfcc_diarization_1channel(mfcc, vad, energy):
+    """Train Gaussian mixture models with mfcc features over speech segments"""
+
+    active_segments, active_segments_index, features_ch1, _, energy_difference = extract_features_for_diarization(mfcc,
+                                                                                                                  vad,
+                                                                                                                  energy)
+    energy_difference = mean_filter(energy_difference,
+                                    int(params.diarization_init_array_filter / params.window_stride))
+
+    # Train UBM GMM - speaker independent
+    features_active = features_ch1[active_segments_index]
+    gmm = MyGmm(n_components=params.gmm_components, verbose=params.gmm_verbose, covariance_type='diag',
+                max_iter=params.gmm_max_iterations,
+                tol=params.gmm_error_rate).fit(features_active)
+
+    # Create model for each speaker
+    gmm1 = deepcopy(gmm)
+    gmm2 = deepcopy(gmm)
+
+    # Move means in direction of each speaker
+    likelihoods = single_gmm_update(gmm1, gmm2, features_ch1, energy_difference, active_segments_index)
+    likelihoods_smoothed = likelihood_propagation_matrix(likelihoods)
 
     diarization, likelihoods_difference = return_diarization_index(likelihoods_smoothed, active_segments)
 
     return diarization
 
 
-def gmm_mfcc_diarization_no_interruptions_2channels_single_iteration(mfcc, vad, energy):
+def gmm_mfcc_diarization_2channels(mfcc, vad, energy):
     """Train Gaussian mixture models with mfcc features over speech segments"""
     active_segments, active_segments_index, features1, features2, energy_difference = extract_features_for_diarization(
         mfcc, vad,
@@ -132,16 +132,15 @@ def gmm_mfcc_diarization_no_interruptions_2channels_single_iteration(mfcc, vad, 
     return diarization
 
 
-
-@timeit
-def gmm_mfcc_diarization_no_interruptions_2channels_2iterations(mfcc, vad, energy):
+def gmm_mfcc_diarization_2channels_2iterations(mfcc, vad, energy):
     """Train Gaussian mixture models with mfcc features over speech segments"""
     active_segments, active_segments_index, features, energy_difference = extract_features_for_diarization(mfcc, vad,
                                                                                                            energy)
 
     # Train UBM GMM - speaker independent
     features_active = features[active_segments_index]
-    gmm = MyGmm(n_components=params.gmm_components, verbose=1, covariance_type='diag', max_iter=params.gmm_max_iterations,
+    gmm = MyGmm(n_components=params.gmm_components, verbose=params.gmm_verbose, covariance_type='diag',
+                max_iter=params.gmm_max_iterations,
                 tol=params.gmm_error_rate).fit(features_active)
 
     # Create model for each speaker

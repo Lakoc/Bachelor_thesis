@@ -13,5 +13,5 @@ with open(input_file, 'r') as source:
         reference = [(item.get("speaker"), item.get("starttime"), item.get("endtime")) for item in
                      items]
         for line in reference:
-            if line[0] is not None:
+            if line[0] != 'spk2':
                 destination.write(f'{float(line[1]):.3f} {float(line[2]):.3f} sp\n')

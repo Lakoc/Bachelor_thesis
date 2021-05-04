@@ -69,7 +69,7 @@ def energy_vad_threshold_with_adaptive_threshold(energy_segments):
 def energy_gmm_based(energy, propagation=False):
     """Estimate vad using gaussian mixture model"""
     # Initialization of model
-    gmm1 = GaussianMixture(n_components=3, max_iter=300, tol=1e-5, weights_init=np.array([1 / 3, 1 / 3, 1 / 3]),
+    gmm1 = GaussianMixture(n_components=3, max_iter=params.vad_max_iter, tol=params.vad_error_rate, weights_init=np.array([1 / 3, 1 / 3, 1 / 3]),
                            means_init=np.array([np.min(energy[:, 0]), (np.max(energy[:, 0]) + np.min(energy[:, 0])) / 2,
                                                 np.max(energy[:, 0])])[:, np.newaxis])
     gmm2 = deepcopy(gmm1)

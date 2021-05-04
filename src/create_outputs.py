@@ -16,8 +16,6 @@ if __name__ == '__main__':
                         help='destination path for pickle files')
     parser.add_argument('template', type=str,
                         help='template for html file')
-    parser.add_argument('stats', type=str,
-                        help='path of file containing stats')
     parser.add_argument('overall_stats', type=str,
                         help='path of file containing overall stats')
     parser.add_argument('text', type=str,
@@ -42,7 +40,7 @@ if __name__ == '__main__':
         for file in files:
             file_name = file.split('.pkl')[0]
             texts = load_texts(args.text)
-            stats = load_stats(file)
-            stats_overall = load_stats_overall(args.stats)
+            stats = load_stats(join(args.src, file))
+            stats_overall = load_stats_overall(args.overall_stats)
             create_output(stats, stats_overall, texts, args.template, args.dest, file_name)
             bar.next()

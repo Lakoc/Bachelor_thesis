@@ -30,6 +30,12 @@ if __name__ == '__main__':
         for file in files:
             file_name = file.split(".wav")[0]
             wav_file, sampling_rate = read_wav_file(join(args.src, file))
+
+            if wav_file.shape[0] < sampling_rate:
+                raise ValueError(f'Wav file {file_name} is too short')
+            if wav_file.shape[1] != 2:
+                raise ValueError(f'Wav file {file_name} does not have 2 channels.')
+
             signal = process_pre_emphasis(wav_file, params.pre_emphasis_coefficient)
             segmented_tracks = process_hamming(signal, sampling_rate, params.window_size,
                                                params.window_overlap)

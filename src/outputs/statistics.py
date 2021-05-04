@@ -1,5 +1,5 @@
 import numpy as np
-from audio_processing.feature_extraction import normalize_energy_to_
+from audio_processing.feature_extraction import normalize_energy_for_plotting
 import params
 import re
 import text2emotion as te
@@ -57,11 +57,10 @@ def detect_loudness(energy, vad, percentile=90, min_len=20):
 
 def process_volume_changes(energy, vad):
     """Get normalized energy of voice active segments"""
-    # TODO: Fix
-    log_energy1 = normalize_energy_to_1(energy[:, 0])
-    log_energy2 = normalize_energy_to_1(energy[:, 1])
-    energy_active_segments1 = np.where(vad[:, 0], log_energy1, 0)
-    energy_active_segments2 = np.where(vad[:, 1], log_energy2, 0)
+    energy1 = normalize_energy_for_plotting(energy[:, 0])
+    energy2 = normalize_energy_for_plotting(energy[:, 1])
+    energy_active_segments1 = np.where(vad[:, 0], energy1, np.nan)
+    energy_active_segments2 = np.where(vad[:, 1], energy2, np.nan)
 
     return energy_active_segments1, energy_active_segments2
 

@@ -47,7 +47,7 @@ def diar_dictaphone(ref_path, filename, output_path, collar_size, verbose):
             confusion_percentage = confusion / reference_arr.shape[0]
 
             # TODO: Confucion back
-            der = (miss + false_alarm) / reference_arr.shape[0]
+            der = (miss + false_alarm + confusion) / reference_arr.shape[0]
 
             if verbose:
                 print(

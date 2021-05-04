@@ -24,7 +24,7 @@ if __name__ == '__main__':
                         help='destination path for json file')
     args = parser.parse_args()
 
-    print(f'Listing files in {args.src}')
+    print(f'Listing files in {args.src} ...')
     files = [f for f in listdir(args.src) if isfile(join(args.src, f)) and f.endswith(f'.pkl')]
 
     stats_overall = {
@@ -62,6 +62,7 @@ if __name__ == '__main__':
         }
     }
 
+    print('Calculating overall stats ...')
     # Extract needed information
     for file_name in files:
         with open(join(args.src, file_name), 'rb') as file:
@@ -95,6 +96,8 @@ if __name__ == '__main__':
             else:
                 stats_overall[key[0]][sub_key] = [np.mean(values), np.var(values)]
 
-    # Save file
+    print(f'Saving overall stats to {args.dest} ...')
+
+    # Save stats
     with open(args.dest, 'w') as file:
         json.dump(stats_overall, file)
