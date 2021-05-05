@@ -1,5 +1,4 @@
 import numpy as np
-from audio_processing.feature_extraction import normalize_energy_for_plotting
 import params
 import re
 import text2emotion as te
@@ -7,10 +6,11 @@ import text2emotion as te
 
 def detect_cross_talks(vad, min_len):
     """Detects cross talks in vad segments"""
+    min_len_segments = int(min_len / params.window_stride)
     cross_talks = np.logical_and(vad[:, 0], vad[:, 1])
     cross_talks = np.append(np.append([0], cross_talks), [0])
     cross_talks_bounds = np.where(np.diff(cross_talks))[0].reshape(-1, 2)
-    cross_talks_bounds = cross_talks_bounds[cross_talks_bounds[:, 1] - cross_talks_bounds[:, 0] > min_len]
+    cross_talks_bounds = cross_talks_bounds[cross_talks_bounds[:, 1] - cross_talks_bounds[:, 0] > min_len_segments]
     pre_cross_talk = cross_talks_bounds[:, 0] - 1
     cross_talk_origin = (vad[pre_cross_talk, 1] == 0).astype('i1')[:, np.newaxis]
 
@@ -56,11 +56,9 @@ def detect_loudness(energy, vad, percentile=90, min_len=20):
 
 
 def process_volume_changes(energy, vad):
-    """Get normalized energy of voice active segments"""
-    energy1 = normalize_energy_for_plotting(energy[:, 0])
-    energy2 = normalize_energy_for_plotting(energy[:, 1])
-    energy_active_segments1 = np.where(vad[:, 0], energy1, np.nan)
-    energy_active_segments2 = np.where(vad[:, 1], energy2, np.nan)
+    """Get energy of voice active segments"""
+    energy_active_segments1 = np.where(vad[:, 0], energy[:, 0], 0)
+    energy_active_segments2 = np.where(vad[:, 1], energy[:, 1], 0)
 
     return energy_active_segments1, energy_active_segments2
 
@@ -254,7 +252,7 @@ def interruption_len_hist(interruptions):
 def get_stats(vad, transcription, energy):
     """Calculate all available statistics"""
     texts, fills = get_texts(transcription)
-    interruptions = detect_interruptions(vad)
+    interruptions = detect_cross_talks(vad, params.min_crosstalk)
     interruptions_len = interruption_len_hist(interruptions[0]), interruption_len_hist(interruptions[1])
     volume_changes = process_volume_changes(energy, vad)
     calculate_loudness(energy, vad, transcription)

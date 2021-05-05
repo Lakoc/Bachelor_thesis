@@ -57,3 +57,5 @@ diar_loop_prob = 0.99
 likelihood_percentile = 20
 model_means_shift = 0.05
 
+# outputs
+min_crosstalk = 0.1

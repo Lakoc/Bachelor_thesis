@@ -33,12 +33,6 @@ def normalize_energy_to_0_1(energy):
     normalized_energy /= np.max(normalized_energy, axis=0)
     return normalized_energy
 
-def normalize_energy_for_plotting(energy):
-    normalized_energy = np.copy(energy)
-    normalized_energy -= np.min(normalized_energy, axis=0)
-    normalized_energy /= (np.max(normalized_energy, axis=0) / 2)
-    normalized_energy -= 1
-    return normalized_energy
 
 def calculate_mfcc(segments, sampling_rate, mel_filters):
     """Extract mfcc from segments,

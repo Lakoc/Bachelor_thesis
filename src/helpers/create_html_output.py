@@ -1,3 +1,5 @@
+import re
+
 import numpy as np
 
 from outputs import plots
@@ -22,8 +24,9 @@ def return_text_by_bounds(options, num, overall):
 
 def create_plot_and_set(fun, args, html, element_id, file_name):
     """Plot to file and set that path to html as source"""
-    fun(*args)
+    ret_val = fun(*args)
     html.find(id=f'figure-{element_id}')['src'] = f'plots/{file_name}/{element_id}.png'
+    return ret_val
 
 
 def add_plots(html, stats, stats_overall, path, file_name):
@@ -62,15 +65,16 @@ def add_plots(html, stats, stats_overall, path, file_name):
                          f'{join(path, f"plots/{file_name}/client_volume")}.png'), html,
                         'client_volume', file_name)
 
-    create_plot_and_set(word_cloud,
-                        (stats['texts'][0],
-                         f'{join(path, f"plots/{file_name}/therapist_cloud")}.png'), html,
-                        'therapist_cloud', file_name)
+    most_frequent_words = ['', '']
+    most_frequent_words[0] = create_plot_and_set(word_cloud,
+                                                 (stats['texts'][0],
+                                                  f'{join(path, f"plots/{file_name}/therapist_cloud")}.png'), html,
+                                                 'therapist_cloud', file_name)
 
-    create_plot_and_set(word_cloud,
-                        (stats['texts'][1],
-                         f'{join(path, f"plots/{file_name}/client_cloud")}.png'), html,
-                        'client_cloud', file_name)
+    most_frequent_words[1] = create_plot_and_set(word_cloud,
+                                                 (stats['texts'][1],
+                                                  f'{join(path, f"plots/{file_name}/client_cloud")}.png'), html,
+                                                 'client_cloud', file_name)
 
     create_plot_and_set(plots.interruptions_histogram,
                         (stats['interruptions_len'][0], stats_overall['interruptions_len']['therapist'],
@@ -136,6 +140,7 @@ def add_plots(html, stats, stats_overall, path, file_name):
                         (stats['client_mood'],
                          f'{join(path, f"plots/{file_name}/client_mood")}.png'), html,
                         'client_mood', file_name)
+    return most_frequent_words
 
 
 def add_volume_table(html, stats):
@@ -145,7 +150,7 @@ def add_volume_table(html, stats):
     loudness = {**dict(((*key, 0), value) for (key, value) in stats['transcription'][0].items() if value['text']),
                 **dict(((*key, 1), value) for (key, value) in stats['transcription'][1].items() if value['text'])}
     loud_sorted = sorted(loudness, key=lambda l: loudness[l]['energy'], reverse=True)
-    loud_sorted = loud_sorted[0: min(len(loud_sorted), 20)]
+    loud_sorted = loud_sorted[0: min(len(loud_sorted), 25)]
     loud_sorted_by_time = sorted(loud_sorted, key=lambda l: l[0])
 
     for segment in loud_sorted_by_time:
@@ -155,8 +160,7 @@ def add_volume_table(html, stats):
         if text is not None:
             new_row = html.new_tag("tr")
             time_start_tag = html.new_tag('td')
-            time_start_tag.string = f'{int(segment[0] * params.window_stride / 60)} m ' \
-                                    f'{int(segment[0] * params.window_stride % 60)} s'
+            time_start_tag.string = f'{int(segment[0] * params.window_stride / 60)}:{int(segment[0] * params.window_stride % 60)}'
             new_row.append(time_start_tag)
 
             time_dur_tag = html.new_tag('td')
@@ -178,7 +182,15 @@ def add_volume_table(html, stats):
             t_body.append(new_row)
 
 
-def add_texts(html, stats, stats_overall, texts, file_name):
+def most_frequent(fills):
+    """Find most frequent element in array"""
+    if len(fills) > 0:
+        return max(set(fills), key=fills.count)
+    else:
+        return ''
+
+
+def add_texts(html, stats, stats_overall, texts, most_frequent_words, file_name):
     """Add texts from json to template html file"""
     title = html.find(id='session_title')
     title.string.replace_with(title.text.replace('###', file_name))
@@ -189,35 +201,80 @@ def add_texts(html, stats, stats_overall, texts, file_name):
     html.find(id='speech_ratio_overall').string = return_text_by_bounds(texts['speech_ratio']['overall'],
                                                                         stats['speech_ratio'][0][0], stats_overall[
                                                                             'speech_ratio']['therapist'])
-    reaction_time = np.mean(stats["reactions"][0][:, 1] - stats["reactions"][0][:, 0]) * params.window_stride
+    reaction_time = np.mean(stats["reactions"][0][:, 1] - stats["reactions"][0][:, 0]) * params.window_stride if \
+        stats['reactions'][0].shape[0] > 0 else 0
 
     html.find(
         id='reaction_time_therapist').string = f'Průměrná reakční doba terapeuta v průběhu sezení je ' \
-                                               f'{reaction_time:.2f} s. Průmerná hodnota mezi sezeními se pohybuje ' \
+                                               f'{reaction_time:.2f} sekund. Průmerná hodnota mezi sezeními se pohybuje ' \
                                                f'kolem {stats_overall["reactions"]["therapist"][0]:.2f} ' \
-                                               f'(+-{stats_overall["reactions"]["therapist"][1]:.2f}) s'
+                                               f'(+-{stats_overall["reactions"]["therapist"][1]:.2f}) sekund.'
 
-    reaction_time = np.mean(stats["reactions"][1][:, 1] - stats["reactions"][1][:, 0]) * params.window_stride
+    reaction_time = np.mean(stats["reactions"][1][:, 1] - stats["reactions"][1][:, 0]) * params.window_stride if \
+        stats['reactions'][1].shape[0] > 0 else 0
 
     html.find(
         id='reaction_time_client').string = f'Průměrná reakční doba klienta v průběhu sezení je ' \
-                                            f'{reaction_time:.2f} s. Průmerná hodnota mezi sezeními se pohybuje ' \
+                                            f'{reaction_time:.2f} sekund. Průmerná hodnota mezi sezeními se pohybuje ' \
                                             f'kolem {stats_overall["reactions"]["client"][0]:.2f} ' \
-                                            f'(+-{stats_overall["reactions"]["client"][1]:.2f}) s'
+                                            f'(+-{stats_overall["reactions"]["client"][1]:.2f}) sekund.'
 
     html.find(
         id='hesitations_therapist').string = f'Průměrný počet váhaní za minutu je ' \
                                              f'{stats_overall["hesitations"]["therapist"][0]:.2f}. Terapeut v ' \
                                              f'průběhu aktuálního sezení váhá průměrně ' \
-                                             f'{stats["hesitations"][0].shape[0] / stats["signal"]["len"] * 60:.2f} ' \
+                                             f'{stats["hesitations"][0].shape[0] / stats["signal"]["len"] * 60:.2f}' \
                                              f'krát za minutu.'
 
     html.find(
         id='hesitations_client').string = f'Průměrný počet váhaní za minutu je ' \
                                           f'{stats_overall["hesitations"]["client"][0]:.2f}. Klient v ' \
                                           f'průběhu aktuálního sezení váhá průměrně ' \
-                                          f'{stats["hesitations"][1].shape[0] / stats["signal"]["len"] * 60:.2f} ' \
+                                          f'{stats["hesitations"][1].shape[0] / stats["signal"]["len"] * 60:.2f}' \
                                           f'krát za minutu.'
+
+    word_counts = [stats['texts'][0].count(most_frequent_words[0]),
+                   stats['texts'][1].count(most_frequent_words[1])]
+    html.find(id='therapist_cloud').string = texts['word_cloud']['therapist'].replace('{{}}',
+                                                                                      f'"{most_frequent_words[0]}"',
+                                                                                      1).replace('{{}}',
+                                                                                                 str(word_counts[
+                                                                                                         0]), 1)
+    html.find(id='client_cloud').string = texts['word_cloud']['client'].replace('{{}}',
+                                                                                f'"{most_frequent_words[1]}"',
+                                                                                1).replace('{{}}',
+                                                                                           str(word_counts[1]),
+                                                                                           1)
+
+    html.find(id='silence_ratio_therapist').string = texts['sil_speech']['therapist']
+    html.find(id='silence_ratio_client').string = texts['sil_speech']['client']
+    html.find(id='loudness_info').string = texts['loudness_overall_info']
+    html.find(id='loudness_text').string = texts['loudness_table_info']
+    html.find(id='fills_info').string = texts['fills_info']
+    html.find(id='client_mood').string = texts['client_mood']
+    html.find(id='emotion_text').string = texts['emotion_text']
+    html.find(id='interruptions_info').string = texts['interruptions_info']
+    html.find(id='therapist_interruptions').string = texts['interruptions']['therapist']
+    html.find(id='client_interruptions').string = texts['interruptions']['client']
+    html.find(id='bounds_len_therapist').string = texts['sentences_len']['therapist']
+    html.find(id='bounds_len_client').string = texts['sentences_len']['client']
+    html.find(id='hesitations_info').string = texts['hesitations_info']
+    html.find(id='sentences_len_info').string = texts['sentences_len_info']
+    html.find(id='speed_info').string = texts['speed_info']
+    html.find(id='speed_therapist').string = texts['speed']['therapist']
+    html.find(id='speed_client').string = texts['speed']['client']
+
+    fill_regex = re.compile(r'[_%]\S*')
+    therapist_fills = [string[1:] for string in fill_regex.findall(stats['texts'][0])]
+    client_fills = [string[1:] for string in fill_regex.findall(stats['texts'][1])]
+
+    html.find(id='therapist_fills').string = texts['therapist_fills'].replace('{{}}',
+                                                                              f'"{most_frequent(therapist_fills)}"')
+    html.find(id='client_fills').string = texts['client_fills'].replace('{{}}', f'"{most_frequent(client_fills)}"')
+    html.find(id='general_info').string = texts['general_info'].replace('###', file_name).replace('{{}}',
+                                                                                                  str(round(
+                                                                                                      stats['signal'][
+                                                                                                          'len'] / 60)))
 
 
 def add_attachments(html, file_name):
@@ -237,12 +294,11 @@ def add_attachments(html, file_name):
 
 def create_output(stats, stats_overall, texts, template, path, file_name):
     """Create single paged html document with overall statistics of session from provided template"""
-
     html = load_template(template)
     html.find_all(rel="stylesheet")[-1]['href'] = 'style.css'
-    add_texts(html, stats, stats_overall, texts, file_name)
+    most_frequent_words = add_plots(html, stats, stats_overall, path, file_name)
+    add_texts(html, stats, stats_overall, texts, most_frequent_words, file_name)
     add_attachments(html, file_name)
     add_volume_table(html, stats)
-    add_plots(html, stats, stats_overall, path, file_name)
     with open(f'{join(path, file_name)}.html', 'w') as output:
         output.write(str(html))
