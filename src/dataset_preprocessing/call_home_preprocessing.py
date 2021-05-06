@@ -19,7 +19,6 @@ for file in files:
                     f1.write(line)
 
 """Trim audio files and create rttm file"""
-# rttm_reg = re.compile(r'(.*) (.*) (\d) ([\d.]*) ([\d.]*) (<NA>) (<NA>) (\d)')
 line_re = re.compile(r'([\d.]*) ([\d.]*) ([AB])[12]?: (.*)')
 separator = '/'
 path_new = f'{separator.join(path.split("/")[0:-2])}/callhome_trimmed'

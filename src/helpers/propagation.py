@@ -2,6 +2,7 @@ import numpy as np
 from scipy.special import logsumexp
 import params
 
+
 def forward_backward(lls, tr, ip):
     """
     Inputs:
@@ -68,12 +69,13 @@ def segments_filter(arr, filter_size, value_to_filter):
     value_to_replace = 1 - value_to_filter
     for index in range(segments.shape[0]):
         segment = segments[index]
-        if arr[segment[0]] == value_to_filter and segment[1] - segment[0] < filter_size:
+        segment_width = segment[1] - segment[0]
+        if arr[segment[0]] == value_to_filter and segment_width < filter_size:
             if value_to_replace == 0 or index == 0 or index == segments.shape[0] - 1:
                 arr[segment[0]:segment[1]] = value_to_replace
             else:
                 pre_segment_len = segments[index - 1][1] - segments[index - 1][0]
                 post_segment_len = segments[index + 1][1] - segments[index + 1][0]
-                if post_segment_len > filter_size and pre_segment_len >  filter_size:
+                if post_segment_len > filter_size and pre_segment_len > filter_size:
                     arr[segment[0]:segment[1]] = value_to_replace
     return arr

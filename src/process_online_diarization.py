@@ -4,10 +4,10 @@ from helpers.dir_exist import create_if_not_exist
 import numpy as np
 
 from audio_processing import vad as vad_module
-from outputs import outputs
+from io_operations import outputs
 import params
 from audio_processing.preprocessing import process_hamming, read_wav_file, process_pre_emphasis
-from audio_processing.feature_extraction import calculate_rmse, normalize_energy_to_0_1, normalize_energy
+from audio_processing.feature_extraction import calculate_rmse, normalize_energy_to_0_1
 from progress.bar import Bar
 from argparse import ArgumentParser
 

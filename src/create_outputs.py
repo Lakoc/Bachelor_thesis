@@ -3,8 +3,8 @@ from os import listdir
 from os.path import isfile, join
 from shutil import copyfile
 from progress.bar import Bar
-from helpers.load_files import load_stats_overall, load_texts, load_stats
-from helpers.create_html_output import create_output
+from io_operations.load_files import load_stats_overall, load_texts, load_stats
+from outputs.create_html_output import create_output
 from helpers.dir_exist import create_if_not_exist, create_new_dir
 
 if __name__ == '__main__':

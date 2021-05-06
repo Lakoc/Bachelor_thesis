@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 from os import listdir
 from os.path import isfile, join
 from progress.bar import Bar
-from helpers.load_files import load_transcription, load_vad_from_rttm, load_energy
+from io_operations.load_files import load_transcription, load_vad_from_rttm, load_energy
 from outputs.statistics import get_stats
 from helpers.dir_exist import create_if_not_exist
 from pickle import dump, HIGHEST_PROTOCOL

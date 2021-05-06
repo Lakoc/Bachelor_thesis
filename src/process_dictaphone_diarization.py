@@ -1,18 +1,16 @@
 from os import listdir
 from os.path import isfile, join
-from audio_processing import vad as vad_module
-from outputs import outputs
+from io_operations import outputs
 import params
 from audio_processing.preprocessing import process_hamming, read_wav_file, process_pre_emphasis
-from audio_processing.feature_extraction import calculate_rmse, calculate_mfcc, normalize_energy_to_0_1, \
-    calculate_energy_over_segments
+from audio_processing.feature_extraction import calculate_mfcc, calculate_energy_over_segments
 import audio_processing.diarization as diarization_module
-from outputs.outputs import diarization_with_timing
+from io_operations.outputs import diarization_with_timing
 from progress.bar import Bar
 from argparse import ArgumentParser
 import numpy as np
 from helpers.dir_exist import create_if_not_exist
-from helpers.load_files import load_vad_from_rttm
+from io_operations.load_files import load_vad_from_rttm
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='Module for processing diarization over wav files in provided directory.')

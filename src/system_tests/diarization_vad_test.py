@@ -1,6 +1,6 @@
 import numpy as np
 from os.path import join
-from helpers.load_files import extract_rttm_line
+from io_operations.load_files import extract_rttm_line
 
 def diar_dictaphone(ref_path, filename, output_path, collar_size, verbose):
     with open(join(output_path, filename), 'r') as hypothesis_file:

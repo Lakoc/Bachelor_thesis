@@ -7,7 +7,7 @@ import shutil
 import numpy as np
 from progress.bar import Bar
 import params
-from helpers.load_files import load_vad_from_rttm
+from io_operations.load_files import load_vad_from_rttm
 
 regex = re.compile(r'SPEAKER \S* (\d) ([\d.]*) ([\d.]*) <NA> <NA> \d.*')
 

@@ -1,4 +1,4 @@
-from outputs import outputs, outputs_text
+from outputs import outputs_text
 import params
 from audio_processing.preprocessing import process_hamming, read_wav_file, process_pre_emphasis
 from audio_processing.feature_extraction import calculate_energy_over_segments, normalize_energy, calculate_rmse, \

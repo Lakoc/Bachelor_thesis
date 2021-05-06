@@ -7,7 +7,7 @@ from os.path import join
 import params
 from helpers.plot_helpers import word_cloud
 
-from helpers.load_files import load_template
+from io_operations.load_files import load_template
 from helpers.dir_exist import create_if_not_exist
 
 

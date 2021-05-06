@@ -1,7 +1,7 @@
 import re
 from os.path import join
 from jiwer import wer
-from helpers.load_files import load_transcription
+from io_operations.load_files import load_transcription
 
 
 def transcription_test(ref_path, filename, hyp_path, verbose):
