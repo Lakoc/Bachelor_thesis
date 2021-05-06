@@ -1,10 +1,8 @@
-import matplotlib.pyplot as plt
-import numpy
 import numpy as np
 import params
 from sklearn.mixture import GaussianMixture
 from scipy import ndimage
-from helpers.propagation import forward_backward, segments_filter, mean_filter
+from helpers.propagation import forward_backward, segments_filter
 from copy import deepcopy
 
 
@@ -105,66 +103,6 @@ def energy_gmm_based(energy, propagation=False):
     vad = np.append(vad1[:, np.newaxis], vad2[:, np.newaxis], axis=1)
     if params.vad_component_to_threshold == 0:
         vad = 1 - vad
-
-    # fig, axs = plt.subplots(nrows=3, figsize=(10, 6))
-    # # height = np.max(signal[:, 0])
-    # threshold = np.full(likelihoods1.shape[0], params.vad_min_likelihood)
-    # # time = np.linspace(0, signal.shape[0], vad.shape[0])
-    #
-    # axs[0].plot(likelihoods2[:, 0], label='Ticho')
-    # axs[0].plot(likelihoods2[:, 1], label='Šum / tichá řeč')
-    # axs[0].plot(likelihoods2[:, 2], label='Řeč')
-    # axs[0].spines['right'].set_visible(False)
-    # axs[0].spines['top'].set_visible(False)
-    # axs[0].legend()
-    # axs[0].set_ylabel('Pravděpodobnost')
-    #
-    # axs[1].plot(likelihoods2[:, params.vad_component_to_threshold], label='Pravděpodobnost ticha')
-    # axs[1].plot(threshold, label='Práh')
-    # axs[1].spines['right'].set_visible(False)
-    # axs[1].spines['top'].set_visible(False)
-    # axs[1].set_ylabel('Velikost')
-    # axs[1].legend()
-    #
-    # axs[2].plot(vad[:,1], label='Řečová aktivita', color='black', linewidth=3)
-    # # axs[2].plot( signal[:, 1] / height, label='Normalizovaný signál')
-    # axs[2].spines['right'].set_visible(False)
-    # axs[2].spines['top'].set_visible(False)
-    # axs[2].set_ylabel('Velikost')
-    # axs[2].legend()
-    # axs[2].set_xlabel('Čas [s]')
-    #
-    # plt.show()
-    #
-    # fig, axs = plt.subplots(nrows=3, figsize=(10, 6))
-    # # height = np.max(signal[:, 0])
-    # # threshold = np.full(likelihood_propagated1.shape[0], params.min_silence_likelihood)
-    # # time = np.linspace(0, signal.shape[0], vad.shape[0])
-    #
-    # axs[0].plot(likelihoods1[:, 0], label='Ticho')
-    # axs[0].plot(likelihoods1[:, 1], label='Šum / tichá řeč')
-    # axs[0].plot(likelihoods1[:, 2], label='Řeč')
-    # axs[0].spines['right'].set_visible(False)
-    # axs[0].spines['top'].set_visible(False)
-    # axs[0].legend()
-    # axs[0].set_ylabel('Pravděpodobnost')
-    #
-    # axs[1].plot(likelihoods1[:, params.vad_component_to_threshold], label='Pravděpodobnost ticha')
-    # axs[1].plot(threshold, label='Práh')
-    # axs[1].spines['right'].set_visible(False)
-    # axs[1].spines['top'].set_visible(False)
-    # axs[1].set_ylabel('Velikost')
-    # axs[1].legend()
-    #
-    # axs[2].plot(vad[:,0], label='Řečová aktivita', color='black', linewidth=3)
-    # # axs[2].plot(signal[:, 0] / height, label='Normalizovaný signál')
-    # axs[2].spines['right'].set_visible(False)
-    # axs[2].spines['top'].set_visible(False)
-    # axs[2].set_ylabel('Velikost')
-    # axs[2].legend()
-    # axs[2].set_xlabel('Čas [s]')
-    #
-    # plt.show()
 
     return vad
 

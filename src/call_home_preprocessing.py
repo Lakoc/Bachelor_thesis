@@ -31,18 +31,22 @@ for file in files:
         with open(f"{path_join(path_new, file)}.rttm", 'w') as f1:
             with open(f"{path_join(path_new, file)}.txt", 'w') as f2:
                 lines = f.readlines()
+
+                # Detect start and end of annotations
                 match = re.search(line_re, lines[0])
                 start_time = float(match[1])
-
-                wav_file, sampling_rate = read_wav_file(f"{path_join(path, file)}.wav")
                 start_index = int(start_time * sampling_rate)
 
                 match = re.search(line_re, lines[-1])
                 end_time = float(match[2])
                 end_index = int(end_time * sampling_rate)
 
+                # Trim source wav file
+                wav_file, sampling_rate = read_wav_file(f"{path_join(path, file)}.wav")
                 file_trimmed = wav_file[start_index: end_index, :]
                 write(f"{path_join(path_new, file)}.wav", sampling_rate, file_trimmed)
+
+                # Save new annotations by subtracting start time
                 for line in lines:
                     match = re.search(line_re, line)
                     start_time_old = float(match[1])

@@ -31,4 +31,6 @@ if __name__ == '__main__':
 
     for file in files:
         file_name = file.split('.wav')[0]
+
+        # Process transcription
         process_file(args.src, args.dest, file_name, args.language)

@@ -26,13 +26,17 @@ if __name__ == '__main__':
 
     with Bar(f'Processing files in {args.src}', max=len(files)) as bar:
         for file in files:
+
+            # Load source files
             file_name = file.split('.rttm')[0]
             energy = load_energy(f'{join(args.src, file_name)}.energy')
             vad = load_vad_from_rttm(f'{join(args.src, file_name)}.rttm', energy.shape[0])
             transcription = load_transcription(f'{join(args.src, file_name)}.txt')
+
+            # Calculate stats
             stats = get_stats(vad, transcription, energy)
 
-            # Save stats
+            # Save stats to .pkl file
             with open(join(args.dest, f'{file_name}.pkl'), 'wb') as fp:
                 dump(stats, fp, HIGHEST_PROTOCOL)
 

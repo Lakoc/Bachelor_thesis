@@ -3,6 +3,7 @@ from os.path import exists
 
 
 def create_if_not_exist(path, verbose=True):
+    """Create directory if it not exists"""
     if not exists(path):
         makedirs(path)
         if verbose:
@@ -10,6 +11,7 @@ def create_if_not_exist(path, verbose=True):
 
 
 def create_new_dir(path, file_type):
+    """Create new dir, ask if should be files added there if exists"""
     if exists(path):
         print(f'Directory {path} already exists. Should {file_type} be added there?\nPlease type [y/n]')
         answer = input()

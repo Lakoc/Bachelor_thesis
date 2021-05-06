@@ -27,6 +27,7 @@ if __name__ == '__main__':
     print(f'Listing files in {args.src} ...')
     files = [f for f in listdir(args.src) if isfile(join(args.src, f)) and f.endswith(f'.pkl')]
 
+    # Overall stats initialization
     stats_overall = {
         "speech_ratio": {
             "therapist": [

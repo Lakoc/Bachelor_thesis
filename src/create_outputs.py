@@ -30,17 +30,22 @@ if __name__ == '__main__':
     if len(files) < 1:
         raise FileNotFoundError(f'No pkl files found in {args.src}')
 
+    # Create new subdir for plots
     create_new_dir(join(args.dest, 'plots'), 'output plots')
 
-
+    # Copy stylesheet file to destination
     copyfile(f'{args.template.split(".html")[0]}.css', join(args.dest, 'style.css'))
     print(f'File {join(args.dest, "style.css")} was created')
 
     with Bar(f'Processing files in {args.src}', max=len(files)) as bar:
         for file in files:
+
+            # Load source files
             file_name = file.split('.pkl')[0]
             texts = load_texts(args.text)
             stats = load_stats(join(args.src, file))
             stats_overall = load_stats_overall(args.overall_stats)
+
+            # Create output
             create_output(stats, stats_overall, texts, args.template, args.dest, file_name)
             bar.next()

@@ -17,6 +17,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    # Init error rate array
     error_rate = np.zeros(2)
 
     print(f'Listing files in {args.hyp}')
@@ -27,15 +28,21 @@ if __name__ == '__main__':
 
     with Bar(f'Calculating word error rate', max=len(files)) as bar:
         for file in files:
+
+            # Load transcription
             file_name = f'{file.split(".")[0].split("/")[-1]}.txt'
+
             if args.verbose:
                 print(f'File {file}\n')
+
+            # Calculate error rate
             error_rate += transcription_test(args.ref, file_name, args.hyp,
                                              args.verbose)
             if args.verbose:
                 print('\n')
             bar.next()
 
+        # Normalize error rate and print overall outputs
         error_rate /= len(files)
         print(f"""\nOverall error rate\n
         Word error rate channel 1: {error_rate[0] * 100:.3f}%

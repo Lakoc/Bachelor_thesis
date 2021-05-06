@@ -87,12 +87,8 @@ def calculate_mfcc(segments, sampling_rate, mel_filters):
     power_spectrum = ((1.0 / params.frequency_resolution) * (magnitude ** 2))
 
     # Apply banks on power_spectrum
-
     filter_banks = np.transpose(np.dot(np.transpose(power_spectrum, [0, 2, 1]), mel_bank.T), [0, 2, 1])
 
-    # fig, ax = plt.subplots()
-    # ax.plot(mel_bank.transpose(1,0))
-    # fig.show()
     # Replace 0 with smallest float for numerical stability and
     filter_banks = np.where(filter_banks == 0, np.finfo(float).eps, filter_banks)
     filter_banks = 20 * np.log10(filter_banks)
@@ -111,7 +107,6 @@ def calculate_mfcc(segments, sampling_rate, mel_filters):
     filter_banks -= np.mean(filter_banks, axis=0)
     mfcc_compressed -= np.mean(mfcc_compressed, axis=0)
 
-    # np.savetxt('features.txt', mfcc_compressed[:, :, 0])
     return filter_banks, mfcc_compressed, power_spectrum
 
 
@@ -145,7 +140,6 @@ def append_delta(mfcc, delta, d_delta):
     return np.append(mfcc_dd, d_delta, axis=1)
 
 
-@deprecated
 def calculate_sign_changes(segmented_tracks):
     """Iterate over all segments and count sign change"""
     sign_changes = np.zeros((2, len(segmented_tracks[0])))

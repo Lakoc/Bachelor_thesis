@@ -32,18 +32,24 @@ if __name__ == '__main__':
 
     with Bar(f'Calculating diarization error rate', max=len(files)) as bar:
         for file in files:
+
             file_name = f'{file.split(".")[0].split("/")[-1]}.rttm'
+
             if args.verbose:
                 print(f'File {file}\n')
+
+            # Calculate err rate according to selected mode
             if args.mode == 2:
                 error_rate += diar_dictaphone(args.ref, file_name, args.hyp, args.collar // 10,
                                               args.verbose)
             else:
                 error_rate += diar_online(args.ref, file_name, args.hyp, args.collar // 10, args.verbose)
+
             if args.verbose:
                 print('\n')
             bar.next()
 
+        # Normalize error rate and print overall stats
         error_rate /= len(files)
         print(f"""\nOverall error rates\n
         Miss rate: {error_rate[0] * 100:.3f}%

@@ -19,22 +19,22 @@ def detect_cross_talks(vad, min_len):
     return cross_talks[cross_talks[:, 0] == 0][:, 1:], cross_talks[cross_talks[:, 0] == 1][:, 1:]
 
 
-def detect_interruptions(vad):
-    """Detects interruptions (speaker 1 is speaking from 0-10, speaker 2 from 3-6) in vad segments"""
-    cross_talks = np.logical_and(vad[:, 0], vad[:, 1])
-    cross_talks = np.append(np.append([0], cross_talks), [0])
-    cross_talks_bounds = np.where(np.diff(cross_talks))[0].reshape(-1, 2)
-    vad_appended = np.append(vad, [[0, 0]], axis=0)
-    pre_cross_talk = vad_appended[cross_talks_bounds[:, 0] - 1]
-    post_cross_talk = vad_appended[cross_talks_bounds[:, 1]]
-
-    interruptions = np.all(post_cross_talk == pre_cross_talk, axis=1)
-    interruptions_arg = np.argwhere(interruptions)
-    interruption_origin = pre_cross_talk[interruptions_arg, 0]
-
-    interruptions = np.append(interruption_origin, cross_talks_bounds[np.squeeze(interruptions_arg)], axis=1)
-
-    return interruptions[interruptions[:, 0] == 0][:, 1:], interruptions[interruptions[:, 0] == 1][:, 1:]
+# def detect_interruptions(vad):
+#     """Detects interruptions (speaker 1 is speaking from 0-10, speaker 2 from 3-6) in vad segments"""
+#     cross_talks = np.logical_and(vad[:, 0], vad[:, 1])
+#     cross_talks = np.append(np.append([0], cross_talks), [0])
+#     cross_talks_bounds = np.where(np.diff(cross_talks))[0].reshape(-1, 2)
+#     vad_appended = np.append(vad, [[0, 0]], axis=0)
+#     pre_cross_talk = vad_appended[cross_talks_bounds[:, 0] - 1]
+#     post_cross_talk = vad_appended[cross_talks_bounds[:, 1]]
+#
+#     interruptions = np.all(post_cross_talk == pre_cross_talk, axis=1)
+#     interruptions_arg = np.argwhere(interruptions)
+#     interruption_origin = pre_cross_talk[interruptions_arg, 0]
+#
+#     interruptions = np.append(interruption_origin, cross_talks_bounds[np.squeeze(interruptions_arg)], axis=1)
+#
+#     return interruptions[interruptions[:, 0] == 0][:, 1:], interruptions[interruptions[:, 0] == 1][:, 1:]
 
 
 def detect_loudness(energy, vad, percentile=90, min_len=20):
@@ -208,22 +208,6 @@ def get_texts(transcriptions):
 def calculate_loudness(energy, vad, transcriptions, percentile=90):
     """Add to transcriptions its "loudness" detected by finding the most energetically important segments"""
     energy_mean = [np.mean(energy[:, 0][vad[:, 0]]), np.mean(energy[:, 1][vad[:, 1]])]
-    # energy_active_segments1 = np.where(vad[:, 0], energy[:, 0], 0)
-    # energy_active_segments2 = np.where(vad[:, 1], energy[:, 1], 0)
-    #
-    # loudness1 = np.squeeze(np.argwhere(energy_active_segments1 > np.percentile(energy_active_segments1, percentile)))
-    # loudness2 = np.squeeze(np.argwhere(energy_active_segments2 > np.percentile(energy_active_segments2, percentile)))
-    #
-    # sequences1 = np.split(loudness1, np.array(np.where(np.diff(loudness1) > 1)[0]) + 1)
-    # sequences2 = np.split(loudness2, np.array(np.where(np.diff(loudness2) > 1)[0]) + 1)
-    # energy_hard = np.zeros(energy.shape)
-    #
-    # for sequence in sequences1:
-    #     energy_hard[sequence[0]: sequence[-1], 0] = 1
-    #
-    # for sequence in sequences2:
-    #     energy_hard[sequence[0]: sequence[-1], 1] = 1
-
     for speaker in range(len(transcriptions)):
         for transcription in transcriptions[speaker]:
             t_start, t_end = transcription
@@ -232,6 +216,7 @@ def calculate_loudness(energy, vad, transcriptions, percentile=90):
 
 
 def calculate_client_mood(transcriptions):
+    """Calculate client mood from transcriptions"""
     emotions = np.zeros((len(transcriptions), 5))
     for index, transcription in enumerate(transcriptions):
         text = transcriptions[transcription]['text']

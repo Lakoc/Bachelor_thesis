@@ -31,21 +31,29 @@ if __name__ == '__main__':
 
     with Bar(f'Processing files in {args.src}', max=len(files)) as bar:
         for file in files:
+
+            # Load wav file
             file_name = file.split('.wav')[0]
             wav_file, sampling_rate = read_wav_file(join(args.src, file))
 
+            # Check wav shape
             if wav_file.shape[0] < sampling_rate:
                 raise ValueError(f'Wav file {file_name} is too short')
             if wav_file.shape[1] != 2:
                 raise ValueError(f'Wav file {file_name} does not have 2 channels.')
 
+            # Preprocessing
             signal = process_pre_emphasis(wav_file, params.pre_emphasis_coefficient)
             segmented_tracks = process_hamming(signal, sampling_rate, params.window_size,
                                                params.window_overlap)
+
+            # Delete signal, preventing ram memory exceeding
             del signal
             root_mean_squared_energy = calculate_energy_over_segments(segmented_tracks)
             np.savetxt(f'{join(args.dest, file_name)}.energy', root_mean_squared_energy)
             _, mfcc, _ = calculate_mfcc(segmented_tracks, sampling_rate, params.cepstral_coef_count)
+
+            # Delete segments, preventing ram memory exceeding
             del segmented_tracks
 
             """Thresholding"""
@@ -55,21 +63,22 @@ if __name__ == '__main__':
             # vad = vad_module.energy_vad_threshold_with_adaptive_threshold(normalize_energy_to_0_1(
             #     root_mean_squared_energy))
             """Gmm based VAD"""
-
             # vad = vad_module.energy_gmm_based(
             #     normalize_energy_to_0_1(root_mean_squared_energy), propagation=True)
+
+            vad = load_vad_from_rttm(f'{join(args.src, file_name)}.rttm', root_mean_squared_energy.shape[0])
 
             """Smoothing the vad output"""
             # vad = vad_module.apply_median_filter(vad)
             # vad = vad_module.apply_silence_speech_removal(vad)
-            vad = load_vad_from_rttm(f'{join(args.src, file_name)}.rttm', root_mean_squared_energy.shape[0])
 
             """Energy based diarization"""
             # diarization = diarization_module.energy_based_diarization_no_interruptions(
             #     root_mean_squared_energy, vad)
 
             diarization = diarization_module.gmm_mfcc_diarization_2channels(mfcc, vad,
-                                                                           root_mean_squared_energy)
+                                                                            root_mean_squared_energy)
 
+            # Save outputs to rttm file
             outputs.diarization_to_rttm_file(join(args.dest, file_name), *diarization_with_timing(diarization))
             bar.next()

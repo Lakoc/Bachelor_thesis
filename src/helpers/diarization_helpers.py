@@ -1,8 +1,7 @@
 import numpy as np
 from scipy import ndimage
 import params
-from helpers.propagation import mean_filter, forward_backward
-import matplotlib.pyplot as plt
+from helpers.propagation import forward_backward
 
 
 def extract_features_for_diarization(mfcc_dd, vad, energy):
@@ -91,9 +90,3 @@ def single_gmm_update(gmm1, gmm2, features, data_full, active_segments_index):
     likelihoods = np.append(speaker1.reshape(-1, 1), speaker2.reshape(-1, 1), axis=1)
 
     return likelihoods
-
-
-def smoother_diarization(diarized):
-    """Remove small segments from diarization"""
-    diarized = ndimage.median_filter(diarized, params.median_filter_diar)
-    return diarized
