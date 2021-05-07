@@ -41,7 +41,7 @@ td {
 }
 
 th {
-    vertical-align: inherit!important;
+    vertical-align: inherit !important;
     cursor: pointer;
     border: 1px solid black;
 }
@@ -63,17 +63,31 @@ th {
 
 .param_text {
     text-align: center;
-    font-size: 20px;
+    font-size: 16px;
     margin: 0 20px 0 20px;
 }
 
 .info-text {
-    font-size: 20px;
+    font-size: 18px;
     margin-bottom: 40px;
 }
 
 .text-center {
     text-align: center;
+}
+
+.interruption_origin {
+    font-weight: bold;
+    color: rgb(255, 127, 14);
+}
+
+#general_info {
+    font-size: 20px;
+}
+
+.no-margin {
+    margin-bottom: 0;
+    font-size: 16px;
 }
 
 .full-width {

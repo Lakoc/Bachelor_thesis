@@ -150,7 +150,7 @@ def add_volume_table(html, stats):
     loudness = {**dict(((*key, 0), value) for (key, value) in stats['transcription'][0].items() if value['text']),
                 **dict(((*key, 1), value) for (key, value) in stats['transcription'][1].items() if value['text'])}
     loud_sorted = sorted(loudness, key=lambda l: loudness[l]['energy'], reverse=True)
-    loud_sorted = loud_sorted[0: min(len(loud_sorted), 25)]
+    loud_sorted = loud_sorted[0: min(len(loud_sorted), params.volume_table_items)]
     loud_sorted_by_time = sorted(loud_sorted, key=lambda l: l[0])
 
     for segment in loud_sorted_by_time:
@@ -263,6 +263,7 @@ def add_texts(html, stats, stats_overall, texts, most_frequent_words, file_name)
     html.find(id='speed_info').string = texts['speed_info']
     html.find(id='speed_therapist').string = texts['speed']['therapist']
     html.find(id='speed_client').string = texts['speed']['client']
+    html.find(id='interruptions_histograms').string = texts['interruptions_histograms']
 
     fill_regex = re.compile(r'[_%]\S*')
     therapist_fills = [string[1:] for string in fill_regex.findall(stats['texts'][0])]
@@ -275,6 +276,8 @@ def add_texts(html, stats, stats_overall, texts, most_frequent_words, file_name)
                                                                                                   str(round(
                                                                                                       stats['signal'][
                                                                                                           'len'] / 60)))
+    html.find(id='general_info_average').string = texts['general_info_average']
+    html.find(id='general_info_graphs').string = texts['general_info_graphs']
 
 
 def add_attachments(html, file_name):
@@ -291,14 +294,84 @@ def add_attachments(html, file_name):
     vad['href'] = f'{file_name}.rttm'
     vad['download'] = f'{file_name}.rttm'
 
+    interruptions = html.find(id='attachment-interruptions')
+    interruptions['href'] = f'{file_name}_interruptions.html'
+    interruptions['download'] = f'{file_name}_interruptions.html'
+
+
+def add_row_to_table(html, t_body, segment):
+    """Add single row to interruptions table"""
+    new_row = html.new_tag("tr")
+    time_start_tag = html.new_tag('td')
+    time_start_tag.string = f'{int(segment[0] * params.window_stride / 60)}:{int(segment[0] * params.window_stride % 60)}'
+    new_row.append(time_start_tag)
+
+    time_dur_tag = html.new_tag('td')
+    time_dur_tag.string = f'{(segment[1]) * params.window_stride:.2f}'
+    new_row.append(time_dur_tag)
+
+    therapist_tag = html.new_tag('td')
+    therapist_tag.string = segment[2]
+    new_row.append(therapist_tag)
+
+    client_tag = html.new_tag('td')
+    client_tag.string = segment[3]
+    new_row.append(client_tag)
+
+    if segment[4] == 0:
+        therapist_tag['class'] = 'interruption_origin'
+    else:
+        client_tag['class'] = 'interruption_origin'
+
+    t_body.append(new_row)
+
+
+def add_rows_to_interruption_table(values, stats, html, t_body, array_len):
+    """Process rows of array"""
+    for value in values:
+        speaker = 1 if value >= array_len else 0
+        index = value - array_len if value >= array_len else value
+        start = stats['interruptions'][speaker][index, 0]
+        duration = (stats['interruptions'][speaker][index, 1] - start)
+        speech = stats['interruptions_texts'][speaker][index]
+        add_row_to_table(html, t_body, [start, duration, speech[speaker], speech[1 - speaker], speaker])
+
+
+def add_interruption_table(original_html, html_table, stats):
+    """Create table of interruptions"""
+
+    interruptions_len1 = (stats['interruptions'][0][:, 1] - stats['interruptions'][0][:, 0]).astype(np.float)
+    interruptions_len2 = (stats['interruptions'][1][:, 1] - stats['interruptions'][1][:, 0]).astype(np.float)
+
+    interruptions_len = np.append(interruptions_len1, interruptions_len2)
+    sorted = np.flip(np.argsort(interruptions_len))
+
+    # Preview of table in document
+    t_body_table = original_html.find(id='interruptions_table').find("tbody")
+    sorted_longest = sorted[0: min(sorted.shape[0], params.interruptions_table_items)]
+    add_rows_to_interruption_table(sorted_longest, stats, original_html, t_body_table, interruptions_len1.shape[0])
+
+    # Full table
+    t_body_table = html_table.find(id='interruptions_table').find("tbody")
+    add_rows_to_interruption_table(sorted, stats, html_table, t_body_table, interruptions_len1.shape[0])
+
 
 def create_output(stats, stats_overall, texts, template, path, file_name):
     """Create single paged html document with overall statistics of session from provided template"""
     html = load_template(template)
+    interruption_table_html = load_template(join(re.split(r'[^/]*.html', template)[0], 'interruptions_table.html'))
+
     html.find_all(rel="stylesheet")[-1]['href'] = 'style.css'
+    interruption_table_html.find_all(rel="stylesheet")[-1]['href'] = 'style.css'
+
     most_frequent_words = add_plots(html, stats, stats_overall, path, file_name)
     add_texts(html, stats, stats_overall, texts, most_frequent_words, file_name)
     add_attachments(html, file_name)
     add_volume_table(html, stats)
+    add_interruption_table(html, interruption_table_html, stats)
+
     with open(f'{join(path, file_name)}.html', 'w') as output:
         output.write(str(html))
+
+    with open(f'{join(path, file_name)}_interruptions.html', 'w') as output:
+        output.write(str(interruption_table_html))

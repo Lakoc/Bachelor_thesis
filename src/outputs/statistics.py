@@ -4,7 +4,13 @@ import re
 import text2emotion as te
 
 
-def detect_cross_talks(vad, min_len):
+def closest_interval(dict_keys, value_to_fit):
+    """Find closest interval to provided value in transcription"""
+    return dict_keys[min(range(len(dict_keys)),
+                         key=lambda i: abs(dict_keys[i][1] - value_to_fit) + abs(dict_keys[i][0] - value_to_fit))]
+
+
+def detect_cross_talks(vad, min_len, transcription):
     """Detects cross talks in vad segments"""
     min_len_segments = int(min_len / params.window_stride)
     cross_talks = np.logical_and(vad[:, 0], vad[:, 1])
@@ -16,7 +22,22 @@ def detect_cross_talks(vad, min_len):
 
     cross_talks = np.append(cross_talk_origin, cross_talks_bounds, axis=1)
 
-    return cross_talks[cross_talks[:, 0] == 0][:, 1:], cross_talks[cross_talks[:, 0] == 1][:, 1:]
+    dictionary_keys = [list(transcription[0].keys()), list(transcription[1].keys())]
+    cross_talks_texts = ([], [])
+
+    """Find transcriptions for cross talks"""
+    for cross_talk in cross_talks:
+        origin = cross_talk[0]
+        start = cross_talk[1]
+        end = cross_talk[2]
+        mean_time = (end + start) / 2
+        interruption_origin = transcription[origin][closest_interval(dictionary_keys[origin], mean_time)]['text']
+        interrupted = transcription[1 - origin][closest_interval(dictionary_keys[1 - origin], mean_time)]['text']
+        cross_talks_texts[origin].append([interruption_origin, interrupted])
+
+    cross_talks_as_tuple = cross_talks[cross_talks[:, 0] == 0][:, 1:], cross_talks[cross_talks[:, 0] == 1][:, 1:]
+
+    return cross_talks_as_tuple, cross_talks_texts
 
 
 # def detect_interruptions(vad):
@@ -205,7 +226,7 @@ def get_texts(transcriptions):
     return texts, non_speech_activity
 
 
-def calculate_loudness(energy, vad, transcriptions, percentile=90):
+def calculate_loudness(energy, vad, transcriptions):
     """Add to transcriptions its "loudness" detected by finding the most energetically important segments"""
     energy_mean = [np.mean(energy[:, 0][vad[:, 0]]), np.mean(energy[:, 1][vad[:, 1]])]
     for speaker in range(len(transcriptions)):
@@ -237,7 +258,7 @@ def interruption_len_hist(interruptions):
 def get_stats(vad, transcription, energy):
     """Calculate all available statistics"""
     texts, fills = get_texts(transcription)
-    interruptions = detect_cross_talks(vad, params.min_crosstalk)
+    interruptions, interruptions_texts = detect_cross_talks(vad, params.min_crosstalk, transcription)
     interruptions_len = interruption_len_hist(interruptions[0]), interruption_len_hist(interruptions[1])
     volume_changes = process_volume_changes(energy, vad)
     calculate_loudness(energy, vad, transcription)
@@ -253,4 +274,4 @@ def get_stats(vad, transcription, energy):
             'speech': speech_bounds, 'speech_joined': segment_bounds_joined, 'hesitations': hesitations,
             'reactions': reactions, 'volume_changes': volume_changes, 'client_mood': client_mood,
             'speech_len': speech_len, 'speech_ratio': speech_ratio, 'texts': texts, 'fills': fills,
-            'signal': {'len': vad.shape[0] * params.window_stride}}
+            'signal': {'len': vad.shape[0] * params.window_stride}, 'interruptions_texts': interruptions_texts}

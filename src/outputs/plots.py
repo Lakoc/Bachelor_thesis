@@ -189,10 +189,6 @@ def client_mood(mood, path):
     labels = ['Hněv', 'Strach', 'Štěstí', 'Smutek', 'Překvapení']
     smoothing_kernel = np.ones(10) / 10
     positive = np.zeros(mood.shape[0])
-    positive_over = np.where(positive > 0, positive, 0)
-    positive_under = np.where(positive < 0, positive, 0)
-    zeros = np.zeros(positive_over.shape[0])
-    time = np.arange(0, zeros.shape[0])
 
     fig, axs = plt.subplots(nrows=2, figsize=(16, 8), sharex=True)
     for column, label in zip(mood.T, labels):
@@ -208,6 +204,11 @@ def client_mood(mood, path):
     axs[0].spines['top'].set_visible(False)
     axs[0].grid(axis='y', color='black', linewidth=.3, alpha=.5)
     axs[0].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+
+    positive_over = np.where(positive > 0, positive, 0)
+    positive_under = np.where(positive < 0, positive, 0)
+    zeros = np.zeros(positive_over.shape[0])
+    time = np.arange(0, zeros.shape[0])
 
     axs[1].fill_between(time, zeros, positive_over, color='C2', alpha=0.5, label='Dobrá nálada')
     axs[1].fill_between(time, zeros, positive_under, color='C1', alpha=0.5, label='Špatná nálada')

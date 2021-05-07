@@ -8,9 +8,11 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 </head>
 
-<body class="container ">
+<body class="container">
 <h1 id="session_title">Souhrnná zpráva o sezení č. ###</h1>
 <p class="info-text text-center" id="general_info"></p>
+<p class="info-text no-margin" id="general_info_average"></p>
+<p class="info-text no-margin" id="general_info_graphs"></p>
 <div class="param">
     <h2 class="param_title">Poměr mluvy</h2>
     <div class="row_picture">
@@ -45,7 +47,7 @@
 </div>
 
 <div class="param">
-    <h2 class="param_title">Hlasitost</h2>
+    <h2 class="param_title">Skoky do řeči a hlasitost</h2>
     <p id="loudness_info" class="info-text"></p>
     <div>
         <div class="image_caption">
@@ -59,8 +61,37 @@
             <p class="param_text" id="client_volume">Hlasitost klienta v průběhu času.</p>
         </div>
     </div>
+    <p class="info-text" id="interruptions_info"></p>
+    <p class="info-text" id="interruptions_table_text"> Následující tabulka obsahuje nejdelší zaznamenané skoky do řeči.
+        Zvýrazněny jsou transkripce řečníká, který skočil do řeči tomu druhému. V <a
+                href="#attachment-interruptions">přílohách</a> se nachází celá tabulka.</p>
+    <table class="w3-table sortable" id="interruptions_table">
+        <thead class="table-header">
+        <tr>
+            <th>Čas [min:s]</th>
+            <th>Délka [s]</th>
+            <th>Transkcripce terapeuta</th>
+            <th>Transkcripce klienta</th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <p class="info-text" id="interruptions_histograms"></p>
+    <div class="row_picture">
+        <div class="image_caption">
+            <img onclick="onClickImg(this)" class="zoom" id="figure-therapist_interruptions" src="placeholder.png"
+                 alt="Therapist_interruptions">
+            <p class="param_text" id="therapist_interruptions">Terapeut</p>
+        </div>
+        <div class="image_caption">
+            <img onclick="onClickImg(this)" class="zoom" id="figure-client_interruptions" src="placeholder.png"
+                 alt="Client_interruptions">
+            <p class="param_text" id="client_interruptions">Klient</p>
+        </div>
+    </div>
     <div class="div-centered">
-        <h2>Následující tabulka poukazuje na energeticky nejvýznamější segmenty řeči mluvčích.</h2>
+        <h3>Následující tabulka poukazuje na energeticky nejvýznamější segmenty řeči mluvčích.</h3>
         <p id="loudness_text" class="info-text"></p>
         <table class="w3-table sortable" id="volume_text_table">
             <thead class="table-header">
@@ -121,23 +152,6 @@
 </div>
 
 <div class="param">
-    <h2 class="param_title">Skoky do řeči</h2>
-    <p class="info-text" id="interruptions_info"></p>
-    <div class="row_picture">
-        <div class="image_caption">
-            <img onclick="onClickImg(this)" class="zoom" id="figure-therapist_interruptions" src="placeholder.png"
-                 alt="Therapist_interruptions">
-            <p class="param_text" id="therapist_interruptions">Terapeut</p>
-        </div>
-        <div class="image_caption">
-            <img onclick="onClickImg(this)" class="zoom" id="figure-client_interruptions" src="placeholder.png"
-                 alt="Client_interruptions">
-            <p class="param_text" id="client_interruptions">Klient</p>
-        </div>
-    </div>
-</div>
-
-<div class="param">
     <h2 class="param_title">Reakční doba</h2>
     <div class="row_picture">
         <div class="image_caption">
@@ -154,7 +168,7 @@
 </div>
 
 <div class="param">
-    <h2 class="param_title">Délka vět</h2>
+    <h2 class="param_title">Délka jednotlivých vět</h2>
     <p class="info-text" id="sentences_len_info"></p>
     <div class="row_picture">
         <div class="image_caption">
@@ -217,6 +231,9 @@
         </a></li>
         <li><a id="attachment-vad" href="" download="VAD">
             Detekce řečové aktivity
+        </a></li>
+        <li><a id="attachment-interruptions" href="" download="Interruptions">
+            Skoky do řeči
         </a></li>
     </ul>
 </div>

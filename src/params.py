@@ -59,3 +59,5 @@ model_means_shift = 0.05
 
 # outputs
 min_crosstalk = 0.1
+volume_table_items = 15
+interruptions_table_items = 10
