@@ -66,7 +66,7 @@ def likelihood_propagation_matrix(likelihood):
     return likelihood_smoothed
 
 
-def single_gmm_update(gmm1, gmm2, features, data_full, active_segments_index, ref):
+def single_gmm_update(gmm1, gmm2, features, data_full, active_segments_index):
     """Update means of gmm by X% in direction of new means"""
 
     features_active = features[active_segments_index]

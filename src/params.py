@@ -10,7 +10,7 @@ window_stride = window_size - window_overlap  # 10ms
 
 # mfcc
 frequency_resolution = 512
-cepstral_coef_count = 10
+cepstral_coef_count = 20
 lifter = 22
 delta_neighbours = 2
 
@@ -46,7 +46,7 @@ gmm_error_rate = 1e-3
 gmm_verbose = False
 
 # --filtration
-diarization_output_mean_filter = 0.2
+diarization_output_mean_filter = 1
 diarization_init_array_filter = 0.5
 
 # --forward-backward

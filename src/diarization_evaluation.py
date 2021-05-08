@@ -1,6 +1,6 @@
 import numpy as np
 from progress.bar import Bar
-from system_tests.diarization_vad_test import diar_dictaphone, diar_online
+from system_tests.diarization_vad_test import diar_dictaphone, diar_online, confusion_channel_error
 from os import listdir
 from os.path import isfile, join
 from argparse import ArgumentParser
@@ -40,7 +40,7 @@ if __name__ == '__main__':
 
             # Calculate err rate according to selected mode
             if args.mode == 2:
-                error_rate += diar_dictaphone(args.ref, file_name, args.hyp, args.collar // 10,
+                error_rate += confusion_channel_error(args.ref, file_name, args.hyp, args.collar // 10,
                                               args.verbose)
             else:
                 error_rate += diar_online(args.ref, file_name, args.hyp, args.collar // 10, args.verbose)

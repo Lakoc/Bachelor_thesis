@@ -72,7 +72,8 @@ def gmm_mfcc_diarization_1channel(mfcc, vad, energy, ref):
                                     int(params.diarization_init_array_filter / params.window_stride))
 
     # Train UBM GMM - speaker independent
-    features_active = features_ch1[active_segments_index]
+    mfcc = np.append(mfcc[:, :, 0], mfcc[:, :, 1], axis=1)
+    features_active = mfcc[active_segments_index]
     gmm = MyGmm(n_components=params.gmm_components, verbose=params.gmm_verbose, covariance_type='diag',
                 max_iter=params.gmm_max_iterations,
                 tol=params.gmm_error_rate).fit(features_active)
@@ -82,32 +83,34 @@ def gmm_mfcc_diarization_1channel(mfcc, vad, energy, ref):
     gmm2 = deepcopy(gmm)
 
     # Move means in direction of each speaker
-    likelihoods = single_gmm_update(gmm1, gmm2, features_ch1, energy_difference, active_segments_index, ref)
-    likelihoods_smoothed = likelihood_propagation_matrix(likelihoods)
+    likelihoods = single_gmm_update(gmm1, gmm2, mfcc, energy_difference, active_segments_index)
+    # likelihoods_smoothed = likelihood_propagation_matrix(likelihoods)
 
-    diarization, likelihoods_difference = return_diarization_index(likelihoods_smoothed, active_segments)
+    diarization, likelihoods_difference = return_diarization_index(likelihoods, active_segments)
 
     likelihoods_difference = mean_filter(likelihoods_difference,
                                          int(params.diarization_init_array_filter / params.window_stride))
 
-    energy_mean = np.mean(energy_difference)
+    # energy_mean = np.mean(energy_difference)
     zeros = np.zeros_like(likelihoods_difference)
-    time = np.linspace(0, 6, energy_difference.shape[0])
+    time = np.linspace(0, 600, energy_difference.shape[0])
     ref[ref == 2] = -1
-    fig, axs = plt.subplots(nrows=2, sharex=True, figsize=(10,6))
-    axs[0].plot(time,ref, label='Referenční výstup diarizace')
-    axs[0].legend(fontsize=14)
-    axs[1].plot(time,energy_difference, label='Rozdíl energií kanálů')
-    axs[1].plot(time,zeros, label='Práh')
-    axs[1].legend(fontsize=14)
-    axs[1].set_xlabel('Čas [min]', fontsize=18)
-    axs[1].set_ylabel('Velikost', fontsize=18)
-    axs[0].set_ylabel('Velikost', fontsize=18)
-    plt.xticks(fontsize=16)
-    plt.yticks(fontsize=16)
-    # axs[2].plot(likelihoods_difference, label='1channel_gmm')
-    # axs[2].plot(zeros, label='threshold')
-    # axs[2].legend()
+    fig, ax = plt.subplots(nrows=1, sharex=True, figsize=(10, 6))
+    ax.plot(time,ref, label='Referenční diarizace')
+    # axs[0].legend()
+    # axs[1].plot(time, energy_difference, label='Rozdíl energií kanálů')
+    # axs[1].plot(time, zeros, label='Práh')
+    # axs[1].legend(fontsize=14)
+    # axs[1].set_xlabel('Čas [min]', fontsize=18)
+    # axs[1].set_ylabel('Velikost', fontsize=18)
+    # plt.xticks(fontsize=16)
+    # axs[1].tick_params(axis='both', labelsize=14)
+
+    ax.plot(time, likelihoods_difference * 10, label='1channel_gmm')
+    ax.plot(time,zeros, label='threshold')
+    ax.legend()
+    plt.xticks(np.arange(0, 601, 10.0), rotation=45)
+    plt.grid(axis='x')
 
     # high_bound = np.percentile(energy_difference, 100 - params.likelihood_percentile)
     # low_bound = np.percentile(energy_difference, params.likelihood_percentile)
@@ -120,17 +123,21 @@ def gmm_mfcc_diarization_1channel(mfcc, vad, energy, ref):
     # axs[1].plot(features2, label='speaker2')
     # axs[1].legend()
 
-    hyp = np.sign(energy_difference)
-    hyp *= active_segments
-
-    confusion = np.sum((ref != hyp)) / ref.shape[0] * 100
-    print(f'\nThresholding 0: {confusion:.2f}%')
-
-    # hyp = np.sign(likelihoods_difference)
+    # hyp = np.sign(energy_difference)
     # hyp *= active_segments
     #
     # confusion = np.sum((ref != hyp)) / ref.shape[0] * 100
-    # print(f'1 channel GMM: {confusion:.2f}%')
+    #
+    hyp = np.sign(likelihoods_difference)
+    hyp *= active_segments
+
+    confusion = np.sum((ref != hyp)) / ref.shape[0] * 100
+    confusion1 = np.sum(np.logical_and(ref == 1, hyp == -1)) / np.sum(ref == 1) * 100
+    confusion2 = np.sum(np.logical_and(ref == -1, hyp == 1)) / np.sum(ref == --1) * 100
+    print(f'1 channel GMM: {confusion:.2f}%')
+    print(f'Therapist miss: {confusion1:.2f}%')
+    print(f'Client miss: {confusion2:.2f}%')
+
     #
     # # Train UBM GMM - speaker independent
     # mfcc = np.append(mfcc[:, :, 0], mfcc[:, :, 1], axis=1)
@@ -180,9 +187,8 @@ def gmm_mfcc_diarization_1channel(mfcc, vad, energy, ref):
     #
     # confusion = np.sum((ref != hyp)) / ref.shape[0] * 100
     # print(f'2 channel 2 iterations GMM: {confusion:.2f}%')
-
+    # fig.tight_layout()
     plt.show()
-
 
     return diarization
 

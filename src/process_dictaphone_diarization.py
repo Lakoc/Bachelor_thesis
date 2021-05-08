@@ -6,7 +6,8 @@ import python_speech_features
 from io_operations import outputs
 import params
 from audio_processing.preprocessing import process_hamming, read_wav_file, process_pre_emphasis
-from audio_processing.feature_extraction import calculate_mfcc, calculate_energy_over_segments
+from audio_processing.feature_extraction import calculate_rmse, calculate_mfcc, calculate_energy_over_segments, \
+    normalize_energy_to_0_1
 import audio_processing.diarization as diarization_module
 from io_operations.outputs import diarization_with_timing
 from progress.bar import Bar
@@ -49,15 +50,17 @@ if __name__ == '__main__':
                                                params.window_overlap)
 
             # Delete signal, preventing ram memory exceeding
-            mfcc_0 = python_speech_features.mfcc(signal[:, 0], samplerate=sampling_rate, winlen=0.02, winstep=0.01,
+            mfcc_0 = python_speech_features.mfcc(signal[:, 0], samplerate=sampling_rate, winlen=params.window_size,
+                                                 winstep=params.window_stride,
                                                  nfft=1024,
-                                                 numcep=13)
-            mfcc_1 = python_speech_features.mfcc(signal[:, 1], samplerate=sampling_rate, winlen=0.02, winstep=0.01,
+                                                 numcep=params.cepstral_coef_count)
+            mfcc_1 = python_speech_features.mfcc(signal[:, 1], samplerate=sampling_rate, winlen=params.window_size,
+                                                 winstep=params.window_stride,
                                                  nfft=1024,
-                                                 numcep=13)
+                                                 numcep=params.cepstral_coef_count)
             mfcc = np.vstack([mfcc_0[np.newaxis, ...], mfcc_1[np.newaxis, ...]]).transpose((1, 2, 0))
             del signal
-            root_mean_squared_energy = calculate_energy_over_segments(segmented_tracks)
+            root_mean_squared_energy = calculate_rmse(segmented_tracks)
             np.savetxt(f'{join(args.dest, file_name)}.energy', root_mean_squared_energy)
             # _, mfcc, _ = calculate_mfcc(segmented_tracks, sampling_rate, params.cepstral_coef_count)
 
