@@ -22,8 +22,8 @@ def extract_features_for_diarization(mfcc_dd, vad, energy):
     energy_difference = (np.log(channel1_energy) - np.log(channel2_energy)).reshape(-1)
 
     # Append all features together
-    features_ch1 = np.append(channel1_energy, channel1_mfcc, axis=1)
-    features_ch2 = np.append(channel2_energy, channel2_mfcc, axis=1)
+    features_ch1 =  channel1_mfcc
+    features_ch2 =  channel2_mfcc
 
     return active_segments, active_segments_index, features_ch1, features_ch2, energy_difference
 
@@ -66,7 +66,7 @@ def likelihood_propagation_matrix(likelihood):
     return likelihood_smoothed
 
 
-def single_gmm_update(gmm1, gmm2, features, data_full, active_segments_index):
+def single_gmm_update(gmm1, gmm2, features, data_full, active_segments_index, ref):
     """Update means of gmm by X% in direction of new means"""
 
     features_active = features[active_segments_index]

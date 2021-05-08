@@ -51,10 +51,10 @@ diarization_init_array_filter = 0.5
 
 # --forward-backward
 diar_min_speech_dur = 1
-diar_loop_prob = 0.99
+diar_loop_prob = 0.9
 
 # --means updates
-likelihood_percentile = 20
+likelihood_percentile = 5
 model_means_shift = 0.05
 
 # outputs

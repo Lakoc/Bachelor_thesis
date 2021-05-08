@@ -7,6 +7,7 @@ from helpers.diarization_helpers import extract_features_for_diarization, likeli
     single_gmm_update
 from sklearn.cluster import KMeans
 from helpers.propagation import mean_filter
+import matplotlib.pyplot as plt
 
 
 def return_diarization_index(likelihoods, active_segments):
@@ -61,7 +62,7 @@ def gmm_mfcc_diarization_1channel_k_means(mfcc, vad, energy):
     return diarization
 
 
-def gmm_mfcc_diarization_1channel(mfcc, vad, energy):
+def gmm_mfcc_diarization_1channel(mfcc, vad, energy, ref):
     """Train Gaussian mixture models with mfcc features over speech segments"""
 
     active_segments, active_segments_index, features_ch1, _, energy_difference = extract_features_for_diarization(mfcc,
@@ -81,10 +82,100 @@ def gmm_mfcc_diarization_1channel(mfcc, vad, energy):
     gmm2 = deepcopy(gmm)
 
     # Move means in direction of each speaker
-    likelihoods = single_gmm_update(gmm1, gmm2, features_ch1, energy_difference, active_segments_index)
+    likelihoods = single_gmm_update(gmm1, gmm2, features_ch1, energy_difference, active_segments_index, ref)
     likelihoods_smoothed = likelihood_propagation_matrix(likelihoods)
 
     diarization, likelihoods_difference = return_diarization_index(likelihoods_smoothed, active_segments)
+
+    likelihoods_difference = mean_filter(likelihoods_difference,
+                                         int(params.diarization_init_array_filter / params.window_stride))
+
+    energy_mean = np.mean(energy_difference)
+    zeros = np.zeros_like(likelihoods_difference)
+    ref[ref == 2] = -1
+    fig, axs = plt.subplots(nrows=5)
+    axs[0].plot(ref, label='reference')
+    axs[0].legend()
+    axs[1].plot(energy_difference, label='diff')
+    axs[1].plot(zeros, label='threshold1')
+    axs[2].plot(likelihoods_difference, label='1channel_gmm')
+    axs[2].plot(zeros, label='threshold')
+    axs[2].legend()
+
+    high_bound = np.percentile(energy_difference, 100 - params.likelihood_percentile)
+    low_bound = np.percentile(energy_difference, params.likelihood_percentile)
+
+    # Extract features
+    features1 = (energy_difference > high_bound) * 1
+    features2 = (energy_difference < low_bound) * -1
+
+    axs[1].plot(features1, label='speaker1')
+    axs[1].plot(features2, label='speaker2')
+    axs[1].legend()
+
+    hyp = np.sign(energy_difference)
+    hyp *= active_segments
+
+    confusion = np.sum((ref != hyp)) / ref.shape[0] * 100
+    print(f'\nThresholding 0: {confusion:.2f}%')
+
+    hyp = np.sign(likelihoods_difference)
+    hyp *= active_segments
+
+    confusion = np.sum((ref != hyp)) / ref.shape[0] * 100
+    print(f'1 channel GMM: {confusion:.2f}%')
+
+    # Train UBM GMM - speaker independent
+    mfcc = np.append(mfcc[:, :, 0], mfcc[:, :, 1], axis=1)
+    features_active = mfcc[active_segments_index]
+    gmm = MyGmm(n_components=params.gmm_components, verbose=params.gmm_verbose, covariance_type='diag',
+                max_iter=params.gmm_max_iterations,
+                tol=params.gmm_error_rate).fit(features_active)
+
+    # Create model for each speaker
+    gmm1 = deepcopy(gmm)
+    gmm2 = deepcopy(gmm)
+
+    # Move means in direction of each speaker
+    likelihoods = single_gmm_update(gmm1, gmm2, mfcc, energy_difference, active_segments_index, ref)
+    likelihoods_smoothed = likelihood_propagation_matrix(likelihoods)
+
+    diarization, likelihoods_difference = return_diarization_index(likelihoods_smoothed, active_segments)
+
+    likelihoods_difference = mean_filter(likelihoods_difference,
+                                         int(params.diarization_init_array_filter / params.window_stride))
+
+    axs[3].plot(likelihoods_difference, label='2channels_gmm')
+    axs[3].plot(zeros, label='threshold')
+    axs[3].legend()
+
+    hyp = np.sign(likelihoods_difference)
+    hyp *= active_segments
+
+    confusion = np.sum((ref != hyp)) / ref.shape[0] * 100
+    print(f'2 channel GMM: {confusion:.2f}%')
+
+    likelihoods_diff = likelihoods_smoothed[:, 0] - likelihoods_smoothed[:, 1]
+
+    likelihoods = single_gmm_update(gmm1, gmm2, mfcc, likelihoods_diff, active_segments_index, ref)
+    likelihoods_smoothed = likelihood_propagation_matrix(likelihoods)
+
+    diarization, likelihoods_difference = return_diarization_index(likelihoods_smoothed, active_segments)
+    likelihoods_difference = mean_filter(likelihoods_difference,
+                                         int(params.diarization_init_array_filter / params.window_stride))
+
+    axs[4].plot(likelihoods_difference, label='2channels2iterations_gmm')
+    axs[4].plot(zeros, label='threshold')
+    axs[4].legend()
+
+    hyp = np.sign(likelihoods_difference)
+    hyp *= active_segments
+
+    confusion = np.sum((ref != hyp)) / ref.shape[0] * 100
+    print(f'2 channel 2 iterations GMM: {confusion:.2f}%')
+
+    plt.show()
+
 
     return diarization
 
