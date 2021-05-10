@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import numpy as np
 from os.path import join
 from io_operations.load_files import extract_rttm_line
@@ -95,23 +96,23 @@ def confusion_channel_error(ref_path, filename, output_path, collar_size, verbos
             for speech_tuple in hypothesis_extracted:
                 hypothesis_arr[speech_tuple[0]: speech_tuple[1]] += speech_tuple[2]
 
-            confusion = np.logical_and(reference_arr != hypothesis_arr,
-                                       np.logical_and(hypothesis_arr > 0, reference_arr > 0))
+            confusion = np.sum(np.logical_and(reference_arr != hypothesis_arr, reference_arr != -1))
 
-            confusion = np.sum(confusion)
             confusion_percentage = confusion / reference_arr.shape[0]
-
-            therapist_miss = np.sum(np.logical_and(reference_arr == 1, hypothesis_arr == 2)) / np.sum(
+            therapist_miss = np.sum(
+                np.logical_and(np.logical_and(reference_arr == 1, hypothesis_arr == 2), reference_arr != -1)) / np.sum(
                 reference_arr == 1)
-            client_miss = np.sum(np.logical_and(reference_arr == 2, hypothesis_arr == 1)) / np.sum(reference_arr == 2)
+            client_miss = np.sum(
+                np.logical_and(np.logical_and(reference_arr == 2, hypothesis_arr == 1), reference_arr != -1)) / np.sum(
+                reference_arr == 2)
 
             if verbose:
                 print(
                     f'Confusion: {confusion_percentage * 100:.3f}%'
-                    f'Therapist_miss: {therapist_miss * 100:.3f}%'
-                    f'Client_miss: {client_miss * 100:.3f}%')
+                    f'Therapist miss: {therapist_miss * 100:.3f}%'
+                    f'Client miss: {client_miss * 100:.3f}%')
 
-            return therapist_miss, client_miss, confusion_percentage, 0
+            return confusion_percentage, therapist_miss, client_miss, 0
 
 
 def diar_online(ref_path, filename, output_path, collar_size, verbose):

@@ -10,7 +10,7 @@ window_stride = window_size - window_overlap  # 10ms
 
 # mfcc
 frequency_resolution = 512
-cepstral_coef_count = 20
+cepstral_coef_count = 10
 lifter = 22
 delta_neighbours = 2
 
@@ -48,14 +48,15 @@ gmm_verbose = False
 # --filtration
 diarization_output_mean_filter = 1
 diarization_init_array_filter = 0.5
+prob_threshold_normalization = 5
 
 # --forward-backward
 diar_min_speech_dur = 1
 diar_loop_prob = 0.9
 
 # --means updates
-likelihood_percentile = 5
-model_means_shift = 0.05
+likelihood_percentile = 10
+model_means_shift = 0.20
 
 # outputs
 min_crosstalk = 0.1

@@ -12,9 +12,8 @@ if __name__ == '__main__':
                         help='path of hypothesis rttm files')
     parser.add_argument('ref', type=str,
                         help='path of reference rttm files')
-    parser.add_argument('mode', type=int, choices=range(1, 3),
-                        help='type of wav files 1 - dictaphone, 2 - online Zoom')
-
+    parser.add_argument('mode', type=int, choices=range(1, 4),
+                        help='type of wav files 1 - online, 2 - dictaphone, 3 - dictaphone with reference')
     parser.add_argument('collar', type=int,
                         help='error collar size in ms')
 
@@ -39,8 +38,11 @@ if __name__ == '__main__':
                 print(f'File {file}\n')
 
             # Calculate err rate according to selected mode
-            if args.mode == 2:
+            if args.mode == 3:
                 error_rate += confusion_channel_error(args.ref, file_name, args.hyp, args.collar // 10,
+                                                      args.verbose)
+            elif args.mode == 2:
+                error_rate += diar_dictaphone(args.ref, file_name, args.hyp, args.collar // 10,
                                               args.verbose)
             else:
                 error_rate += diar_online(args.ref, file_name, args.hyp, args.collar // 10, args.verbose)
@@ -51,9 +53,16 @@ if __name__ == '__main__':
 
         # Normalize error rate and print overall stats
         error_rate /= len(files)
-        print(f"""\nOverall error rates\n
-        Miss rate: {error_rate[0] * 100:.3f}%
-        False alarm rate: {error_rate[1] * 100:.3f}%
-        {f'Confusion error rate: {error_rate[2] * 100:.3f}%' if args.mode == 2 else ''}
-        System accuracy: {error_rate[3] * 100:.3f}%
-        """)
+        if args.mode == 3:
+            print(f"""\nOverall error rates\n
+            Confusion: {error_rate[0] * 100:.3f}%
+            Therapist miss: {error_rate[1] * 100:.3f}%
+            Client miss: {error_rate[2] * 100:.3f}%
+            """)
+        else:
+            print(f"""\nOverall error rates\n
+            Miss rate: {error_rate[0] * 100:.3f}%
+            False alarm rate: {error_rate[1] * 100:.3f}%
+            {f'Confusion error rate: {error_rate[2] * 100:.3f}%' if args.mode == 2 else ''}
+            System accuracy: {error_rate[3] * 100:.3f}%
+            """)
