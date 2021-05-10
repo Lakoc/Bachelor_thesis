@@ -49,4 +49,3 @@ if __name__ == '__main__':
             # Create output
             create_output(stats, stats_overall, texts, args.template, args.dest, file_name)
             bar.next()
-            exit(0)
