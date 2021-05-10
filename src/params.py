@@ -46,16 +46,17 @@ gmm_error_rate = 1e-3
 gmm_verbose = False
 
 # --filtration
-diarization_output_mean_filter = 0.2
+diarization_output_mean_filter = 1
 diarization_init_array_filter = 0.5
+prob_threshold_normalization = 5
 
 # --forward-backward
 diar_min_speech_dur = 1
-diar_loop_prob = 0.99
+diar_loop_prob = 0.9
 
 # --means updates
-likelihood_percentile = 20
-model_means_shift = 0.05
+likelihood_percentile = 10
+model_means_shift = 0.20
 
 # outputs
 min_crosstalk = 0.1

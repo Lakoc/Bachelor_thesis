@@ -130,14 +130,13 @@ def calculate_delta(mfcc):
     # Normalize, transpose and extract padded segments
     deltas = deltas / normalization
     deltas = deltas.transpose(1, 0, 2)
-    # TODO: check
+
     return deltas[delta_neighbours: deltas.shape[0] - delta_neighbours, :, :]
 
 
-def append_delta(mfcc, delta, d_delta):
+def append_delta(mfcc, delta):
     """Append delta and delta - delta coefficients to mfcc features"""
-    mfcc_dd = np.append(mfcc, delta, axis=1)
-    return np.append(mfcc_dd, d_delta, axis=1)
+    return np.append(mfcc, delta, axis=1)
 
 
 def calculate_sign_changes(segmented_tracks):

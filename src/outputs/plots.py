@@ -41,10 +41,10 @@ def speech_time_comparison_others(speech_time, speech_time_mean, path):
 
 def volume_changes(energy_over_segments, interruptions, size, path):
     """Plot volume changes over time for better finding of most energetic segments"""
-    silence = np.where(energy_over_segments == 0, 1, 0)
-    energy_over_segments = mean_filter(energy_over_segments, 1000)
-    energy_over_segments = np.where(silence, 0, energy_over_segments)
+    speech = energy_over_segments != 0
+    energy_over_segments = mean_filter(energy_over_segments, 150)
     energy_over_segments /= np.max(energy_over_segments)
+    speech = np.where(speech, energy_over_segments, 0)
     interruptions_arr = np.empty(shape=energy_over_segments.shape[0])
     interruptions_arr[:] = np.nan
     for interruption in interruptions:
@@ -53,13 +53,12 @@ def volume_changes(energy_over_segments, interruptions, size, path):
             interruptions_arr[interruption[0]: interruption[1]] = 1
             interruptions_arr[interruption[1] - 1] = 0
 
-    silence = np.where(silence, 0, np.nan)
     time = np.linspace(0, size / 60, energy_over_segments.shape[0])
+    zeros = np.zeros_like(speech)
 
     fig, ax = plt.subplots(figsize=(24, 4))
-    ax.plot(time, energy_over_segments, label='Hlasitost')
-    ax.plot(time, interruptions_arr, label='Skoky do řeči druhému mluvčímu')
-    ax.plot(time, silence, label='Neaktivní úseky')
+    ax.fill_between(time, zeros, energy_over_segments, color='C0', alpha=0.5, label='Hlasitost')
+    ax.plot(time,  interruptions_arr, color='C1', label='Skoky do řeči druhému mluvčímu')
     ax.set_ylabel('Normalizovaná velikost', fontsize=16)
     ax.set_xlabel('Čas [min]', fontsize=16)
     ax.spines['right'].set_visible(False)
