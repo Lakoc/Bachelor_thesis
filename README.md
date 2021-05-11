@@ -9,6 +9,7 @@ These are then aggregated, compared with other sessions, and graphically present
 In this way, therapists are provided with feedback that can serve for professional growth and better psychotherapy in the future.
 
 See demonstration outputs, which are located in the `sample_output/` directory.
+
 For more details about analysis, see `thesis.pdf` file.
 ## Prerequisites
 
@@ -169,15 +170,16 @@ optional arguments:
 ```
 
 ## Project structure
-
     .
     ├── LICENSE                 # MIT license
     ├── README.md               # Contents of this file
     ├── requirements.txt        # Python libraries requirements
     ├── sample_data             # Directory containing sample data with its anotations
-    ├── sample_stats            # Samples of overall stats calculated on datasets 
+    ├── sample_outputs          # Directory containing sample system outputs
+    ├── sample_stats            # Samples of overall stats calculated on datasets
     ├── src                     # Source files
-    └── templates               # Files used for creation of output HTML file
+    ├── templates               # Files used for creation of output HTML file
+    └── text_src                # Source files of thesis documentation
 
 ## Runnable scripts used for analysis
     src/
