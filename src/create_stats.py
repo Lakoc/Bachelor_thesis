@@ -9,7 +9,7 @@ from pickle import dump, HIGHEST_PROTOCOL
 
 if __name__ == '__main__':
     parser = ArgumentParser(
-        description='Module for creating html statistic')
+        description='Module for calculation of statistic for each file in source destination.')
     parser.add_argument('src', type=str,
                         help='source path of wav, rttm and txt files')
     parser.add_argument('dest', type=str,

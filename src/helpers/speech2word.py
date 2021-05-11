@@ -129,7 +129,7 @@ def process_file(src, dst, file, language):
 
                         # Save transcription to output file
                         f2.write(
-                            f'Channel {channel} {start:.2f}, {duration:.2f}: {out}\n')
+                            f'Channel {channel} {start:.2f}, {start+duration:.2f}: {out}\n')
                         bar.next()
     # Clean created files
     clean(tmp_dir)

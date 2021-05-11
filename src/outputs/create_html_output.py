@@ -176,7 +176,7 @@ def add_volume_table(html, stats):
             new_row.append(volume_tag)
 
             text_tag = html.new_tag('td')
-            text_tag.string = text
+            text_tag.string = text or 'Unknown'
             new_row.append(text_tag)
 
             t_body.append(new_row)
@@ -311,11 +311,11 @@ def add_row_to_table(html, t_body, segment):
     new_row.append(time_dur_tag)
 
     therapist_tag = html.new_tag('td')
-    therapist_tag.string = segment[2]
+    therapist_tag.string = segment[2] or '<Unknown>'
     new_row.append(therapist_tag)
 
     client_tag = html.new_tag('td')
-    client_tag.string = segment[3]
+    client_tag.string = segment[3] or '<Unknown>'
     new_row.append(client_tag)
 
     if segment[4] == 0:
@@ -356,7 +356,7 @@ def add_interruption_table(original_html, html_table, stats):
     add_rows_to_interruption_table(sorted, stats, html_table, t_body_table, interruptions_len1.shape[0])
 
 
-def create_output(stats, stats_overall, texts, template, path, file_name):
+def create_output(stats, stats_overall, texts, template, path, file_name, hide_emotions, hide_interruptions):
     """Create single paged html document with overall statistics of session from provided template"""
     html = load_template(template)
     interruption_table_html = load_template(join(re.split(r'[^/]*.html', template)[0], 'interruptions_table.html'))
@@ -369,6 +369,13 @@ def create_output(stats, stats_overall, texts, template, path, file_name):
     add_attachments(html, file_name)
     add_volume_table(html, stats)
     add_interruption_table(html, interruption_table_html, stats)
+
+    if hide_emotions:
+        html.find(id='emotions').decompose()
+
+    if hide_interruptions:
+        html.find(id='interruptions').decompose()
+        html.find(id='attachments-interrupt').decompose()
 
     with open(f'{join(path, file_name)}.html', 'w') as output:
         output.write(str(html))

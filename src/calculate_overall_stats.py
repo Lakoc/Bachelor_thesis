@@ -17,7 +17,7 @@ def get_dictionary_paths_2_levels(dictionary):
 
 if __name__ == '__main__':
     parser = ArgumentParser(
-        description='Module for calculating overall statistics over dataset')
+        description='Module for calculating overall statistics over dataset.')
     parser.add_argument('src', type=str,
                         help='source path of pickle files')
     parser.add_argument('dest', type=str,

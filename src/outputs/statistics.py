@@ -99,9 +99,8 @@ def calculate_speech_speed(transcriptions):
         for key in transcriptions[speaker]:
             duration = key[1] - key[0]
             text = transcriptions[speaker][key]['text']
-
-            if text is None:
-                transcriptions[speaker][key]['words_per_segment'] = None
+            if text == '':
+                transcriptions[speaker][key]['words_per_segment'] = 0
             else:
                 text = re.sub(r'%[a-zA-Z]*|{[a-zA-Z ]*}|\[[a-zA-Z ]*]|<[a-zA-Z]*|[^a-zA-Z\s]', "", text).strip()
                 words_per_segment = len(text.split()) / duration
@@ -241,7 +240,8 @@ def calculate_client_mood(transcriptions):
     emotions = np.zeros((len(transcriptions), 5))
     for index, transcription in enumerate(transcriptions):
         text = transcriptions[transcription]['text']
-        emotions[index] = list(te.get_emotion(text).values())
+        if text:
+            emotions[index] = list(te.get_emotion(text).values())
 
     return emotions
 

@@ -6,12 +6,12 @@ from helpers.dir_exist import create_if_not_exist
 
 if __name__ == '__main__':
     parser = ArgumentParser(
-        description='Module for processing transcription over wav and rttm files in provided directory.')
+        description='Module for processing transcription over wav according to rttm files in provided directory.')
     parser.add_argument('src', type=str, help='source path of wav and rttm files')
     parser.add_argument('dest', type=str, help='destination path for txt files')
 
     parser.add_argument('--language', type=str, default='en-US',
-                        help='language tag for recognition')
+                        help='language tag of selected language')
 
     args = parser.parse_args()
 

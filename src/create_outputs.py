@@ -9,17 +9,21 @@ from helpers.dir_exist import create_if_not_exist, create_new_dir
 
 if __name__ == '__main__':
     parser = ArgumentParser(
-        description='Module for creating html statistic')
+        description='Module for creating html documents providing stats about each audio file. '
+                    'Generated plots could be found in subdir \plots.')
     parser.add_argument('src', type=str,
                         help='source path of pickle files')
     parser.add_argument('dest', type=str,
                         help='destination path for pickle files')
     parser.add_argument('template', type=str,
-                        help='template for html file')
+                        help='html document template')
     parser.add_argument('overall_stats', type=str,
                         help='path of file containing overall stats')
     parser.add_argument('text', type=str,
-                        help='path of file containing texts')
+                        help='path of file containing template texts')
+
+    parser.add_argument('--hide_emotions', action="store_true", help='remove emotions from html document')
+    parser.add_argument('--hide_interruptions', action="store_true", help='remove interruptions from html document')
 
     args = parser.parse_args()
 
@@ -39,7 +43,6 @@ if __name__ == '__main__':
 
     with Bar(f'Processing files in {args.src}', max=len(files)) as bar:
         for file in files:
-
             # Load source files
             file_name = file.split('.pkl')[0]
             texts = load_texts(args.text)
@@ -47,5 +50,5 @@ if __name__ == '__main__':
             stats_overall = load_stats_overall(args.overall_stats)
 
             # Create output
-            create_output(stats, stats_overall, texts, args.template, args.dest, file_name)
+            create_output(stats, stats_overall, texts, args.template, args.dest, file_name, args.hide_emotions, args.hide_interruptions)
             bar.next()

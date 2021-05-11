@@ -7,17 +7,17 @@ from argparse import ArgumentParser
 
 if __name__ == '__main__':
 
-    parser = ArgumentParser(description='Module for checking Diarization error rate.')
+    parser = ArgumentParser(description='Module for DER (diarization error rate) calculation.')
     parser.add_argument('hyp', type=str,
                         help='path of hypothesis rttm files')
     parser.add_argument('ref', type=str,
                         help='path of reference rttm files')
     parser.add_argument('mode', type=int, choices=range(1, 4),
-                        help='type of wav files 1 - online, 2 - dictaphone, 3 - dictaphone with reference')
+                        help='type of evaluation (1 - online, 2 - dictaphone, 3 - dictaphone with reference)')
     parser.add_argument('collar', type=int,
                         help='error collar size in ms')
 
-    parser.add_argument('--verbose', action="store_true", help='print error for each file')
+    parser.add_argument('--verbose', action="store_true", help='print error rate for each file')
 
     args = parser.parse_args()
 

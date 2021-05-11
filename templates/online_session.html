@@ -61,6 +61,7 @@
             <p class="param_text" id="client_volume">Hlasitost klienta v průběhu času.</p>
         </div>
     </div>
+    <div id="interruptions">
     <p class="info-text" id="interruptions_info"></p>
     <p class="info-text" id="interruptions_table_text"> Následující tabulka obsahuje nejdelší zaznamenané skoky do řeči.
         Zvýrazněny jsou transkripce řečníká, který skočil do řeči tomu druhému. V <a
@@ -90,6 +91,7 @@
             <p class="param_text" id="client_interruptions">Klient</p>
         </div>
     </div>
+    </div>
     <div class="div-centered">
         <h3>Následující tabulka poukazuje na energeticky nejvýznamější segmenty řeči mluvčích.</h3>
         <p id="loudness_text" class="info-text"></p>
@@ -109,7 +111,7 @@
     </div>
 </div>
 
-<div class="param">
+<div class="param" id="emotions">
     <h2 class="param_title">Emoce klienta</h2>
     <p id="emotion_text" class="info-text"></p>
     <div class="image_caption">
@@ -232,7 +234,7 @@
         <li><a id="attachment-vad" href="" download="VAD">
             Detekce řečové aktivity
         </a></li>
-        <li><a id="attachment-interruptions" href="" download="Interruptions">
+        <li id="attachments-interrupt"><a id="attachment-interruptions" href="" download="Interruptions">
             Skoky do řeči
         </a></li>
     </ul>
