@@ -20,8 +20,11 @@ Python 3.8.5
 Install the required packages with:  
 ```pip install -r requirements.txt```
 
-In case of using sphinx ASR install required library by:  
-```pip install -U sphinx```
+In case of using sphinx ASR install required libraries using system package manager (apt for Ubuntu):
+```
+sudo apt install python python-dev python-pip build-essential swig libpulse-dev
+pip install pocketsphinx
+```
 
 ## Usage example
 

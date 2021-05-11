@@ -121,9 +121,9 @@ def process_file(src, dst, file, language):
                             try:
                                 # Try recognition
                                 """Google API for testing purposes"""
-                                out = r.recognize_google(audio, language=language)
+                                # out = r.recognize_google(audio, language=language)
                                 """Sphinx ASR - offline"""
-                                # out = r.recognize_sphinx(audio)
+                                out = r.recognize_sphinx(audio)
                             except sr.UnknownValueError:
                                 out = '<UNKNOWN>'
 

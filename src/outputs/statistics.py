@@ -99,7 +99,7 @@ def calculate_speech_speed(transcriptions):
         for key in transcriptions[speaker]:
             duration = key[1] - key[0]
             text = transcriptions[speaker][key]['text']
-            if text == '':
+            if text == '' or text is None:
                 transcriptions[speaker][key]['words_per_segment'] = 0
             else:
                 text = re.sub(r'%[a-zA-Z]*|{[a-zA-Z ]*}|\[[a-zA-Z ]*]|<[a-zA-Z]*|[^a-zA-Z\s]', "", text).strip()
