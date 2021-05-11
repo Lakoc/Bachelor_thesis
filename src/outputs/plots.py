@@ -58,7 +58,7 @@ def volume_changes(energy_over_segments, interruptions, size, path):
 
     fig, ax = plt.subplots(figsize=(24, 4))
     ax.fill_between(time, zeros, energy_over_segments, color='C0', alpha=0.5, label='Hlasitost')
-    ax.plot(time,  interruptions_arr, color='C1', label='Skoky do řeči druhému mluvčímu')
+    ax.plot(time, interruptions_arr, color='C1', label='Skoky do řeči druhému mluvčímu')
     ax.set_ylabel('Normalizovaná velikost', fontsize=16)
     ax.set_xlabel('Čas [min]', fontsize=16)
     ax.spines['right'].set_visible(False)
@@ -186,7 +186,8 @@ def fills_difference(fills, signal_len, fills_mean, path):
 
 def client_mood(mood, path):
     labels = ['Hněv', 'Strach', 'Štěstí', 'Smutek', 'Překvapení']
-    smoothing_kernel = np.ones(10) / 10
+    kernel_size = min(mood.shape[0], 10)
+    smoothing_kernel = np.ones(kernel_size) / kernel_size
     positive = np.zeros(mood.shape[0])
 
     fig, axs = plt.subplots(nrows=2, figsize=(16, 8), sharex=True)
