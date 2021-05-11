@@ -37,6 +37,9 @@ def diar_thresholding_step(diarization, likelihoods_diff):
         else:
             # end of activity null speaker
             new_val = -10
+
+    # Have not found any edge on the end so complete by last speaker
+    diar_post[diar_post == -10] = diar_post[np.where(np.abs(diar_post) == 1)[0][-1]]
     return diar_post
 
 
