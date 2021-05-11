@@ -179,7 +179,8 @@ optional arguments:
     ├── sample_stats            # Samples of overall stats calculated on datasets
     ├── src                     # Source files
     ├── templates               # Files used for creation of output HTML file
-    └── text_src                # Source files of thesis documentation
+    ├── text_src                # Source files of thesis text
+    └── thesis.pdf              # Text of the thesis
 
 ## Runnable scripts used for analysis
     src/
