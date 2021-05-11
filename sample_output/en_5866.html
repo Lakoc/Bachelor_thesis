@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Souhrnná zpráva o sezení</title>
+<link href="https://www.w3schools.com/w3css/4/w3.css" rel="stylesheet"/>
+<link href="online_session.css" rel="stylesheet"/>
+<link href="style.css" rel="stylesheet"/>
+</head>
+<body class="container">
+<h1 id="session_title">Souhrnná zpráva o sezení č. en_5866</h1>
+<p class="info-text text-center" id="general_info">Tato souhrnná zpráva obsahuje nejdůležitější aspekty, které byly zaznamenány analýzou psychoterapeutického sezení s identifikátorem en_5866, které probíhalo 10 minut.</p>
+<p class="info-text no-margin" id="general_info_average">Statistiky získáne z tohoto sezení jsou porovnávány s dlouhodobým průměrem Vašich nebo všech dostupných sezení v systému. Větši odchylky od průměrných hodnot nemusí být nijak varovné, může se jednat pouze o jiných druh terapie.</p>
+<p class="info-text no-margin" id="general_info_graphs">Všechny níže použité grafy je možné zobrazi v plné velikosti po kliknutí na příslušný graf. Tabulky je možné řadit podle hodnot v příslušných sloupcích.</p>
+<div class="param">
+<h2 class="param_title">Poměr mluvy</h2>
+<div class="row_picture">
+<div class="image_caption">
+<img alt="Speech_ratio" class="zoom" id="figure-speech_ratio" onclick="onClickImg(this)" src="plots/en_5866/speech_ratio.png"/>
+<p class="param_text" id="speech_ratio_current">Poměř mluvy terapeuta aklienta je vyvážený.</p>
+</div>
+<div class="image_caption">
+<img alt="Speech_ratio_overall" class="zoom" id="figure-speech_ratio_overall" onclick="onClickImg(this)" src="plots/en_5866/speech_ratio_overall.png"/>
+<p class="param_text" id="speech_ratio_overall">Poměr doby mluvy terapeuta k době mluvy klienta je výrazně nižší v porovnání s ostaními sezeními. Jedná se o specifický druh sezení? Je to Váš záměr?</p>
+</div>
+</div>
+</div>
+<div class="param">
+<h2 class="param_title">Poměr řeči/ticha</h2>
+<p class="info-text"></p>
+<div class="row_picture">
+<div class="image_caption">
+<img alt="Silence_ratio" class="zoom" id="figure-silence_ratio_therapist" onclick="onClickImg(this)" src="plots/en_5866/silence_ratio_therapist.png"/>
+<p class="param_text" id="silence_ratio_therapist">Poměr mluvy a ticha terapeuta.</p>
+</div>
+<div class="image_caption">
+<img alt="Silence_ratio" class="zoom" id="figure-silence_ratio_client" onclick="onClickImg(this)" src="plots/en_5866/silence_ratio_client.png"/>
+<p class="param_text" id="silence_ratio_client">Poměr mluvy a ticha klienta.</p>
+</div>
+</div>
+</div>
+<div class="param">
+<h2 class="param_title">Skoky do řeči a hlasitost</h2>
+<p class="info-text" id="loudness_info">Na následujících grafech jsou ukázány skoky do řeči, kdy jeden mluvčí skočil do řeči druhému. Dále grafy zobrazují měnící se úroveň hlasitosti v průběhu sezení. V případě detekce větších výkyvů, je možné si přiloženou nahrávku opětovně poslechnout a analyzovat, co vedlo k tak razantní změně hlasitosti.</p>
+<div>
+<div class="image_caption">
+<img alt="Volume_therapist" class="zoom full-width" id="figure-therapist_volume" onclick="onClickImg(this)" src="plots/en_5866/therapist_volume.png"/>
+<p class="param_text" id="therapist_volume">Hlasitost terapeuta v průběhu času.</p>
+</div>
+<div class="image_caption">
+<img alt="Volume_client" class="zoom full-width" id="figure-client_volume" onclick="onClickImg(this)" src="plots/en_5866/client_volume.png"/>
+<p class="param_text" id="client_volume">Hlasitost klienta v průběhu času.</p>
+</div>
+</div>
+<div id="interruptions">
+<p class="info-text" id="interruptions_info">Skoky do řeči obsahuji informaci o tom, jak často se vzájemně v rámci terapie vyrušujete. Nadměrný výskyt skoků do řeči však může vést k nespokojenosti jedné ze stran. Zvažte, zda neskáčete přiliš do řeči klientovi, případně proč klient skáče do řeči Vám.</p>
+<p class="info-text" id="interruptions_table_text"> Následující tabulka obsahuje nejdelší zaznamenané skoky do řeči.
+        Zvýrazněny jsou transkripce řečníká, který skočil do řeči tomu druhému. V <a href="#attachment-interruptions">přílohách</a> se nachází celá tabulka.</p>
+<table class="w3-table sortable" id="interruptions_table">
+<thead class="table-header">
+<tr>
+<th>Čas [min:s]</th>
+<th>Délka [s]</th>
+<th>Transkcripce terapeuta</th>
+<th>Transkcripce klienta</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>1:9</td><td>2.19</td><td>It'll be alright.  </td><td class="interruption_origin">That's what &amp;Toon said  </td></tr><tr><td>3:15</td><td>1.73</td><td class="interruption_origin">Well good good you need to.  </td><td>{breath} But it  </td></tr><tr><td>3:21</td><td>1.56</td><td>Well did you ever  </td><td class="interruption_origin">So I was so tickled.  </td></tr><tr><td>1:17</td><td>1.44</td><td>{breath} Da- grandpa said put that little dishwasher in there to work {laugh} [[says laughing]]  </td><td class="interruption_origin">{laugh} I know {breath}  </td></tr><tr><td>4:38</td><td>1.41</td><td>You don't have to worry about &amp;Doodles.  </td><td class="interruption_origin">(( )) oh well that's what I figured.  </td></tr><tr><td>2:42</td><td>1.39</td><td>Honey I'm so sorry I wish I could've been there.  </td><td class="interruption_origin">(( )) My friends came up. My friend brought me a teddy bear my other friend brought me a plant.  </td></tr><tr><td>2:38</td><td>1.24</td><td class="interruption_origin">Bless your heart.  </td><td>Yes [[drawn out]]. I didn't have anyone to talk to I just sat there by myself {laugh}.  </td></tr><tr><td>2:23</td><td>1.22</td><td class="interruption_origin">{breath} Well.  </td><td>{laugh}{breath}  </td></tr><tr><td>2:59</td><td>1.17</td><td>You hit the jackpot.  </td><td class="interruption_origin">I won crystal.  </td></tr><tr><td>1:40</td><td>1.08</td><td>Well good [[drawn out]]  </td><td class="interruption_origin">So  </td></tr></tbody>
+</table>
+<p class="info-text" id="interruptions_histograms">Následující histogramy shrnují počty a délky skoků do řeči v průběhu sezení.</p>
+<div class="row_picture">
+<div class="image_caption">
+<img alt="Therapist_interruptions" class="zoom" id="figure-therapist_interruptions" onclick="onClickImg(this)" src="plots/en_5866/therapist_interruptions.png"/>
+<p class="param_text" id="therapist_interruptions">Počty skoků do řeči, kterých se dopustil terapeut.</p>
+</div>
+<div class="image_caption">
+<img alt="Client_interruptions" class="zoom" id="figure-client_interruptions" onclick="onClickImg(this)" src="plots/en_5866/client_interruptions.png"/>
+<p class="param_text" id="client_interruptions">Počty skoků do řeči, kterých se dopustil klient.</p>
+</div>
+</div>
+</div>
+<div class="div-centered">
+<h3>Následující tabulka poukazuje na energeticky nejvýznamější segmenty řeči mluvčích.</h3>
+<p class="info-text" id="loudness_text">Je pravděpodobné, že v těchto momentech chtěl mluvčí zdůraznit určitý aspekt. Mohlo taktéž dojít k rozrušení mluvčího.</p>
+<table class="w3-table sortable" id="volume_text_table">
+<thead class="table-header">
+<tr>
+<th>Start [min:s]</th>
+<th>Délka [s]</th>
+<th>Mlvučí</th>
+<th>Násobek průměrné hlasitosti</th>
+<th>Text</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>1:9</td><td>1.03</td><td>Terapeut</td><td>1.75</td><td>Itll be alright</td></tr><tr><td>1:44</td><td>0.95</td><td>Terapeut</td><td>2.35</td><td>Is it bad</td></tr><tr><td>2:7</td><td>0.61</td><td>Terapeut</td><td>2.14</td><td>Really</td></tr><tr><td>2:59</td><td>1.22</td><td>Terapeut</td><td>2.01</td><td>You hit the jackpot</td></tr><tr><td>3:1</td><td>0.90</td><td>Klient</td><td>1.82</td><td>I know</td></tr><tr><td>3:1</td><td>0.95</td><td>Terapeut</td><td>1.83</td><td>That great</td></tr><tr><td>3:21</td><td>0.77</td><td>Terapeut</td><td>1.81</td><td>Well did you ever</td></tr><tr><td>3:42</td><td>0.67</td><td>Klient</td><td>1.79</td><td>I know</td></tr><tr><td>4:5</td><td>0.34</td><td>Terapeut</td><td>1.79</td><td>yeah</td></tr><tr><td>4:30</td><td>0.76</td><td>Terapeut</td><td>1.94</td><td>Thats right</td></tr><tr><td>4:44</td><td>1.01</td><td>Terapeut</td><td>1.73</td><td>uhhuh she was</td></tr><tr><td>5:0</td><td>2.90</td><td>Terapeut</td><td>1.83</td><td>thats what I thought</td></tr><tr><td>5:37</td><td>0.52</td><td>Terapeut</td><td>1.74</td><td>Right</td></tr><tr><td>5:38</td><td>0.32</td><td>Terapeut</td><td>1.74</td><td>Right</td></tr><tr><td>7:25</td><td>0.55</td><td>Terapeut</td><td>1.98</td><td>yeah</td></tr></tbody>
+</table>
+</div>
+</div>
+<div class="param" id="emotions">
+<h2 class="param_title">Emoce klienta</h2>
+<p class="info-text" id="emotion_text">Odhad emocí na základě detekce klíčových slov spojených z různým typem emocí v textovém přepisu nahrávky. Následující grafy jsou pouze orientační, pokud však nálada rapidně klesá nebo roste je vhodné zvážit následný poslech daného úseku.</p>
+<div class="image_caption">
+<img alt="Client_mood" class="zoom" id="figure-client_mood" onclick="onClickImg(this)" src="plots/en_5866/client_mood.png"/>
+<p class="param_text" id="client_mood">Změny nálad klienta v průběhu sezení.</p>
+</div>
+</div>
+<div class="param">
+<h2 class="param_title">Nejčastěji používaná slova</h2>
+<div class="row_picture">
+<div class="image_caption">
+<img alt="Words_therapist" class="zoom" id="figure-therapist_cloud" onclick="onClickImg(this)" src="plots/en_5866/therapist_cloud.png"/>
+<p class="param_text" id="therapist_cloud">Terapeut nejčastěji používal slovo "Well". Použil ho celkem 20krát v průběhu sezení.</p>
+</div>
+<div class="image_caption">
+<img alt="Words_client" class="zoom" id="figure-client_cloud" onclick="onClickImg(this)" src="plots/en_5866/client_cloud.png"/>
+<p class="param_text" id="client_cloud">Klient nejčastěji používal slovo "said". Použil ho celkem 33krát v průběhu sezení.</p>
+</div>
+</div>
+</div>
+<div class="param">
+<h2 class="param_title">Mimoslovní složky hlasového projevu</h2>
+<p class="info-text" id="fills_info">O rozpoložení hovořící osoby něco vypovídají i všelijaké těžko popsatelné zvuky při slovním projevu. Kromě různých „ehm ehm...“, „hmmm...“, „éééé...“ mezi mimoslovní složky patří i povzdechnutí a další projevy dýchání.</p>
+<div class="row_picture">
+<div class="image_caption">
+<img alt="Fills_therapist" class="zoom" id="figure-therapist_fills" onclick="onClickImg(this)" src="plots/en_5866/therapist_fills.png"/>
+<p class="param_text" id="therapist_fills">Terapeut nejčastěji používá mimoslovní složku "uh".</p>
+</div>
+<div class="image_caption">
+<img alt="Fills_client" class="zoom" id="figure-client_fills" onclick="onClickImg(this)" src="plots/en_5866/client_fills.png"/>
+<p class="param_text" id="client_fills">Klient nejčastěji používá mimoslovní složku "uh".</p>
+</div>
+</div>
+</div>
+<div class="param">
+<h2 class="param_title">Reakční doba</h2>
+<div class="row_picture">
+<div class="image_caption">
+<img alt="Therapist_reactions" class="zoom" id="figure-reaction_time_therapist" onclick="onClickImg(this)" src="plots/en_5866/reaction_time_therapist.png"/>
+<p class="param_text" id="reaction_time_therapist">Průměrná reakční doba terapeuta v průběhu sezení je 0.25 sekund. Průmerná hodnota mezi sezeními se pohybuje kolem 0.46 (+-0.09) sekund.</p>
+</div>
+<div class="image_caption">
+<img alt="reactions" class="zoom" id="figure-reaction_time_client" onclick="onClickImg(this)" src="plots/en_5866/reaction_time_client.png"/>
+<p class="param_text" id="reaction_time_client">Průměrná reakční doba klienta v průběhu sezení je 0.29 sekund. Průmerná hodnota mezi sezeními se pohybuje kolem 0.36 (+-0.05) sekund.</p>
+</div>
+</div>
+</div>
+<div class="param">
+<h2 class="param_title">Délka jednotlivých vět</h2>
+<p class="info-text" id="sentences_len_info">Délky souvislých úseků řeči. Příliš krátké věty naznačují velmi stručný rozhovor, dlouhé pak velmi rozvitou konverzaci na dané téma.</p>
+<div class="row_picture">
+<div class="image_caption">
+<img alt="Therapist_bounds_len" class="zoom" id="figure-bounds_len_therapist" onclick="onClickImg(this)" src="plots/en_5866/bounds_len_therapist.png"/>
+<p class="param_text" id="bounds_len_therapist">Procentuální výskyt vět o příslušné délce na straně terapeuta.</p>
+</div>
+<div class="image_caption">
+<img alt="Client_bounds_len" class="zoom" id="figure-bounds_len_client" onclick="onClickImg(this)" src="plots/en_5866/bounds_len_client.png"/>
+<p class="param_text" id="bounds_len_client">Procentuální výskyt vět o příslušné délce na straně klienta.</p>
+</div>
+</div>
+</div>
+<div class="param">
+<h2 class="param_title">Rychlost řeči</h2>
+<p class="info-text" id="speed_info">Vysoká rychlost řeči může indikovat nadměrný stres, opačně nízká rychlost klid a dobrou náladu.</p>
+<div class="row_picture">
+<div class="image_caption">
+<img alt="Therapist_speed" class="zoom" id="figure-speed_therapist" onclick="onClickImg(this)" src="plots/en_5866/speed_therapist.png"/>
+<p class="param_text" id="speed_therapist">Měnící se rychlost řeči a její průměr na straně terapeuta.</p>
+</div>
+<div class="image_caption">
+<img alt="Client_speed" class="zoom" id="figure-speed_client" onclick="onClickImg(this)" src="plots/en_5866/speed_client.png"/>
+<p class="param_text" id="speed_client">Měnící se rychlost řeči a její průměr na straně klienta.</p>
+</div>
+</div>
+</div>
+<div class="param">
+<h2 class="param_title">Váhaní v monologu</h2>
+<p class="info-text" id="hesitations_info">Pomlky, pauzy v řeči, zmlknutí a podobné projevy narušují plynulost řeči. Větné pomlky (mezi jednotlivými větami – trvají 0.5 až 1 sekundu) jsou potřebné, řeč se tak nestává lavinou či směsicí slov a je srozumitelná. Pomlky v jiných místech jsou tzv. „pomlky váhání“. Delší pomlky naznačují, že mluvčí více váhá a není si úplně jist svým sdělením. V nahrávce jsou detekovány všechny pomlky, pomlky o délce menší než 0.5 sekundy můžou být pro účely terapie nezajímavé a je nutné použití této metriky dále zkoumat a konzultovat s dalšími psychoterapeuty.</p>
+<div class="row_picture">
+<div class="image_caption">
+<img alt="Therapist_hesitations" class="zoom" id="figure-hesitations_therapist" onclick="onClickImg(this)" src="plots/en_5866/hesitations_therapist.png"/>
+<p class="param_text" id="hesitations_therapist">Průměrný počet váhaní za minutu je 0.70. Terapeut v průběhu aktuálního sezení váhá průměrně 0.70krát za minutu.</p>
+</div>
+<div class="image_caption">
+<img alt="Client_hesitations" class="zoom" id="figure-hesitations_client" onclick="onClickImg(this)" src="plots/en_5866/hesitations_client.png"/>
+<p class="param_text" id="hesitations_client">Průměrný počet váhaní za minutu je 0.69. Klient v průběhu aktuálního sezení váhá průměrně 0.50krát za minutu.</p>
+</div>
+</div>
+</div>
+<div class="attachments">
+<h2>Přílohy</h2>
+<ul>
+<li>
+<a download="en_5866.txt" href="en_5866.txt" id="attachment-transcription">
+                Transkripce
+            </a>
+</li>
+<li><a download="en_5866.wav" href="en_5866.wav" id="attachment-audio">
+            Audio nahrávka
+        </a></li>
+<li><a download="en_5866.rttm" href="en_5866.rttm" id="attachment-vad">
+            Detekce řečové aktivity
+        </a></li>
+<li id="attachments-interrupt"><a download="en_5866_interruptions.html" href="en_5866_interruptions.html" id="attachment-interruptions">
+            Skoky do řeči
+        </a></li>
+</ul>
+</div>
+<div class="modal-flex w3-modal" id="modal01" onclick="this.style.display='none'">
+<span class="w3-button w3-hover-red w3-xlarge w3-display-topright">×</span>
+<div class="modal-content w3-animate-zoom">
+<img alt="Full_screen" id="img01" src="placeholder.png" style="width:100%"/>
+</div>
+</div>
+<script>
+    const onClickImg = (element) => {
+        document.getElementById("img01").src = element.src;
+        document.getElementById("modal01").style.display = "flex";
+    }
+</script>
+<script src="https://www.kryogenix.org/code/browser/sorttable/sorttable.js"></script>
+</body>
+</html>
