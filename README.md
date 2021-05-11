@@ -175,7 +175,7 @@ optional arguments:
     ├── README.md               # Contents of this file
     ├── requirements.txt        # Python libraries requirements
     ├── sample_data             # Directory containing sample data with its anotations
-    ├── sample_outputs          # Directory containing sample system outputs
+    ├── sample_output           # Directory containing sample system outputs
     ├── sample_stats            # Samples of overall stats calculated on datasets
     ├── src                     # Source files
     ├── templates               # Files used for creation of output HTML file

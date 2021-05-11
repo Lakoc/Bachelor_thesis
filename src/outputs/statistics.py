@@ -227,7 +227,7 @@ def get_texts(transcriptions):
 
 def calculate_loudness(energy, vad, transcriptions):
     """Add to transcriptions its "loudness" detected by finding the most energetically important segments"""
-    energy_mean = [np.mean(energy[:, 0][vad[:, 0]]), np.mean(energy[:, 1][vad[:, 1]])]
+    energy_mean = [np.mean(energy[:, 0][vad[:, 0].astype(bool)]), np.mean(energy[:, 1][vad[:, 1].astype(bool)])]
     for speaker in range(len(transcriptions)):
         for transcription in transcriptions[speaker]:
             t_start, t_end = transcription
