@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Souhrnná zpráva o sezení</title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="online_session.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+</head>
+
+<body class="container">
+<h1 id="session_title">Souhrnná zpráva o sezení č. ###</h1>
+<p class="info-text text-center" id="general_info"></p>
+<p class="info-text no-margin" id="general_info_average"></p>
+<p class="info-text no-margin" id="general_info_graphs"></p>
+<div class="param">
+    <h2 class="param_title">Poměr mluvy</h2>
+    <div class="row_picture">
+        <div class="image_caption">
+            <img onclick="onClickImg(this)" class="zoom" id="figure-speech_ratio" src="placeholder.png"
+                 alt="Speech_ratio">
+            <p class="param_text" id="speech_ratio_current">###</p>
+        </div>
+        <div class="image_caption">
+            <img onclick="onClickImg(this)" class="zoom" id="figure-speech_ratio_overall" src="placeholder.png"
+                 alt="Speech_ratio_overall">
+            <p class="param_text" id="speech_ratio_overall">###</p>
+        </div>
+    </div>
+</div>
+
+<div class="param">
+    <h2 class="param_title">Poměr řeči/ticha</h2>
+    <p class="info-text"></p>
+    <div class="row_picture">
+        <div class="image_caption">
+            <img onclick="onClickImg(this)" class="zoom" id="figure-silence_ratio_therapist" src="placeholder.png"
+                 alt="Silence_ratio">
+            <p class="param_text" id="silence_ratio_therapist">Poměr mluvy a ticha terapeuta</p>
+        </div>
+        <div class="image_caption">
+            <img onclick="onClickImg(this)" class="zoom" id="figure-silence_ratio_client" src="placeholder.png"
+                 alt="Silence_ratio">
+            <p class="param_text" id="silence_ratio_client">Poměr mluvy a ticha klienta</p>
+        </div>
+    </div>
+</div>
+
+<div class="param">
+    <h2 class="param_title">Skoky do řeči a hlasitost</h2>
+    <p id="loudness_info" class="info-text"></p>
+    <div>
+        <div class="image_caption">
+            <img onclick="onClickImg(this)" class="zoom full-width" id="figure-therapist_volume" src="placeholder.png"
+                 alt="Volume_therapist">
+            <p class="param_text" id="therapist_volume">Hlasitost terapeuta v průběhu času.</p>
+        </div>
+        <div class="image_caption">
+            <img onclick="onClickImg(this)" class="zoom full-width" id="figure-client_volume" src="placeholder.png"
+                 alt="Volume_client">
+            <p class="param_text" id="client_volume">Hlasitost klienta v průběhu času.</p>
+        </div>
+    </div>
+    <div id="interruptions">
+    <p class="info-text" id="interruptions_info"></p>
+    <p class="info-text" id="interruptions_table_text"> Následující tabulka obsahuje nejdelší zaznamenané skoky do řeči.
+        Zvýrazněny jsou transkripce řečníká, který skočil do řeči tomu druhému. V <a
+                href="#attachment-interruptions">přílohách</a> se nachází celá tabulka.</p>
+    <table class="w3-table sortable" id="interruptions_table">
+        <thead class="table-header">
+        <tr>
+            <th>Čas [min:s]</th>
+            <th>Délka [s]</th>
+            <th>Transkcripce terapeuta</th>
+            <th>Transkcripce klienta</th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <p class="info-text" id="interruptions_histograms"></p>
+    <div class="row_picture">
+        <div class="image_caption">
+            <img onclick="onClickImg(this)" class="zoom" id="figure-therapist_interruptions" src="placeholder.png"
+                 alt="Therapist_interruptions">
+            <p class="param_text" id="therapist_interruptions">Terapeut</p>
+        </div>
+        <div class="image_caption">
+            <img onclick="onClickImg(this)" class="zoom" id="figure-client_interruptions" src="placeholder.png"
+                 alt="Client_interruptions">
+            <p class="param_text" id="client_interruptions">Klient</p>
+        </div>
+    </div>
+    </div>
+    <div class="div-centered">
+        <h3>Následující tabulka poukazuje na energeticky nejvýznamější segmenty řeči mluvčích.</h3>
+        <p id="loudness_text" class="info-text"></p>
+        <table class="w3-table sortable" id="volume_text_table">
+            <thead class="table-header">
+            <tr>
+                <th>Start [min:s]</th>
+                <th>Délka [s]</th>
+                <th>Mlvučí</th>
+                <th>Násobek průměrné hlasitosti</th>
+                <th>Text</th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="param" id="emotions">
+    <h2 class="param_title">Emoce klienta</h2>
+    <p id="emotion_text" class="info-text"></p>
+    <div class="image_caption">
+        <img onclick="onClickImg(this)" class="zoom" id="figure-client_mood" src="placeholder.png" alt="Client_mood">
+        <p class="param_text" id="client_mood">Klient</p>
+    </div>
+</div>
+
+<div class="param">
+    <h2 class="param_title">Nejčastěji používaná slova</h2>
+    <div class="row_picture">
+        <div class="image_caption">
+            <img onclick="onClickImg(this)" class="zoom" id="figure-therapist_cloud" src="placeholder.png"
+                 alt="Words_therapist">
+            <p class="param_text" id="therapist_cloud">Terapeut</p>
+        </div>
+        <div class="image_caption">
+            <img onclick="onClickImg(this)" class="zoom" id="figure-client_cloud" src="placeholder.png"
+                 alt="Words_client">
+            <p class="param_text" id="client_cloud">Klient</p>
+        </div>
+    </div>
+</div>
+
+<div class="param">
+    <h2 class="param_title">Mimoslovní složky hlasového projevu</h2>
+    <p class="info-text" id="fills_info"></p>
+    <div class="row_picture">
+        <div class="image_caption">
+            <img onclick="onClickImg(this)" class="zoom" id="figure-therapist_fills" src="placeholder.png"
+                 alt="Fills_therapist">
+            <p class="param_text" id="therapist_fills">Terapeut</p>
+        </div>
+        <div class="image_caption">
+            <img onclick="onClickImg(this)" class="zoom" id="figure-client_fills" src="placeholder.png"
+                 alt="Fills_client">
+            <p class="param_text" id="client_fills">Klient</p>
+        </div>
+    </div>
+</div>
+
+<div class="param">
+    <h2 class="param_title">Reakční doba</h2>
+    <div class="row_picture">
+        <div class="image_caption">
+            <img onclick="onClickImg(this)" class="zoom" id="figure-reaction_time_therapist" src="placeholder.png"
+                 alt="Therapist_reactions">
+            <p class="param_text" id="reaction_time_therapist">Terapeut</p>
+        </div>
+        <div class="image_caption">
+            <img onclick="onClickImg(this)" class="zoom" id="figure-reaction_time_client" src="placeholder.png"
+                 alt="reactions">
+            <p class="param_text" id="reaction_time_client">Klient</p>
+        </div>
+    </div>
+</div>
+
+<div class="param">
+    <h2 class="param_title">Délka jednotlivých vět</h2>
+    <p class="info-text" id="sentences_len_info"></p>
+    <div class="row_picture">
+        <div class="image_caption">
+            <img onclick="onClickImg(this)" class="zoom" id="figure-bounds_len_therapist" src="placeholder.png"
+                 alt="Therapist_bounds_len">
+            <p class="param_text" id="bounds_len_therapist">Terapeut</p>
+        </div>
+        <div class="image_caption">
+            <img onclick="onClickImg(this)" class="zoom" id="figure-bounds_len_client" src="placeholder.png"
+                 alt="Client_bounds_len">
+            <p class="param_text" id="bounds_len_client">Klient</p>
+        </div>
+    </div>
+</div>
+
+<div class="param">
+    <h2 class="param_title">Rychlost řeči</h2>
+    <p class="info-text" id="speed_info"></p>
+    <div class="row_picture">
+        <div class="image_caption">
+            <img onclick="onClickImg(this)" class="zoom" id="figure-speed_therapist" src="placeholder.png"
+                 alt="Therapist_speed">
+            <p class="param_text" id="speed_therapist">Terapeut</p>
+        </div>
+        <div class="image_caption">
+            <img onclick="onClickImg(this)" class="zoom" id="figure-speed_client" src="placeholder.png"
+                 alt="Client_speed">
+            <p class="param_text" id="speed_client">Klient</p>
+        </div>
+    </div>
+</div>
+
+<div class="param">
+    <h2 class="param_title">Váhaní v monologu</h2>
+    <p class="info-text" id="hesitations_info"></p>
+    <div class="row_picture">
+        <div class="image_caption">
+            <img onclick="onClickImg(this)" class="zoom" id="figure-hesitations_therapist" src="placeholder.png"
+                 alt="Therapist_hesitations">
+            <p class="param_text" id="hesitations_therapist">Terapeut</p>
+        </div>
+        <div class="image_caption">
+            <img onclick="onClickImg(this)" class="zoom" id="figure-hesitations_client" src="placeholder.png"
+                 alt="Client_hesitations">
+            <p class="param_text" id="hesitations_client">Klient</p>
+        </div>
+    </div>
+</div>
+
+<div class="attachments">
+    <h2>Přílohy</h2>
+    <ul>
+        <li>
+            <a id="attachment-transcription" href="" download="Transcription">
+                Transkripce
+            </a>
+        </li>
+        <li><a id="attachment-audio" href="" download="Audio">
+            Audio nahrávka
+        </a></li>
+        <li><a id="attachment-vad" href="" download="VAD">
+            Detekce řečové aktivity
+        </a></li>
+        <li id="attachments-interrupt"><a id="attachment-interruptions" href="" download="Interruptions">
+            Skoky do řeči
+        </a></li>
+    </ul>
+</div>
+
+
+<div id="modal01" class="modal-flex w3-modal" onclick="this.style.display='none'">
+    <span class="w3-button w3-hover-red w3-xlarge w3-display-topright">&times;</span>
+    <div class="modal-content w3-animate-zoom">
+        <img id="img01" style="width:100%" alt="Full_screen" src="placeholder.png">
+    </div>
+</div>
+
+<script>
+    const onClickImg = (element) => {
+        document.getElementById("img01").src = element.src;
+        document.getElementById("modal01").style.display = "flex";
+    }
+</script>
+<script src="https://www.kryogenix.org/code/browser/sorttable/sorttable.js"></script>
+
+</body>
+</html>

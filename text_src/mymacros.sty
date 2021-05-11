@@ -1,0 +1,7 @@
+\ProvidesPackage{mymacros}[My own macros]
+
+\newcommand{\imageref}[2]{%
+  \ifstrequal{#2}{1}
+  {Obr.~\ref{#1}}%
+  {obr.~\ref{#1}}%
+}

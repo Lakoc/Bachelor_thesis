@@ -1,0 +1,49 @@
+{
+  "general_info": "Tato souhrnná zpráva obsahuje nejdůležitější aspekty, které byly zaznamenány analýzou psychoterapeutického sezení s identifikátorem ###, které probíhalo {{}} minut.",
+  "general_info_average": "Statistiky získáne z tohoto sezení jsou porovnávány s dlouhodobým průměrem Vašich nebo všech dostupných sezení v systému. Větši odchylky od průměrných hodnot nemusí být nijak varovné, může se jednat pouze o jiných druh terapie.",
+  "general_info_graphs": "Všechny níže použité grafy je možné zobrazi v plné velikosti po kliknutí na příslušný graf. Tabulky je možné řadit podle hodnot v příslušných sloupcích.",
+  "speech_ratio": {
+    "current": {
+      "therapist_low": "Klient je v průběhu rozhovoru výrazně aktivnější.",
+      "standard": "Poměř mluvy terapeuta aklienta je vyvážený.",
+      "therapist_high": "Terapeut je v rozhovoru výrazně aktivnější."
+    },
+    "overall": {
+      "therapist_low": "Poměr doby mluvy terapeuta k době mluvy klienta je výrazně nižší v porovnání s ostaními sezeními. Jedná se o specifický druh sezení? Je to Váš záměr?",
+      "standard": "Poměř mluvy řečníků odpovídá dlouhodobým stastikám.",
+      "therapist_high": "Poměr doby mluvy terapeuta k době mluvy klienta je výrazně vyšší v porovnání s ostaními sezeními. Jedná se o specifický druh sezení? Je to Váš záměr?"
+    }
+  },
+  "sil_speech": {
+    "therapist": "Poměr mluvy a ticha terapeuta.",
+    "client": "Poměr mluvy a ticha klienta."
+  },
+  "word_cloud": {
+    "therapist": "Terapeut nejčastěji používal slovo {{}}. Použil ho celkem {{}}krát v průběhu sezení.",
+    "client": "Klient nejčastěji používal slovo {{}}. Použil ho celkem {{}}krát v průběhu sezení."
+  },
+  "loudness_overall_info": "Na následujících grafech jsou ukázány skoky do řeči, kdy jeden mluvčí skočil do řeči druhému. Dále grafy zobrazují měnící se úroveň hlasitosti v průběhu sezení. V případě detekce větších výkyvů, je možné si přiloženou nahrávku opětovně poslechnout a analyzovat, co vedlo k tak razantní změně hlasitosti.",
+  "loudness_table_info": "Je pravděpodobné, že v těchto momentech chtěl mluvčí zdůraznit určitý aspekt. Mohlo taktéž dojít k rozrušení mluvčího.",
+  "fills_info": "O rozpoložení hovořící osoby něco vypovídají i všelijaké těžko popsatelné zvuky při slovním projevu. Kromě různých „ehm ehm...“, „hmmm...“, „éééé...“ mezi mimoslovní složky patří i povzdechnutí a další projevy dýchání.",
+  "therapist_fills": "Terapeut nejčastěji používá mimoslovní složku {{}}.",
+  "client_fills": "Klient nejčastěji používá mimoslovní složku {{}}.",
+  "client_mood": "Změny nálad klienta v průběhu sezení.",
+  "emotion_text": "Odhad emocí na základě detekce klíčových slov spojených z různým typem emocí v textovém přepisu nahrávky. Následující grafy jsou pouze orientační, pokud však nálada rapidně klesá nebo roste je vhodné zvážit následný poslech daného úseku.",
+  "interruptions_info": "Skoky do řeči obsahuji informaci o tom, jak často se vzájemně v rámci terapie vyrušujete. Nadměrný výskyt skoků do řeči však může vést k nespokojenosti jedné ze stran. Zvažte, zda neskáčete přiliš do řeči klientovi, případně proč klient skáče do řeči Vám.",
+  "hesitations_info": "Pomlky, pauzy v řeči, zmlknutí a podobné projevy narušují plynulost řeči. Větné pomlky (mezi jednotlivými větami – trvají 0.5 až 1 sekundu) jsou potřebné, řeč se tak nestává lavinou či směsicí slov a je srozumitelná. Pomlky v jiných místech jsou tzv. „pomlky váhání“. Delší pomlky naznačují, že mluvčí více váhá a není si úplně jist svým sdělením. V nahrávce jsou detekovány všechny pomlky, pomlky o délce menší než 0.5 sekundy můžou být pro účely terapie nezajímavé a je nutné použití této metriky dále zkoumat a konzultovat s dalšími psychoterapeuty.",
+  "sentences_len_info": "Délky souvislých úseků řeči. Příliš krátké věty naznačují velmi stručný rozhovor, dlouhé pak velmi rozvitou konverzaci na dané téma.",
+  "interruptions_histograms": "Následující histogramy shrnují počty a délky skoků do řeči v průběhu sezení.",
+  "interruptions": {
+    "client": "Počty skoků do řeči, kterých se dopustil klient.",
+    "therapist": "Počty skoků do řeči, kterých se dopustil terapeut."
+  },
+  "sentences_len": {
+    "client": "Procentuální výskyt vět o příslušné délce na straně klienta.",
+    "therapist": "Procentuální výskyt vět o příslušné délce na straně terapeuta."
+  },
+  "speed_info": "Vysoká rychlost řeči může indikovat nadměrný stres, opačně nízká rychlost klid a dobrou náladu.",
+  "speed": {
+    "client": "Měnící se rychlost řeči a její průměr na straně klienta.",
+    "therapist": "Měnící se rychlost řeči a její průměr na straně terapeuta."
+  }
+}
